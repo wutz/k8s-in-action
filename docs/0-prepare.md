@@ -31,11 +31,142 @@
 ### 软件
 
 - OS: ubuntu 22.04
-- K8S: [k3s](https://k3s.io/) v1.29.4+k3s1
-- Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v17.2.7
+- K8S: [k3s](https://k3s.io/) v1.29
+- Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v17.2
 
 > 更多需求可以参考 [k3s requirements](https://docs.k3s.io/zh/installation/requirements)
 
 ## 所有节点初始化
 
-###
+> 以下均已 mn[01-03],gn001 作为代表所有节点示例
+
+### 设置节点名称
+
+```sh
+# 所有节点根据自身名字进行设置
+hostnamectl set-hostname mn01.play.local
+```
+
+> play 根据集群用途或者地域设置，例如 dev1, bj1 等
+
+```sh
+# 在 mn01 节点配置 hosts
+cat << 'EOF' >> /etc/hosts
+10.0.1.1  mn01.play.local mn01
+10.0.1.2  mn02.play.local mn02
+10.0.1.3  mn03.play.local mn03
+
+10.0.2.1  gn001.play.local gn001
+EOF
+```
+
+### 设置 ssh 无密码登录
+
+```sh
+# 在 mn01 节点执行生成 ssh 密钥
+ssh-keygen -t ecdsa
+```
+
+> ecdsa 相比 rsa 更安全，以及 rsa 被逐渐废弃
+
+```sh
+# 在 mn01 节点执行配置无密码登录
+cat ~/.ssh/id_ecdsa.pub >> ~/.ssh/authorized_keys
+# 在 mn01 节点同步 ssh 密钥到其他 mn 节点
+rsync -avP ~/.ssh/ mn02:~/.ssh
+rsync -avP ~/.ssh/ mn03:~/.ssh
+# 在 mn01 节点同步 hosts 到其他 mn 节点
+rsync -avP /etc/hosts mn02:/etc/hosts
+rsync -avP /etc/hosts mn03:/etc/hosts
+
+# 在 mn01 节点执行 ssh-copy 设置无密码登录其他节点
+ssh-copy gn001
+```
+
+> 设置 mn 节点对等
+
+### 管理工具 pdsh
+
+```sh
+# 所有节点执行
+apt install pdsh -y
+
+# 在 mn 节点执行
+cat << 'EOF' > /etc/profile.d/pdsh.sh
+export PDSH_RCMD_TYPE=ssh
+EOF
+source /etc/profile.d/pdsh.sh
+
+# 在 mn01 节点生成 hosts 用于后续执行 pdsh / pdcp
+cat << 'EOF' > hosts
+mn[01-03],gn001
+EOF
+```
+
+### 设置时间同步和时区
+
+```sh
+pdsh -w ^hosts sed -i 's/#NTP=/NTP=ntp.aliyun.com/g' /etc/systemd/timesyncd.conf
+pdsh -w ^hosts systemctl restart systemd-timesyncd
+pdsh -w ^hosts timedatectl timesync-status
+
+pdsh -w ^hosts timedatectl set-timezone Asia/Shanghai
+```
+
+> 也可以根据需要自行搭建 ntp server
+
+### 设置防火墙
+
+```sh
+pdsh -w ^hosts ufw disable
+```
+
+### 开启 CPU 超线程
+
+在 BIOS 中修改后重启，在系统执行 `lscpu` 检查是否为 `Thread(s) per core: 2`
+
+### 开启 CPU Performance Mode
+
+```sh
+cat << 'EOF' > cpufrequtils
+GOVERNOR="performance"
+EOF
+pdsh -w ^hosts apt install cpufrequtils -y
+pdcp -w ^hosts cpufrequtils /etc/default
+pdsh -w ^hosts systemctl restart cpufrequtils
+
+# 查看当前 CPU 频率 (执行任意命令即可)
+pdsh -w ^hosts cpufreq-info
+pdsh -w ^hosts grep MHz /proc/cpuinfo
+pdsh -w ^hosts cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors
+```
+
+### 设置 apt 镜像
+
+```sh
+pdsh -w ^hosts sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list
+pdsh -w ^hosts sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+pdsh -w ^hosts sed -i 's/http:/https:/g' /etc/apt/sources.list
+pdsh -w ^hosts apt update
+```
+
+### 锁定内核版本，避免驱动失效
+
+```sh
+cat << 'EOF' > nolinuxupgrades
+Package: linux-*
+Pin: version *
+Pin-Priority: -1
+EOF
+pdcp -w ^hosts nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
+```
+
+### [推荐]关闭密码登录增强安全性
+
+```sh
+cat << 'EOF' > /etc/ssh/sshd_config.d/90-password.conf
+PasswordAuthentication no
+EOF
+
+systemctl reload sshd
+```
