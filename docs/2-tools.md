@@ -45,6 +45,16 @@
    k apply -f test.yaml
    ```
 
+5. 多集群管理
+
+   可以使用插件 kubectx 进行切换，但是容易忘记所在集群, 下面使用为每个集群设置别名方式降低误操作
+
+   ```sh
+   alias d1='export KUBECONFIG=~/.kube/ctx/dev1.yaml; kubectl'
+
+   d1 get po
+   ```
+
 ## kustomize
 
 阅读文章 https://kubectl.docs.kubernetes.io/
