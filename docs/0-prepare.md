@@ -40,6 +40,32 @@
 
 > 以下均已 mn[01-03],gn001 作为代表所有节点示例
 
+### 设置节点统一 interface 名称
+
+> 通常在云主机上 interface 名称已统一，可以跳过
+
+一般物理机上 interface 名称需要根据实际情况进行修改统一名称，下面是一个示例
+
+```sh
+cat << 'EOF' /etc/netplan/00-installer-config.yaml
+network:
+  ethernets:
+    eth0:
+      addresses:
+      - 10.0.1.1/24
+      routes:
+      - to: default
+        via: 10.0.1.254
+      nameservers:
+        addresses:
+        - 223.5.5.5
+        - 223.6.6.6
+        - 114.114.114.114
+      match:
+        macaddress: 98:04:4b:2b:b4:e5
+      set-name: eth0
+```
+
 ### 设置节点名称
 
 ```sh
@@ -98,7 +124,7 @@ EOF
 source /etc/profile.d/pdsh.sh
 
 # 在 mn01 节点生成 hosts 用于后续执行 pdsh / pdcp
-cat << 'EOF' > hosts
+cat << 'EOF' > all
 mn[01-03],gn001
 EOF
 ```
@@ -106,11 +132,11 @@ EOF
 ### 设置时间同步和时区
 
 ```sh
-pdsh -w ^hosts sed -i 's/#NTP=/NTP=ntp.aliyun.com/g' /etc/systemd/timesyncd.conf
-pdsh -w ^hosts systemctl restart systemd-timesyncd
-pdsh -w ^hosts timedatectl timesync-status
+pdsh -w ^all sed -i 's/#NTP=/NTP=ntp.aliyun.com/g' /etc/systemd/timesyncd.conf
+pdsh -w ^all systemctl restart systemd-timesyncd
+pdsh -w ^all timedatectl timesync-status
 
-pdsh -w ^hosts timedatectl set-timezone Asia/Shanghai
+pdsh -w ^all timedatectl set-timezone Asia/Shanghai
 ```
 
 > 也可以根据需要自行搭建 ntp server
@@ -118,7 +144,7 @@ pdsh -w ^hosts timedatectl set-timezone Asia/Shanghai
 ### 设置防火墙
 
 ```sh
-pdsh -w ^hosts ufw disable
+pdsh -w ^all ufw disable
 ```
 
 ### 开启 CPU 超线程
@@ -131,23 +157,23 @@ pdsh -w ^hosts ufw disable
 cat << 'EOF' > cpufrequtils
 GOVERNOR="performance"
 EOF
-pdsh -w ^hosts apt install cpufrequtils -y
-pdcp -w ^hosts cpufrequtils /etc/default
-pdsh -w ^hosts systemctl restart cpufrequtils
+pdsh -w ^all apt install cpufrequtils -y
+pdcp -w ^all cpufrequtils /etc/default
+pdsh -w ^all systemctl restart cpufrequtils
 
 # 查看当前 CPU 频率 (执行任意命令即可)
-pdsh -w ^hosts cpufreq-info
-pdsh -w ^hosts grep MHz /proc/cpuinfo
-pdsh -w ^hosts cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors
+pdsh -w ^all cpufreq-info
+pdsh -w ^all grep MHz /proc/cpuinfo
+pdsh -w ^all cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors
 ```
 
 ### 设置 apt 镜像
 
 ```sh
-pdsh -w ^hosts sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list
-pdsh -w ^hosts sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
-pdsh -w ^hosts sed -i 's/http:/https:/g' /etc/apt/sources.list
-pdsh -w ^hosts apt update
+pdsh -w ^all sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list
+pdsh -w ^all sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+pdsh -w ^all sed -i 's/http:/https:/g' /etc/apt/sources.list
+pdsh -w ^all apt update
 ```
 
 ### 锁定内核版本，避免驱动失效
@@ -158,7 +184,7 @@ Package: linux-*
 Pin: version *
 Pin-Priority: -1
 EOF
-pdcp -w ^hosts nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
+pdcp -w ^all nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
 ```
 
 ### [推荐]关闭密码登录增强安全性
