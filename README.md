@@ -6,7 +6,7 @@
 
 0. [准备](docs/0-prepare.md)
 1. [安装 k3s](docs/1-k3s.md)
-2. [使用常用客户端工具 kubectl + kustomize + helm/helmwave](docs/2-kubectl-kustomize-helm.md)
+2. [使用常用客户端工具 kubectl + kustomize + helm/helmwave](docs/2-tools.md)
 3. [部署存储 Rook + NFS CSI]
 4. [部署入口网络 MetalLB + Nginx Ingress + CertManager]
 5. [部署 Metric 监控 VictoriaMetrics + Grafana]
