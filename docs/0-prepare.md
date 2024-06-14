@@ -32,7 +32,7 @@
 
 - OS: ubuntu 22.04
 - K8S: [k3s](https://k3s.io/) v1.29
-- Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v17.2
+- Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v18.2
 
 > 更多需求可以参考 [k3s requirements](https://docs.k3s.io/zh/installation/requirements)
 
