@@ -52,17 +52,17 @@ network:
   ethernets:
     eth0:
       addresses:
-      - 10.0.1.1/24
+      - 10.0.3.158/22
       routes:
       - to: default
-        via: 10.0.1.254
+        via: 10.0.0.1
       nameservers:
         addresses:
         - 223.5.5.5
         - 223.6.6.6
         - 114.114.114.114
       match:
-        macaddress: 98:04:4b:2b:b4:e5
+        macaddress: fa:16:3e:f1:c3:fd
       set-name: eth0
 ```
 
@@ -78,11 +78,11 @@ hostnamectl set-hostname mn01.play.local
 ```sh
 # 在 mn01 节点配置 hosts
 cat << 'EOF' >> /etc/hosts
-10.0.1.1  mn01.play.local mn01
-10.0.1.2  mn02.play.local mn02
-10.0.1.3  mn03.play.local mn03
+10.0.3.158  mn01.play.local mn01
+10.0.0.27   mn02.play.local mn02
+10.0.1.98   mn03.play.local mn03
 
-10.0.2.1  gn001.play.local gn001
+10.0.1.51   gn001.play.local gn001
 EOF
 ```
 
