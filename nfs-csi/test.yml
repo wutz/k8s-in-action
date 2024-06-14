@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-nfs
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany # In this example, multiple Pods consume the same PVC.
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nfs-csi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-nfs
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: deployment-nfs
+  template:
+    metadata:
+      name: deployment-nfs
+      labels:
+        name: deployment-nfs
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: deployment-nfs
+          image: mcr.microsoft.com/oss/nginx/nginx:1.19.5
+          command:
+            - "/bin/bash"
+            - "-c"
+            - set -euo pipefail; while true; do echo $(hostname) $(date) >> /mnt/nfs/outfile; sleep 1; done
+          volumeMounts:
+            - name: nfs
+              mountPath: "/mnt/nfs"
+              readOnly: false
+      volumes:
+        - name: nfs
+          persistentVolumeClaim:
+            claimName: test-nfs
