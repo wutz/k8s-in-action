@@ -1,0 +1,6 @@
+controller:
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: "true"
+speaker:
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: "true"

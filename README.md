@@ -42,7 +42,7 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
   - DNS: 用于集群服务发现, 通常使用 CoreDNS
   - TLS: 用于创建 TLS 证书，常见开启 Ingress 的 HTTPS 依赖 TLS. 通常使用 CertManager
 
-1. 部署 LoadBalancer MetalLB
+1. [部署 LoadBalancer MetalLB](metallb/README.md)
 2. 部署 Ingress Nginx
 3. 部署 CertManager
 
