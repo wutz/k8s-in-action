@@ -12,7 +12,7 @@
 
 - 测试
 
-  修改 `ingress.yaml` 中的 `hosts` 为实际 DNS 域名
+  修改 `ingress.yaml` 中的 `hosts` 和 `host` 为实际 DNS 域名
 
   ```sh
   # 部署
