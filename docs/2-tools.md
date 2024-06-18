@@ -80,11 +80,7 @@ k apply -k .
 
 阅读 https://helm.sh/ 了解常用使用方法
 
-> 作为临时使用, 持久化使用 Helm Controller 或者 Helmwave
-
-### Helm Controller
-
-阅读 https://docs.k3s.io/zh/helm
+> 作为临时使用, 持久化使用 Helmwave
 
 ### Helmwave
 

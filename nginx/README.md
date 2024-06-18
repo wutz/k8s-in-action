@@ -23,3 +23,12 @@ K8S 支持多种 Ingress 并存，但是如何要把 Nginx 作为缺省 Ingress�
 
   - 把 Nginx 作为缺省 Ingress
   - 从 Service Load Balancer 限定申请的 IP，防止意外情况变化（比如删除再创建，这种可能申请的 IP 会变化）
+
+- 配置 DNS 解析到 Service Nginx 的 IP 上
+
+  ```sh
+  # 输出的 EXTERNAL—IP 为需要 DNS 解析的 IP （(如果环境使用一对一 NAT，需要解析到外网 IP)
+  k get svc ingress-nginx-controller -n ingress-nginx
+  ```
+
+  后面示例假设配置 DNS 解析 `*.play.example.com`
