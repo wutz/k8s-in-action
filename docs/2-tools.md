@@ -80,9 +80,13 @@ k apply -k .
 
 阅读 https://helm.sh/ 了解常用使用方法
 
-> 作为临时使用, 持久化使用 Helmwave
+> 作为临时使用, 持久化使用 Helm Controller 或者 Helmwave
 
-## Helmwave
+### Helm Controller
+
+阅读 https://docs.k3s.io/zh/helm
+
+### Helmwave
 
 阅读 https://docs.helmwave.app/
 
@@ -95,3 +99,7 @@ k apply -k .
 5. 创建 `helmwave.yml` 描述文件
 6. 执行 `helmwave up --build` 部署服务
 7. 执行 `helmwave down` 卸载服务
+
+## 图形客户端
+
+- https://k8slens.dev/
