@@ -1,0 +1,6 @@
+controller:
+  ingressClassResource:
+    default: true
+  service:
+    annotations:
+      metallb.universe.tf/loadBalancerIPs: "10.0.2.58"
