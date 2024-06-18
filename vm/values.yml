@@ -1,0 +1,36 @@
+vmsingle:
+  spec:
+    retentionPeriod: 1y
+    storage:
+      storageClassName: ceph-filesystem
+      resources:
+        requests:
+          storage: 1Ti
+
+grafana:
+  # env:
+  #  HTTP_PROXY: http://127.0.0.1:3128
+  #  HTTPS_PROXY: http://127.0.0.1:3128
+  #  NO_PROXY: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,*.svc"
+  adminPassword: WWv3QDXBmgAcqfxz
+  persistence:
+    enabled: true
+    size: 100Gi
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - g.play.example.com
+    tls:
+      - hosts:
+          - g.play.example.com
+        secretName: grafana-tls
+
+victoria-metrics-operator:
+  operator:
+    # -- By default, operator converts prometheus-operator objects.
+    disable_prometheus_converter: false
+    # -- Enables ownership reference for converted prometheus-operator objects,
+    # it will remove corresponding victoria-metrics objects in case of deletion prometheus one.
+    enable_converter_ownership: true

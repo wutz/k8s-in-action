@@ -50,7 +50,7 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
 
 ## 监控
 
-1. 部署 Metric 监控 VictoriaMetrics + Grafana
+1. [部署 Metric 监控 VictoriaMetrics](vm/README.md)
 2. 部署日志监控 Loki
 
 ## 数据库

@@ -1,0 +1,35 @@
+project: "vm"
+version: "0.36.3"
+
+.options:
+  &options # if set, upgrade process rolls back changes made in case of failed upgrade.
+  atomic: true
+  # the wait will be set automatically if atomic is true
+  wait: true
+  # time to wait for any individual Kubernetes operation .
+  timeout: 300s
+  # limit the maximum number of revisions saved per release.
+  max_history: 3
+  # create the release namespace if not present.
+  namespace: vm
+  create_namespace: true
+  pending_release_strategy: rollback
+
+repositories:
+  - name: vm
+    url: https://victoriametrics.github.io/helm-charts/
+
+releases:
+  - name: vm
+    <<: *options
+    chart:
+      name: vm/victoria-metrics-k8s-stack
+      version: v0.23.1
+    values:
+      - values.yml
+    lifecycle:
+      pre_up:
+        # setup prometheus crd (https://docs.victoriametrics.com/operator/migration/)
+        - kubectl apply --server-side -k hooks
+      post_down:
+        - kubectl delete --server-side -k hooks
