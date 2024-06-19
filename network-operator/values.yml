@@ -1,0 +1,12 @@
+nfd:
+  enabled: false
+deployCR: true
+rdmaSharedDevicePlugin:
+  deploy: true
+  resources:
+    - name: ib
+      vendors: [15b3]
+      deviceIDs: ["1021"]
+      rdmaHcaMax: 63
+secondaryNetwork:
+  deploy: false
