@@ -1,0 +1,34 @@
+project: "gpu-operator"
+version: "0.36.3"
+
+.options:
+  &options # if set, upgrade process rolls back changes made in case of failed upgrade.
+  atomic: true
+  # the wait will be set automatically if atomic is true
+  wait: true
+  # time to wait for any individual Kubernetes operation .
+  timeout: 300s
+  # limit the maximum number of revisions saved per release.
+  max_history: 3
+  # create the release namespace if not present.
+  namespace: "gpu-operator"
+  create_namespace: true
+  pending_release_strategy: rollback
+
+repositories:
+  - name: nvidia
+    url: https://helm.ngc.nvidia.com/nvidia
+
+releases:
+  - name: "gpu-operator"
+    <<: *options
+    chart:
+      name: nvidia/gpu-operator
+      version: v24.3.0
+    values:
+      - values.yml
+    lifecycle:
+      post_up:
+        - kubectl apply -k hooks
+      pre_down:
+        - kubectl delete -k hooks
