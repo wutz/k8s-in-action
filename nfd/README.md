@@ -10,6 +10,12 @@
 
   > values.yml 配置主要来自 gpu-operator
 
+- 查看 Node Label
+
+  ```sh
+  k get node --show-labels
+  ```
+
 - 卸载
 
   ```sh
