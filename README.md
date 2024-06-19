@@ -4,6 +4,13 @@
 
 ## 基础
 
+目前 K8S 主流发行版本为以下列出, 可以选择一个偏好的，本实战项目是基于 k3s：
+
+- [k0s](https://docs.k0sproject.io/stable/)
+- [k3s](https://k3s.io/)
+- [k8s](https://kubernetes.io/docs/reference/setup-tools/kubeadm/)
+- [eks](https://distro.eks.amazonaws.com/)
+
 1. [准备](docs/0-prepare.md)
 2. [安装 k3s](docs/1-k3s.md)
 3. [常用客户端](docs/2-tools.md)
