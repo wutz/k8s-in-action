@@ -62,7 +62,7 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
 
 ### 推理
 
-1. 运行 Ollama + Open WebUI 推理服务
+1. [部署 Ollama + Open WebUI 推理服务](ollama/README.md)
 2. 部署 Serverless 服务 KNative
 3. 部署推理服务 KServe + vLLM
 

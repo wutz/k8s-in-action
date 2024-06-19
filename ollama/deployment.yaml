@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: ollama
+spec:
+  selector:
+    matchLabels:
+      name: ollama
+  template:
+    metadata:
+      labels:
+        name: ollama
+    spec:
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          env:
+            - name: OLLAMA_NUM_PARALLEL
+              value: "4"
+            - name: OLLAMA_MAX_LOADED_MODELS
+              value: "4"
+          ports:
+            - name: http
+              containerPort: 11434
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 3
+              memory: 9Gi
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - name: ollama
+              mountPath: /root/.ollama
+        - name: open-webui
+          image: ghcr.io/open-webui/open-webui:main
+          env:
+            - name: OLLAMA_BASE_URL
+              value: "http://localhost:11434"
+            - name: HF_ENDPOINT
+              value: https://hf-mirror.com
+            - name: RESET_CONFIG_ON_START
+              value: "true"
+          ports:
+            - name: open-webui
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 1
+              memory: 3Gi
+          volumeMounts:
+            - name: ollama
+              subPath: open-webui
+              mountPath: /app/backend/data
+      volumes:
+        - name: ollama
+          persistentVolumeClaim:
+            claimName: ollama
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
