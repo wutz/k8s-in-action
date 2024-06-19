@@ -1,0 +1,74 @@
+apiVersion: kubeflow.org/v2beta1
+kind: MPIJob
+metadata:
+  name: nccl-tests-h100
+spec:
+  slotsPerWorker: 8
+  runPolicy:
+    cleanPodPolicy: Running
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - image: ghcr.io/coreweave/nccl-tests:12.1.1-cudnn8-devel-ubuntu20.04-nccl2.18.3-1-471f0db
+              name: nccl
+              env:
+                - name: OMPI_ALLOW_RUN_AS_ROOT
+                  value: "1"
+                - name: OMPI_ALLOW_RUN_AS_ROOT_CONFIRM
+                  value: "1"
+              # Uncomment to be able to exec in to launcher pod for interactive testing
+              # command: ['sleep', '86400']
+              command: ["/bin/bash", "-c"]
+              args: [
+                  "mpirun \
+                  -np 24 \
+                  -bind-to none \
+                  -x LD_LIBRARY_PATH \
+                  -x NCCL_SOCKET_IFNAME=eth0 \
+                  -x NCCL_IB_HCA=mlx5 \
+                  -x UCX_NET_DEVICES=mlx5_0:1,mlx5_1:1,mlx5_2:1,mlx5_3:1,mlx5_4:1,mlx5_7:1,mlx5_8:1,mlx5_9:1 \
+                  -x SHARP_COLL_ENABLE_PCI_RELAXED_ORDERING=1 \
+                  -x NCCL_COLLNET_ENABLE=0 \
+                  /opt/nccl_tests/build/all_reduce_perf -b 512M -e 8G -f 2 -g 1 \
+                  ",
+                ]
+
+              resources:
+                requests:
+                  cpu: 2
+                  memory: 128Mi
+          enableServiceLinks: false
+          automountServiceAccountToken: false
+    Worker:
+      replicas: 3
+      template:
+        metadata:
+          labels:
+            job: nccl-test
+        spec:
+          containers:
+            - image: ghcr.io/coreweave/nccl-tests:12.1.1-cudnn8-devel-ubuntu20.04-nccl2.18.3-1-471f0db
+              name: nccl
+              resources:
+                requests:
+                  cpu: 110
+                  memory: 960Gi
+                  nvidia.com/gpu: 8
+                  rdma/ib: 1
+                limits:
+                  cpu: 110
+                  memory: 960Gi
+                  nvidia.com/gpu: 8
+                  rdma/ib: 1
+              volumeMounts:
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - emptyDir:
+                medium: Memory
+              name: dshm
+          enableServiceLinks: false
+          automountServiceAccountToken: false
