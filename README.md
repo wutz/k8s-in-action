@@ -57,7 +57,8 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
 
 ## AI
 
-1. 部署 GPU 支撑服务 GPU Operator
+1. [部署 Node Feature Discovery](nfd/README.md)
+2. 部署 GPU 支撑服务 GPU Operator
 
 ### 推理
 
