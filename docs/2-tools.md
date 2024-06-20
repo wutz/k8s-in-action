@@ -48,7 +48,12 @@
    可以使用插件 kubectx 进行切换，但是容易忘记所在集群, 下面使用为每个集群设置别名方式降低误操作
 
    ```sh
+   cat << 'EOF' >> /etc/profile.d/k8s.sh
    alias d1='export KUBECONFIG=~/.kube/ctx/dev1.yaml; kubectl'
+   alias p1='export KUBECONFIG=~/.kube/ctx/prd1.yaml; kubectl'
+   complete -o default -F __start_kubectl d1 p1
+   EOF
+   source /etc/profile.d/k8s.sh
 
    d1 get po
    ```
