@@ -11,7 +11,7 @@ K8S 支持多种 Ingress 并存，但是如何要把 Nginx 作为缺省 Ingress�
   ```sh
   pdsh -w ^server "sed -i '/disable:/a - traefik' /etc/rancher/k3s/config.yaml"
   pdsh -w ^server systemctl restart k3s
-  kubectl patch service traefik -p '{"metadata":{"finalizers":[]}}' --type 'merge'
+  kubectl patch service traefik -n kube-system -p '{"metadata":{"finalizers":[]}}' --type 'merge'
   ```
 
 - 部署 ingress nginx
@@ -28,8 +28,8 @@ K8S 支持多种 Ingress 并存，但是如何要把 Nginx 作为缺省 Ingress�
 - 配置 DNS 解析到 Service Nginx 的 IP 上
 
   ```sh
-  # 输出的 EXTERNAL—IP 为需要 DNS 解析的 IP （(如果环境使用一对一 NAT，需要解析到外网 IP)
-  k get svc ingress-nginx-controller -n ingress-nginx
+  # 输出的 EXTERNAL—IP 为需要 DNS 解析的 IP （如果环境使用一对一 NAT，需要解析到外网 IP)
+  kubectl get svc ingress-nginx-controller -n ingress-nginx
   ```
 
   后面示例假设配置 DNS 解析 `*.play.example.com`

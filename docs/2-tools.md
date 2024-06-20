@@ -26,8 +26,6 @@
    export KUBECONFIG=~/.kube/config
 
    source <(kubectl completion bash)
-   alias k=kubectl
-   complete -o default -F __start_kubectl k
    EOF
 
    source /etc/profile.d/k8s.sh
@@ -36,13 +34,13 @@
 4. 常用使用方法
 
    ```sh
-   k get nodes
-   k get po
+   kubectl get nodes
+   kubectl get po
 
-   k ns kube-system
-   k get po
+   kubectl ns kube-system
+   kubectl get po
 
-   k apply -f test.yaml
+   kubectl apply -f test.yaml
    ```
 
 5. 多集群管理

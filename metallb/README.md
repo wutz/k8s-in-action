@@ -19,7 +19,7 @@ k3s 缺省安装的是 [ServiceLB](https://docs.k3s.io/zh/networking/networking-
   helmwave up --build
 
   # 缺省 service traefik 会申请走 ip
-  k get svc traefik -n kube-system
+  kubectl get svc traefik -n kube-system
   ```
 
   上述步骤完成：
