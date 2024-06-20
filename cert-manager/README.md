@@ -16,18 +16,18 @@
 
   ```sh
   # 部署
-  k apply -k tests
+  kubectl apply -k tests
 
   # 访问 https://kuard.play.example.com
 
   # 卸载
-  k delete -k tests
+  kubectl delete -k tests
   ```
 
   可以通过查看签名过程
 
   ```sh
-  k get ing
-  k get cert
-  k get challenges
+  kubectl get ing
+  kubectl get cert
+  kubectl get challenges
   ```
