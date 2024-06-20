@@ -11,6 +11,7 @@ K8S 支持多种 Ingress 并存，但是如何要把 Nginx 作为缺省 Ingress�
   ```sh
   pdsh -w ^server "sed -i '/disable:/a - traefik' /etc/rancher/k3s/config.yaml"
   pdsh -w ^server systemctl restart k3s
+  kubectl patch service traefik -p '{"metadata":{"finalizers":[]}}' --type 'merge'
   ```
 
 - 部署 ingress nginx
