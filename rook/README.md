@@ -1,6 +1,4 @@
-# Rook (Ceph)
-
-> https://rook.io/
+# [Rook Ceph](https://rook.io/)
 
 - 至少 3 台机器，每台至少插入 1 块本地盘
 - 推荐额外配置 1 条网络用于集群内数据复制, 可以极大提升存储性能
@@ -8,9 +6,9 @@
   - 如果有 2 条网络，根据实际的宿主机网络设置 `public` 和 `cluster` 网段
 - 为存储节点打上额外 label, 下面使用 3 台 mn 节点复用作为存储节点
   ```sh
-  k label node mn01.play.local role=storage-node
-  k label node mn02.play.local role=storage-node
-  k label node mn03.play.local role=storage-node
+  kubectl label node mn01.play.local role=storage-node
+  kubectl label node mn02.play.local role=storage-node
+  kubectl label node mn03.play.local role=storage-node
   ```
 - 部署 Rook
 
