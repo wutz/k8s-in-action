@@ -41,6 +41,16 @@
 
 ## 存储
 
+- CSI (Container Storage Interface)
+- Volume: 容器中文件在磁盘中是临时存放的，当容器崩溃或者停止时容器中创建和修改的文件将会丢失，故而使用 Volume 解决这一问题
+  - Ephemeral Volume 临时卷：与 Pod 生命周期相同, 在 Pod 停止会摧毁临时卷
+    - emptyDir: 在 Pod 启动时为空，通常使用系统盘或者 RAM 中的空间
+    - configMap, secret: 提供将配置挂载进 Pod 中
+  - Persistent Volume 持久卷：超出 Pod 生命周期, 在 pod 停止会继续保留持久卷
+    - PV (PersistentVolume ): 由管理员手动或由 StorageClass 动态创建
+    - PVC (PersistentVolumeClaim): 用户的存储请求, 指定需要的存储大小或访问数据的方式
+    - StorageClass: 指定存储类型
+
 k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据库使用。
 
 如果需要持久存储，不需要 HA 支持的情况下可以使用 NFS，需要 HA 支持可以使用 Rook (Ceph)。
