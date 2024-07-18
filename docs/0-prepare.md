@@ -190,9 +190,6 @@ pdcp -w ^all nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
 ### [推荐]关闭密码登录增强安全性
 
 ```sh
-cat << 'EOF' > /etc/ssh/sshd_config.d/90-password.conf
-PasswordAuthentication no
-EOF
-
-systemctl reload sshd
+pdsh -w ^all "sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config.d/50-cloud-init.conf"
+pdsh -w ^all systemctl reload ssh
 ```
