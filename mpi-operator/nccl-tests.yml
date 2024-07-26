@@ -29,7 +29,6 @@ spec:
                   -x LD_LIBRARY_PATH \
                   -x NCCL_SOCKET_IFNAME=eth0 \
                   -x NCCL_IB_HCA=mlx5 \
-                  -x SHARP_COLL_ENABLE_PCI_RELAXED_ORDERING=1 \
                   -x NCCL_COLLNET_ENABLE=0 \
                   -x NCCL_ALGO=RING \
                   -x NCCL_IB_QPS_PER_CONNECTION=4 \
