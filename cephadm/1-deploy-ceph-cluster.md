@@ -12,8 +12,8 @@
     cat > daemon.json <<EOF
     {
         "proxies": {
-            "http-proxy": "http://10.254.25.1:3128",
-            "https-proxy": "http://10.254.25.1:3128",
+            "http-proxy": "http://172.19.1.100:3128",
+            "https-proxy": "http://172.19.1.100:3128",
             "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,localhost,.example.com"
         }
     }
@@ -141,3 +141,19 @@
         # 应用描述文件
         > ceph orch apply osd -i ./osd_spec.yml [--dry-run]
         ```
+
+* 创建 crush rule
+    
+    ```bash
+    # ceph osd crush rule create-replicated <name> <root> <failure-domain> <class>
+    ceph osd crush rule create-replicated rep_ssd default host ssd
+    ceph osd pool set .mgr crush_rule rep_ssd
+    ```
+
+    > * 缺省自带副本类 crush rule `replicated_rule`，如果系统中存在 HDD 和 SSD 两类设备这将混用在一起，这会带来不稳定性能。
+    > * 一般显示创建副本类 crush rule 指定设备类型（例如上面明确 ssd 设备）
+
+* 部署完 Ceph 集群后并不能提供对外服务，需要根据应用场景部署对应服务
+
+    * [提供 Ceph RADOS 原生服务](2-ceph-rados.md)
+    * [部署 CephFS](3-deploy-cephfs.md)
