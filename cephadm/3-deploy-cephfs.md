@@ -48,7 +48,7 @@ CephFS 提供一些功能:
     ceph osd pool set cephfs1_metadata size 2
     ceph osd pool get cephfs1_metadata all
     
-    ceph osd pool create cephfs1_data 128 128 rep_ssd
+    ceph osd pool create cephfs1_data 128 128 rep_ssd --bulk
     ceph osd pool set cephfs1_data size 2
     ceph osd pool set cephfs1_data target_size_ratio 0.3
     ceph osd pool set cephfs1_data bulk true
