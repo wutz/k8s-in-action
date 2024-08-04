@@ -6,7 +6,7 @@
 
 * 关闭 `mpijob/v1`
 
-    前面安装 [mpi-operator](../mpi-operator/README.md) 提供的 `mpijob/v2beta` 与 `training-operator` 提供的 `mpijob/v1` 不能同时存在。
+    前面安装 [mpi-operator](../mpi-operator/README.md) 提供的 `mpijob/v2beta1` 与 `training-operator` 提供的 `mpijob/v1` 不能同时存在。
 
     另外 `mpijob/v2beta1` 采用 ssh 互信方式，更接近裸金属环境适用范围更广
 
