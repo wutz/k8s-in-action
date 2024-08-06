@@ -10,7 +10,7 @@
     # 创建 pool
     ceph osd pool create juicefs 128 128 rep_ssd --bulk
     # 设置为 2 副本。通常 SSD 设置 2 副本，HDD 设置 3 副本
-    ceph osd pool set juicefs min_size 2
+    ceph osd pool set juicefs size 2
     # 设置 pool 用途
     ceph osd pool application enable juicefs juicefs
 
