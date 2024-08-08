@@ -67,6 +67,8 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
 
 ## 数据库
 
+* [部署单机 Redis](redis/README.md)
+
 ## AI
 
 1. [部署 Node Feature Discovery](nfd/README.md)
