@@ -1,5 +1,7 @@
 # 提供 Ceph RADOS 原生服务
 
+依赖 [部署 Ceph 集群](1-deploy-ceph-cluster.md)
+
 一般用于访问 Ceph RADOS 原生服务的客户端程序，下面以为 JuiceFS 提供 Ceph RADOS Pool 为例.
 
 相比于 Ceph RGW (s3) 接口，Ceph RADOS 减少额外开销服务(RGW 实例)以及流量负载均衡问题。

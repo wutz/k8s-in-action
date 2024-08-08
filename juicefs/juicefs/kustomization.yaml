@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+secretGenerator:
+- files:
+  - ceph.conf=ceph/ceph.conf
+  - ceph.client.juicefs.keyring=ceph/ceph.client.juicefs.keyring
+  name: ceph-conf
+  options:
+    disableNameSuffixHash: true
+  type: Opaque
+namespace: juicefs
+resources:
+- secret.yaml
+- storageclass.yaml
