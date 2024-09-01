@@ -1,14 +1,14 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: sc-juicefs
+  name: sc-juicefs-dev
 provisioner: csi.juicefs.com
 parameters:
-  csi.storage.k8s.io/provisioner-secret-name: juicefs-secret
+  csi.storage.k8s.io/provisioner-secret-name: juicefs-dev-secret
   csi.storage.k8s.io/provisioner-secret-namespace: juicefs
-  csi.storage.k8s.io/node-publish-secret-name: juicefs-secret
+  csi.storage.k8s.io/node-publish-secret-name: juicefs-dev-secret
   csi.storage.k8s.io/node-publish-secret-namespace: juicefs
-  csi.storage.k8s.io/controller-expand-secret-name: juicefs-secret   
+  csi.storage.k8s.io/controller-expand-secret-name: juicefs-dev-secret   
   csi.storage.k8s.io/controller-expand-secret-namespace: juicefs
   pathPattern: "${.pvc.namespace}-${.pvc.name}"
 mountOptions:

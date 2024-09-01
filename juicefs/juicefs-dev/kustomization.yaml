@@ -3,8 +3,8 @@ kind: Kustomization
 secretGenerator:
 - files:
   - ceph.conf=ceph/ceph.conf
-  - ceph.client.juicefs.keyring=ceph/ceph.client.juicefs.keyring
-  name: ceph-conf
+  - ceph.client.juicefs.keyring=ceph/ceph.client.juicefs-dev.keyring
+  name: ceph-dev-conf
   options:
     disableNameSuffixHash: true
   type: Opaque

@@ -29,7 +29,8 @@ JuiceFS 主要包含 3 种版本，分别是：
     * Redis
         * [单机版本 Redis](../redis/README.md)
         * Redis HA (待补充)
-    * TiKV (待补充)
+    * TiKV
+        * [部署 TiKV 集群](../tikv/README.md)
 * 对象存储
     * [Ceph RADOS](../cephadm/2-ceph-rados.md)
 
@@ -40,25 +41,37 @@ JuiceFS 主要包含 3 种版本，分别是：
     ```bash
     helmwave up --build
     ```
+2. 可以在一个集群中部署多个 JuiceFS，下面分别演示元数据是 Redis 和 TiKV 的场景
 
-2. 创建名字为 `juicefs` 的 JuiceFS (可以创建多个不同的 JuiceFS)
+    * 创建名字为 `juicefs-dev` 的 JuiceFS 使用 Redis 作为元数据用于开发场景
+        * 修改元数据连接信息: 修改文件 [juicefs-dev/secret.yaml](juicefs-dev/secret.yaml) 中的 `metaurl` 为实际值
+        * 修改对象存储连接信息
+        * 放置 ceph 配置文件到 [juicefs-dev/ceph](juicefs-dev/ceph) 中
+        * 如果提供的 ceph 配置不是 `ceph.client.juicefs-dev.keyring` 则需要修改 [kustomization.yaml](juicefs-dev/kustomization.yaml) 中的实际文件名称，以及 [juicefs-dev/secret.yaml](juicefs-dev/secret.yaml) 中的 `secret-key` 为实际值
+        * 最后修改 [juicefs-dev/secret.yaml](juicefs-dev/secret.yaml) 中的 `bucket` 值，其值为 ceph pool 名称
 
-    * 修改元数据连接信息: 修改文件 [juicefs/secret.yaml](juicefs/secret.yaml) 中的 `metaurl` 为实际值
-    * 修改对象存储连接信息
-        * 放置 ceph 配置文件到 [juicefs/ceph](juicefs/ceph) 中
-        * 如果提供的 ceph 配置不是 `ceph.client.juicefs.keyring` 则需要修改 [kustomization.yaml](juicefs/kustomization.yaml) 中的实际文件名称，以及 [juicefs/secret.yaml](juicefs/secret.yaml) 中的 `secret-key` 为实际值
-        * 最后修改 [juicefs/secret.yaml](juicefs/secret.yaml) 中的 `bucket` 值，其值为 ceph pool 名称
+        ```bash
+        部署执行
+        kubectl apply -k juicefs-dev
 
-    部署执行
+        验证
+        kubectl apply -f tests.yaml
+        ```
 
-    ```bash
-    kubectl apply -k juicefs
-    ```
+    * 创建名字为 `juicefs-prd` 的 JuiceFS 使用 TiKV 作为元数据用于生产场景
+        * 修改元数据连接信息: 修改文件 [juicefs-prd/secret.yaml](juicefs-prd/secret.yaml) 中的 `metaurl` 为实际值
+        * 修改对象存储连接信息
+        * 放置 ceph 配置文件到 [juicefs-prd/ceph](juicefs-prd/ceph) 中
+        * 如果提供的 ceph 配置不是 `ceph.client.juicefs-prd.keyring` 则需要修改 [kustomization.yaml](juicefs-prd/kustomization.yaml) 中的实际文件名称，以及 [juicefs-prd/secret.yaml](juicefs-prd/secret.yaml) 中的 `secret-key` 为实际值
+        * 最后修改 [juicefs-prd/secret.yaml](juicefs-prd/secret.yaml) 中的 `bucket` 值，其值为 ceph pool 名称
+        * 使用 TiKV 场景 JuiceFS CSI 存在[问题](https://github.com/juicedata/juicefs-csi-driver/issues/443#issuecomment-2323272940), 请按照问题 workaround 进行操作
 
-3. 验证
+        ```bash
+        # 部署执行
+        kubectl apply -k juicefs-prd
 
-    ```bash
-    kubectl apply -f tests.yaml
-    ```
+        # 验证
+        kubectl apply -f tests.yaml
+        ``` 
 
 
