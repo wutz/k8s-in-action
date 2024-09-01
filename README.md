@@ -87,3 +87,7 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
 
 1. [部署 MPI Operator 支持训练](mpi-operator/README.md)
 2. [部署 Training Operator](training-operator/README.md)
+
+### 其他
+
+* [部署 PyPI 镜像站](pypi/README.md)

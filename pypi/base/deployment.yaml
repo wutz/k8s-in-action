@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pypi
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: pypi
+  template:
+    metadata:
+      labels:
+        name: pypi
+    spec:
+      containers:
+        - name: pypi
+          image: jonasal/devpi-server:6.12
+          ports:
+            - name: http
+              containerPort: 3141
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 4
+              memory: 8Gi
+          volumeMounts:
+            - name: cache
+              mountPath: /devpi/server
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: cache
