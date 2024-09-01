@@ -26,10 +26,10 @@ JuiceFS 主要包含 3 种版本，分别是：
 以下部署方式使用方案：
 
 * 元数据 (选择一个）：
-    * Redis
+    * Redis 适合文件数量在 1 亿以下，数据一致性要求不高场景
         * [单机版本 Redis](../redis/README.md)
         * Redis HA (待补充)
-    * TiKV
+    * TiKV 适合文件数量在 100 亿，数据一致性要求高场景生产环境
         * [部署 TiKV 集群](../tikv/README.md)
 * 对象存储
     * [Ceph RADOS](../cephadm/2-ceph-rados.md)
