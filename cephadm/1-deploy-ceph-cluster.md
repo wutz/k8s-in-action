@@ -68,8 +68,14 @@
         ceph orch host ls
         ```
         
+    * 其它配置
+        - 如果上游的 container image 被移除，可以执行 `ceph config set global container_image xxx`  
+        - 如果添加节点属于不同的网络，需要指定 `public_network` 和 `cluster_network` 参数
 
-    如果上游的 container image 被移除，可以执行 `ceph config set global container_image xxx`  
+            ```bash
+            ceph config set mon public_network "172.19.12.0/24,172.29.12.0/24"
+            ceph config set global cluster_network "172.20.12.0/24,172.30.12.0/24"
+            ```
 
 * [添加存储](https://docs.ceph.com/en/reef/cephadm/services/osd/#cephadm-deploy-osds)
 
