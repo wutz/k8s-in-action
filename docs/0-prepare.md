@@ -141,10 +141,27 @@ pdsh -w ^all timedatectl set-timezone Asia/Shanghai
 
 > 也可以根据需要自行搭建 ntp server
 
+### 设置 apt 镜像
+
+```sh
+pdsh -w ^all sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list
+pdsh -w ^all sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+pdsh -w ^all sed -i 's/http:/https:/g' /etc/apt/sources.list
+pdsh -w ^all apt update
+```
+
 ### 设置防火墙
 
 ```sh
 pdsh -w ^all ufw disable
+```
+
+### 关闭 swap
+
+```sh
+pdsh -w ^all swapoff -a
+pdsh -w ^all cp /etc/fstab /etc/fstab.bak
+pdsh -w ^all "sed -i 's/^\/swap/#&/' /etc/fstab"
 ```
 
 ### 开启 CPU 超线程
@@ -165,15 +182,6 @@ pdsh -w ^all systemctl restart cpufrequtils
 pdsh -w ^all cpufreq-info
 pdsh -w ^all grep MHz /proc/cpuinfo
 pdsh -w ^all cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors
-```
-
-### 设置 apt 镜像
-
-```sh
-pdsh -w ^all sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list
-pdsh -w ^all sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
-pdsh -w ^all sed -i 's/http:/https:/g' /etc/apt/sources.list
-pdsh -w ^all apt update
 ```
 
 ### 锁定内核版本，避免驱动失效
