@@ -180,7 +180,7 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share/ecdir
     ```yaml
     storageClass:
       create: true
-      clusterID: f89b88ea-4dad-11ec-a673-4d72a9026ccc
+      clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
       fsName: cephfs1
       reclaimPolicy: Retain
     secret:
@@ -188,7 +188,7 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share/ecdir
       adminID: cephfs1k
       adminKey: <---key--->
     csiConfig:
-      - clusterID: f89b88ea-4dad-11ec-a673-4d72a9026ccc
+      - clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
         monitors:
           - 172.19.12.1:6789
           - 172.19.12.2:6789
