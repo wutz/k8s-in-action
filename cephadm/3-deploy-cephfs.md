@@ -182,7 +182,6 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share/ecdir
       create: true
       clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
       fsName: cephfs1
-      reclaimPolicy: Retain
     secret:
       create: true
       adminID: cephfs1k
