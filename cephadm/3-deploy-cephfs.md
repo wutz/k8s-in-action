@@ -180,6 +180,7 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share/ecdir
     ```yaml
     storageClass:
       create: true
+      name: csi-cephfs-sc
       clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
       fsName: cephfs1
     secret:
