@@ -1,0 +1,26 @@
+apiVersion: nfd.k8s-sigs.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: cpu
+spec:
+  rules:
+    - name: "CPU Node"
+      labels:
+        "node-role.kubernetes.io/cpu": "true"
+      matchFeatures:
+        - feature: system.name
+          matchExpressions:
+            nodename: { op: InRegexp, value: ["^c"] }
+
+    - name: "EPYC Rome"
+      labels:
+        "node.kubernetes.io/cpu": "epyc-rome"
+      matchFeatures:
+        - feature: cpu.model
+          matchExpressions:
+            vendor_id: { op: In, value: ["AMD"] }
+            family: { op: In, value: ["23"] }
+            id: { op: In, value: ["49"] }
+        - feature: system.name
+          matchExpressions:
+            nodename: { op: InRegexp, value: ["^c", "^g"] }

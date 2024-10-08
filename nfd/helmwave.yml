@@ -27,3 +27,8 @@ releases:
       version: v0.16.0
     values:
       - values.yml
+    lifecycle:
+      post_up:
+       - kubectl apply -k hooks
+      pre_down:
+       - kubectl delete -k hooks
