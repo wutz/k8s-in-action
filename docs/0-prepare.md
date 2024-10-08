@@ -66,11 +66,13 @@ network:
       set-name: eth0
 ```
 
+* 如果是 bonding 设备，把 `bond0` 替换为 `eth0` 即可
+
 ### 设置节点名称
 
 ```sh
 # 所有节点根据自身名字进行设置
-hostnamectl set-hostname mn01.play.local
+hostnamectl set-hostname mn01.dev1.local
 ```
 
 > play 根据集群用途或者地域设置，例如 dev1, bj1 等
@@ -78,11 +80,16 @@ hostnamectl set-hostname mn01.play.local
 ```sh
 # 在 mn01 节点配置 hosts
 cat << 'EOF' >> /etc/hosts
-10.0.3.158  mn01.play.local mn01
-10.0.0.27   mn02.play.local mn02
-10.0.1.98   mn03.play.local mn03
+# mn
+10.0.3.158  mn01.dev1.local mn01
+10.0.0.27   mn02.dev1.local mn02
+10.0.1.98   mn03.dev1.local mn03
 
-10.0.1.51   gn001.play.local gn001
+# cn
+10.0.1.40   cn001.dev1.local cn001
+
+# gn
+10.0.1.51   gn001.dev1.local gn001
 EOF
 ```
 
