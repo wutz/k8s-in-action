@@ -20,6 +20,36 @@
 
   > 只需要修改 GPU 节点的配置
 
+- 修改调度策略为优先填充满节点：缺省平分到节点会造成无法申请满 8 卡的节点资源
+
+  > 修改所有 mn 节点
+
+  ```sh
+  cat << 'EOF' > scheduler.yaml
+  apiVersion: kubescheduler.config.k8s.io/v1
+  kind: KubeSchedulerConfiguration
+  clientConnection:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+  profiles:
+  - pluginConfig:
+    - args:
+        scoringStrategy:
+          resources:
+          - name: cpu
+            weight: 1
+          - name: memory
+            weight: 1
+          - name: nvidia.com/gpu
+            weight: 3
+          type: MostAllocated
+      name: NodeResourcesFit
+  EOF
+
+  pdcp -w ^server scheduler.yaml /etc/rancher/k3s/
+  pdsh -w ^server "sed -i '\$a kube-scheduler-arg:\n- authentication-tolerate-lookup-failure=false\n- config=/etc/rancher/k3s/scheduler.yaml' /etc/rancher/k3s/config.yaml"
+  pdsh -w ^server systemctl restart k3s
+  ```
+
 - 在 Grafana 中添加 Nvidia DCGM Dashboard (Import 时使用 ID: `21362`)
 
 - 测试
