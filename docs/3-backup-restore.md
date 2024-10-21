@@ -10,7 +10,7 @@ K3S默认开启快照备份，备份时间为每天的00:00和12:00。系统会�
 
 默认情况下K3S快照保存在/var/lib/rancher/k3s/server/db/snapshots目录下
 
-```bash
+```sh
 root@mn01:~# cd /var/lib/rancher/k3s/server/db/snapshots
 root@mn01:/var/lib/rancher/k3s/server/db/snapshots# ls
 etcd-snapshot-mn01.dev1.local-1729310405  etcd-snapshot-mn01.dev1.local-1729440002  on-demand-mn01.dev1.local-1729149615
@@ -28,7 +28,7 @@ etcd-snapshot-mn01.dev1.local-1729396804  on-demand-mn01.dev1.local-1729149154
 
 执行如下命令手工触发备份
 
-```bash
+```sh
 root@mn01:/var/lib/rancher/k3s/server/db/snapshots# k3s etcd-snapshot save
 INFO[0000] Snapshot on-demand-mn01.dev1.local-1729494108 saved.
 ```
@@ -59,7 +59,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 请在mn[01-03]节点执行如下命令关闭k3s服务
 
-```bash
+```sh
 # systemctl stop k3s
 ```
 
@@ -67,7 +67,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 此步骤需要先确认需要恢复到的快照备份文件，通常选择一个最新的快照备份。
 
-```bash
+```sh
 # k3s server --cluster-reset --cluster-reset-restore-path=/var/lib/rancher/k3s/server/db/snapshots/etcd-snapshot-mn01.dev1.local-1729483202
 ```
 
@@ -75,14 +75,14 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 请在mn[01-03]节点执行如下命令,备份和删除/var/lib/rancher/k3s/server/db目录
 
-```bash
+```sh
 # cd /var/lib/rancher/k3s/server/
 # mv db db.20241021
 ```
 
 ### mn01节点启动k3s服务
 
-```bash
+```sh
 # systemctl start k3s
 ```
 
@@ -90,13 +90,13 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 以下步骤需要依次在mn[02-03]节点上执行
 
-```bash
+```sh
 # systemctl start k3s
 ```
 
 ### gn001节点重新加入新集群
 
-```bash
+```sh
 # systemctl restart k3s-agent
 ```
 
@@ -110,7 +110,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 请在mn[01-03]节点执行如下命令关闭k3s服务
 
-```bash
+```sh
 # systemctl stop k3s
 ```
 
@@ -118,7 +118,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 请在mn02上执行如下操作,执行前请先确认mn02和mn01已经做过ssh互信。
 
-```bash
+```sh
 # rsync -avoPg /var/lib/rancher/k3s/server/db/snapshots/etcd-snapshot-mn01.dev1.local-1729483202 mn01:/tmp/etcd-snapshot-mn01.dev1.local-1729483202
 ```
 
@@ -126,7 +126,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 此步骤需要先确认需要恢复到的快照备份文件，通常选择一个最新的快照备份。
 
-```bash
+```sh
 # k3s server --cluster-reset --cluster-reset-restore-path=/tmp/etcd-snapshot-mn01.dev1.local-1729483202
 ```
 
@@ -134,14 +134,14 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 请在mn[01-03]节点执行如下命令,备份和删除/var/lib/rancher/k3s/server/db目录
 
-```bash
+```sh
 # cd /var/lib/rancher/k3s/server/
 # mv db db.20241021
 ```
 
 ### mn01节点启动k3s服务
 
-```bash
+```sh
 # systemctl start k3s
 ```
 
@@ -149,12 +149,12 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 以下步骤需要依次在mn[02-03]节点上执行
 
-```bash
+```sh
 # systemctl start k3s
 ```
 
 ### gn001节点重新加入新集群
 
-```bash
+```sh
 # systemctl restart k3s-agent
 ```
