@@ -28,7 +28,7 @@ expose:
       secretName: "harbor-tls-secret"
   ingress:
     hosts:
-      core: cr.hs5h-int.paratera.com
+      core: harbor.example.paratera.com
     # set to the type of ingress controller if it has specific requirements.
     # leave as `default` for most ingress controllers.
     # set to `gce` if using the GCE ingress controller
@@ -109,7 +109,7 @@ expose:
 # the IP address of k8s node
 #
 # If Harbor is deployed behind the proxy, set it as the URL of proxy
-externalURL: https://cr.hs5h-int.paratera.com
+externalURL: https://harbor.example.paratera.com
 
 # The persistence is enabled by default and a default StorageClass
 # is needed in the k8s cluster to provision volumes dynamically.
@@ -994,7 +994,7 @@ database:
       #    memory: 128Mi
       #    cpu: 100m
   external:
-    host: "pgm-z87um9hgrsktkiev6.pg.rds.hs5b-int.paratera.com"
+    host: "pgm-z87um9hgrsktkiev6.pg.rds.example.com"
     port: "5432"
     username: "habor"
     password: "xxxxxxxxxxxxxxx"
@@ -1064,7 +1064,7 @@ redis:
     # support redis, redis+sentinel
     # addr for redis: <host_redis>:<port_redis>
     # addr for redis+sentinel: <host_sentinel1>:<port_sentinel1>,<host_sentinel2>:<port_sentinel2>,<host_sentinel3>:<port_sentinel3>
-    addr: "r-uvnz4dxcdnmzwshc2.redis.rds.hs5b-int.paratera.com:6379"
+    addr: "r-uvnz4dxcdnmzwshc2.redis.rds.example.com:6379"
     # The name of the set of Redis instances to monitor, it must be set to support redis+sentinel
     sentinelMasterSet: ""
     # The "coreDatabaseIndex" must be "0" as the library Harbor

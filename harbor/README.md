@@ -27,13 +27,13 @@ expose:
   type: ingress
   ingress:
     hosts:
-      core: cr.hs5h-int.paratera.com  
+      core: harbor.example.com  
 ```
 
 - 配置 `externalURL`
 
 ```yaml
-externalURL: https://cr.hs5h-int.paratera.com
+externalURL: https://harbor.example.com
 ```
 
 - 配置 tls （如果使用）
@@ -52,8 +52,8 @@ expose:
 
 ```bash
 kubectl create secret tls harbor-tls-secret \
-  --cert=cr.hs5h-int.paratera.com.pem \
-  --key=cr.hs5h-int.paratera.com.key \
+  --cert=harbor.example.com.pem \
+  --key=harbor.example.com.key \
   -n harbor-system
 ```
 
