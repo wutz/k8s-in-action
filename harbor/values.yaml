@@ -28,7 +28,7 @@ expose:
       secretName: "harbor-tls-secret"
   ingress:
     hosts:
-      core: harbor.example.paratera.com
+      core: harbor.example.com
     # set to the type of ingress controller if it has specific requirements.
     # leave as `default` for most ingress controllers.
     # set to `gce` if using the GCE ingress controller
@@ -109,7 +109,7 @@ expose:
 # the IP address of k8s node
 #
 # If Harbor is deployed behind the proxy, set it as the URL of proxy
-externalURL: https://harbor.example.paratera.com
+externalURL: https://harbor.example.com
 
 # The persistence is enabled by default and a default StorageClass
 # is needed in the k8s cluster to provision volumes dynamically.
