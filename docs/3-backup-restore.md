@@ -6,7 +6,7 @@
 
 # 备份
 
-K3S默认开启快照备份，备份时间为每天的00:00和12:00。系统会始终保留5个最近由系统自动触发的快照备份数据。
+K3S默认开启快照备份，备份时间为每天的00:00和12:00。系统会始终保留5个最近自动触发的快照备份数据。
 
 默认情况下K3S快照保存在/var/lib/rancher/k3s/server/db/snapshots目录下
 
@@ -49,7 +49,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 本章节基于两个实际场景说明如何进行集群的恢复
 
-## 基于主节点mn01恢复
+## 一、基于主节点mn01恢复
 
 本章节描述如何使用mn01节点的快照备份恢复整个集群。
 
@@ -100,7 +100,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 # systemctl restart k3s-agent
 ```
 
-## 基于主节点mn02恢复
+## 二、基于主节点mn02恢复
 
 本章节假设mn01节点的备份数据被手工误删除，如何使用mn02节点的快照备份恢复整个集群。同样mn03节点的备份也适用于该场景
 
@@ -127,7 +127,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 此步骤需要先确认需要恢复到的快照备份文件，通常选择一个最新的快照备份。
 
 ```bash
-# k3s server --cluster-reset --cluster-reset-restore-path=/var/lib/rancher/k3s/server/db/snapshots/etcd-snapshot-mn01.dev1.local-1729483202
+# k3s server --cluster-reset --cluster-reset-restore-path=/tmp/etcd-snapshot-mn01.dev1.local-1729483202
 ```
 
 ### 备份和删除源数据目录
