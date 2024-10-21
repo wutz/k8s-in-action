@@ -1,14 +1,12 @@
-# 集群元数据备份和恢复
+# 1. 集群元数据备份和恢复
 
-使用K3S搭建的的Kubernetes集群默认使用etcd保存元数据信息。
+使用K3S搭建的Kubernetes集群默认使用etcd保存元数据信息。
 
 本章节介绍如何基于etcd进行Kubernetes集群元数据的备份和恢复。
 
-没有特殊说明，本文档描述内容全部基于3主节点进行。
+## 1.1. 备份
 
-## 备份
-
-K3S默认开启快照备份，备份时间为每天的00:00和12:00。系统会始终保留5个最近系统自动触发的快照备份数据。
+K3S默认开启快照备份，备份时间为每天的00:00和12:00。系统会始终保留5个最近由系统自动触发的快照备份数据。
 
 默认情况下K3S快照保存在/var/lib/rancher/k3s/server/db/snapshots目录下
 
@@ -22,11 +20,11 @@ etcd-snapshot-mn01.dev1.local-1729396804  on-demand-mn01.dev1.local-1729149154
 
 如上图所示，所有etcd-snapshot开头的快照都是系统自动触发的快照；on-demand开头的快照都是手工执行相关命令创建的快照。
 
-系统会始终保留5个最近自动触发的快照数据；系统不会自动删除手工创建的备份数据，需要手工删除。
+系统会始终保留5个最近自动触发的快照数据；手工创建的备份数据不会被自动删除，需要手工删除。
 
 如果你的Kubernetes集群有多个etcd,master节点，每个节点都会在00:00和12:00自动触发快照备份。
 
-### 手工触发备份
+### 1.1.1. 手工触发备份
 
 执行如下命令手工触发备份
 
@@ -47,17 +45,17 @@ https://docs.k3s.io/cli/etcd-snapshot
 
 因为集群具有3个主节点并且每个主节点都保持5分备份，就不需要依赖外部备份机制再实现数据的冗余备份。
 
-## 恢复
+## 1.2. 恢复
 
 本章节基于两个实际场景说明如何进行集群的恢复
 
-### 基于主节点mn01恢复
+### 1.2.1. 基于主节点mn01恢复
 
 本章节描述如何使用mn01节点的快照备份恢复整个集群。
 
 以下操作请在root用户环境下进行。
 
-#### 所有主节点关闭k3s服务
+#### 1.2.1.1. 所有主节点关闭k3s服务
 
 请在mn[01-03]节点执行如下命令关闭k3s服务
 
@@ -65,7 +63,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 # systemctl stop k3s
 ```
 
-#### mn01节点执行数据恢复
+#### 1.2.1.2. mn01节点执行数据恢复
 
 此步骤需要先确认需要恢复到的快照备份文件，通常选择一个最新的快照备份。
 
@@ -73,7 +71,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 # k3s server --cluster-reset --cluster-reset-restore-path=/var/lib/rancher/k3s/server/db/snapshots/etcd-snapshot-mn01.dev1.local-1729483202
 ```
 
-#### 备份和删除源数据目录
+#### 1.2.1.3. 备份和删除源数据目录
 
 请在mn[01-03]节点执行如下命令,备份和删除/var/lib/rancher/k3s/server/db目录
 
@@ -82,13 +80,13 @@ https://docs.k3s.io/cli/etcd-snapshot
 # mv db db.20241021
 ```
 
-#### mn01节点启动k3s服务
+#### 1.2.1.4. mn01节点启动k3s服务
 
 ```bash
 # systemctl start k3s
 ```
 
-#### mn[02-03]节点从新加入到新集群
+#### 1.2.1.5. mn[02-03]节点从新加入到新集群
 
 以下步骤需要依次在mn[02-03]节点上执行
 
@@ -96,19 +94,19 @@ https://docs.k3s.io/cli/etcd-snapshot
 # systemctl start k3s
 ```
 
-#### gn001节点重新加入新集群
+#### 1.2.1.6. gn001节点重新加入新集群
 
 ```bash
 # systemctl restart k3s-agent
 ```
 
-### 基于主节点mn02恢复
+### 1.2.2. 基于主节点mn02恢复
 
 本章节假设mn01节点的备份数据被手工误删除，如何使用mn02节点的快照备份恢复整个集群。同样mn03节点的备份也适用于该场景
 
 以下操作请在root用户环境下进行。
 
-#### 所有主节点关闭k3s服务
+#### 1.2.2.1. 所有主节点关闭k3s服务
 
 请在mn[01-03]节点执行如下命令关闭k3s服务
 
@@ -116,7 +114,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 # systemctl stop k3s
 ```
 
-#### 把mn02的备份数据同步到mn01节点
+#### 1.2.2.2. 把mn02的备份数据同步到mn01节点
 
 请在mn02上执行如下操作,执行前请先确认mn02和mn01已经做过ssh互信。
 
@@ -124,7 +122,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 # rsync -avoPg /var/lib/rancher/k3s/server/db/snapshots/etcd-snapshot-mn01.dev1.local-1729483202 mn01:/tmp/etcd-snapshot-mn01.dev1.local-1729483202
 ```
 
-#### mn01节点执行数据恢复
+#### 1.2.2.3. mn01节点执行数据恢复
 
 此步骤需要先确认需要恢复到的快照备份文件，通常选择一个最新的快照备份。
 
@@ -132,7 +130,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 # k3s server --cluster-reset --cluster-reset-restore-path=/var/lib/rancher/k3s/server/db/snapshots/etcd-snapshot-mn01.dev1.local-1729483202
 ```
 
-#### 备份和删除源数据目录
+#### 1.2.2.4. 备份和删除源数据目录
 
 请在mn[01-03]节点执行如下命令,备份和删除/var/lib/rancher/k3s/server/db目录
 
@@ -141,13 +139,13 @@ https://docs.k3s.io/cli/etcd-snapshot
 # mv db db.20241021
 ```
 
-#### mn01节点启动k3s服务
+#### 1.2.2.5. mn01节点启动k3s服务
 
 ```bash
 # systemctl start k3s
 ```
 
-#### mn[02-03]节点从新加入到新集群
+#### 1.2.2.6. mn[02-03]节点从新加入到新集群
 
 以下步骤需要依次在mn[02-03]节点上执行
 
@@ -155,7 +153,7 @@ https://docs.k3s.io/cli/etcd-snapshot
 # systemctl start k3s
 ```
 
-#### gn001节点重新加入新集群
+#### 1.2.2.7. gn001节点重新加入新集群
 
 ```bash
 # systemctl restart k3s-agent
