@@ -39,14 +39,16 @@ EOF
 helmwave up --build
 ```
 
-配置 DNS 解析到 Service Nginx 的 IP 上
+配置 DNS 解析到 Service Nginx 的 IP 上 (需要联系 DNS 管理员配置解析)
 
 ```sh
-# 输出的 EXTERNAL—IP 为需要 DNS 解析的 IP （如果环境使用一对一 NAT，需要解析到外网 IP)
+# 获取 Service Nginx 的 EXTERNAL-IP
 kubectl get svc ingress-nginx-controller -n ingress-nginx
 ```
 
-后面示例假设配置 DNS 解析 `*.bj1a.example.com`
+* 从上述获取到为内网 IP `10.128.0.100`, 则解析 `*.bj1a-int.example.com` 到 `10.128.0.100`
+* 如果上述 IP 配置外网一对一 NAT，例如 `1.2.3.4`, 则解析 `*.bj1a.example.com` 到 `1.2.3.4`
+* 如果上述 IP 为外网 IP， 例如 `1.2.3.4`, 则解析 `*.bj1a.example.com` 到 `1.2.3.4`
 
 ## 卸载
 
