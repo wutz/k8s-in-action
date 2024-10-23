@@ -25,6 +25,8 @@
 * 对外服务：*.<集群名称>.example.com, 例如 *.bj1a.example.com
 * 对内服务：*.<集群名称>-int.example.com, 例如 *.bj1a-int.example.com
 
+> int 是 internal 的缩写，表示内部服务
+
 ### 节点命名
 
 * 管理节点：mn[01-07].<集群名称>.local, 例如 mn01.bj1a.local
@@ -33,7 +35,7 @@
 * 网络负载均衡节点：ln[01-99].<集群名称>.local, 例如 ln01.bj1a.local
   * 生产集群至少 2 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
   * 测试集群复用管理节点
-* 存储节点：sn[01-99].<集群名称>.local, 例如 sn001.bj1a.local
+* 存储节点：sn[01-99].<集群名称>.local, 例如 sn01.bj1a.local
   * 生产集群至少 3 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
   * 测试集群复用管理节点
 * 数据库节点：dn[01-99].<集群名称>.local, 例如 dn01.bj1a.local
@@ -64,7 +66,8 @@
 
 ### 设置节点统一 interface 名称
 
-> 通常在云主机上 interface 名称已统一，可以跳过
+> * 后续一些服务依赖一致的 interface 名称
+> * 某些环境 interface 名称已统一，可以跳过
 
 一般物理机上 interface 名称需要根据实际情况进行修改统一名称，下面是一个示例
 
@@ -195,6 +198,8 @@ pdsh -w ^all "sed -i 's/^\/swap/#&/' /etc/fstab"
 在 BIOS 中修改后重启，在系统执行 `lscpu` 检查是否为 `Thread(s) per core: 2`
 
 ### 开启 CPU Performance Mode
+
+> 如果在 BIOS 中已经开启，可以跳过。开启此选项极大提升性能
 
 ```sh
 cat << 'EOF' > cpufrequtils
