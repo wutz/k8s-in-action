@@ -4,15 +4,43 @@
 
 ![k8s-arch](images/k8s-arch.png)
 
-### 节点
+### 集群名称
 
-- mn[01-03]: 提供 K8S 集群管理节点，至少 3 台以满足 HA。
-- ln[01-02]: 提供 K8S 网络负载均衡服务，至少 2 台以满足 HA。
-- sn[001-003]: 提供存储服务，至少 3 台以满足 HA。
-- cn[001-002]：提供纯 CPU 计算负载。
-- gn[001-003]：提供 GPU 计算负载。
+* 格式：<2位字母城市缩写><1位数字序号><1位字母后缀>
+* 城市缩写：例如北京 bj, 上海 sh 和广州 gz 等
+* 数字序号：同一城市下使用内网互联的机房，从数字 1 开始
+* 字母后缀：同一机房下区分不同集群
+  * 编号 a-g: 用于内部生产集群
+  * 编号 h-n: 用于用户集群
+  * 编号 u-z: 用于内部测试集群
+* 示例：
+  * bj1a: 北京第一个机房内部生产集群
+  * sh3u: 上海第三个机房内部测试集群
+  * gz2h: 广州第二个机房用户集群
 
-> 集群最小集为 1 台机器。满足 HA 情况下，最小集为 3 台机器。其他功能节点根据集群大小均可以合并到 mn 节点中。
+### DNS 命名
+
+> example.com 为示例域名，根据实际情况进行替换
+
+* 对外服务：*.<集群名称>.example.com, 例如 *.bj1a.example.com
+* 对内服务：*.<集群名称>-int.example.com, 例如 *.bj1a-int.example.com
+
+### 节点命名
+
+* 管理节点：mn[01-07].<集群名称>.local, 例如 mn01.bj1a.local
+  * 生产集群至少 3 节点满足 HA 需要，最大 7 节点
+  * 测试集群至少 1 节点，可以与计算节点复用
+* 网络负载均衡节点：ln[01-99].<集群名称>.local, 例如 ln01.bj1a.local
+  * 生产集群至少 2 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
+  * 测试集群复用管理节点
+* 存储节点：sn[01-99].<集群名称>.local, 例如 sn001.bj1a.local
+  * 生产集群至少 3 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
+  * 测试集群复用管理节点
+* 数据库节点：dn[01-99].<集群名称>.local, 例如 dn01.bj1a.local
+  * 生产集群至少 2 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
+  * 测试集群复用管理节点
+* CPU 计算节点：cn[001-999].<集群名称>.local, 例如 cn001.bj1a.local
+* GPU 计算节点：gn[001-999].<集群名称>.local, 例如 gn001.bj1a.local
 
 ### 网络
 
@@ -22,16 +50,10 @@
 
 > 可以根据具体业务和用户需求调整网络配置。
 
-### 存储
-
-- 至少 3 台各插入 1 块本地 SSD 存储服务器
-
-> 如果有外置存储服务则可选，存储服务尽可能分离以避免潜在互相影响，如果条件有限可以复用 mn 节点作为存储服务器。
-
 ### 软件
 
 - OS: ubuntu 22.04
-- K8S: [k3s](https://k3s.io/) v1.29
+- K8S: [k3s](https://k3s.io/) v1.30
 - Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v18.2
 
 > 更多需求可以参考 [k3s requirements](https://docs.k3s.io/zh/installation/requirements)
@@ -52,10 +74,10 @@ network:
   ethernets:
     eth0:
       addresses:
-      - 10.0.3.158/22
+      - 10.128.0.1/16
       routes:
       - to: default
-        via: 10.0.0.1
+        via: 10.128.255.254
       nameservers:
         addresses:
         - 223.5.5.5
@@ -64,6 +86,8 @@ network:
       match:
         macaddress: fa:16:3e:f1:c3:fd
       set-name: eth0
+EOF
+netplan apply
 ```
 
 * 如果是 bonding 设备，把 `bond0` 替换为 `eth0` 即可
@@ -72,24 +96,19 @@ network:
 
 ```sh
 # 所有节点根据自身名字进行设置
-hostnamectl set-hostname mn01.dev1.local
+hostnamectl set-hostname mn01.bj1a.local
 ```
-
-> play 根据集群用途或者地域设置，例如 dev1, bj1 等
 
 ```sh
 # 在 mn01 节点配置 hosts
 cat << 'EOF' >> /etc/hosts
 # mn
-10.0.3.158  mn01.dev1.local mn01
-10.0.0.27   mn02.dev1.local mn02
-10.0.1.98   mn03.dev1.local mn03
-
-# cn
-10.0.1.40   cn001.dev1.local cn001
+10.128.0.1  mn01.bj1a.local mn01
+10.128.0.2  mn02.bj1a.local mn02
+10.128.0.3  mn03.bj1a.local mn03
 
 # gn
-10.0.1.51   gn001.dev1.local gn001
+10.128.1.1  gn001.bj1a.local gn001
 EOF
 ```
 
@@ -192,6 +211,8 @@ pdsh -w ^all cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governor
 ```
 
 ### 锁定内核版本，避免驱动失效
+
+> 确保所有节点使用一致的内核版本后，再进行锁定
 
 ```sh
 cat << 'EOF' > nolinuxupgrades
