@@ -3,7 +3,7 @@
 k3s 缺省安装的是 [ServiceLB](https://docs.k3s.io/zh/networking/networking-services#service-load-balancer), 其为每个 Service 在所有节点启动一个 Pod，这个 Pod 通过 iptables 将流量从 Host 转换到 Service ClusterIP 上。这也造成缺省安装 k3s 的 80 & 443
 被占用，但是通过 `netstat -tunlp` 又查询不到。ServiceLB 比较适合无需要 HA 支持场景。
 
-对于需要 HA 支持场景，可以使用 MetalLB 替代。虽然 K8S 支持多种 Service Load Balancer 并存，但是一般简化使用需要关闭 ServiceLB 功能。
+对于需要 HA 支持场景，可以使用 MetalLB 替代。
 
 
 ## 部署
