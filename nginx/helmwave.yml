@@ -24,6 +24,6 @@ releases:
     <<: *options
     chart:
       name: ingress-nginx/ingress-nginx
-      version: v4.10.1
+      version: v4.11.2
     values:
       - values.yml
