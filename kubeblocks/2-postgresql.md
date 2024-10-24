@@ -64,7 +64,7 @@ $ kbcli cluster create mycluster --cluster-definition postgresql --cluster-versi
 ## 创建用户
 
 ```bash
-$ $ kbcli cluster create-account mycluster --component postgresql --name dev --password dev
+$ kbcli cluster create-account mycluster --component postgresql --name dev --password dev
 +----------+---------+
 | RESULT   | MESSAGE |
 +----------+---------+
