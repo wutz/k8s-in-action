@@ -12,6 +12,8 @@
 $ kubectl create ns mysql
 ```
 
+以下命令全部在mysql命名空间中进行，请先切换到该空间。
+
 ## 确认可安装的MySQL版本
 
 执行如下步骤确认可安装的MySQL版本
