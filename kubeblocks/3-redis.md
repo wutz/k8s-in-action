@@ -33,63 +33,53 @@ redis-7.2.4          redis                Available   false        Oct 21,2024 1
 即将被创建的Redis集群名称为mycluster
 
 ```bash
-$ kbcli cluster create mycluster --cluster-definition redis --cluster-version redis-7.2.4 --pvc type=redis,name=data,mode=ReadWriteOnce,size=20Gi --set cpu=1,memory=1Gi,replicas=1
+$ kbcli cluster create redis --mode standalone mycluster --cpu 1 --memory 1
 ```
 
 以上命令创建一个单节点的Redis集群，Redis版本为8.0.33。
 
-硬件配置为CPU为1核，内存1GB，数据盘20GB（/var/lib/redis）
+硬件配置为CPU为1核，内存1GB
 
 ## 创建主备集群
 
 主备复制集群会启动一主一从实例，当主出现故障的时候自动切换。
 
+该集群通过redis-sentinel负责进行主备健康度的侦测和切换。
+
 即将被创建的Redis集群名称为mycluster
 
 ```bash
-$ kbcli cluster create mycluster --cluster-definition redis --cluster-version redis-8.0.33 --pvc type=redis,name=data,mode=ReadWriteOnce,size=20Gi --set cpu=1,memory=1Gi,replicas=2
+$ kbcli cluster create mycluster --cluster-definition redis --cluster-version redis-7.2.4 --pvc type=redis,name=data,mode=ReadWriteOnce,size=20Gi --set cpu=1,memory=1Gi,replicas=2
 
 ```
 
-以上命令创建一套具有一主一从两个节点的Redis集群，Redis版本为8.0.33。
+以上命令创建一套具有一主一从两个节点的Redis集群，Redis版本为7.2.4。
 
-硬件配置为CPU为1核，内存1GB，数据盘20GB（/var/lib/redis）
-
-## 创建用户
-
-```bash
-$ $ kbcli cluster create-account mycluster --component redis --name dev --password dev
-+----------+---------+
-| RESULT   | MESSAGE |
-+----------+---------+
-| password | dev     |
-+----------+---------+
-```
+硬件配置为CPU为1核，内存1GB，数据盘20GB（/data）
 
 ## 查询集群状态
 
 ```bash
 $ kbcli cluster describe mycluster
-Name: mycluster	 Created Time: Oct 23,2024 22:42 UTC+0800
-NAMESPACE   CLUSTER-DEFINITION   VERSION        STATUS    TERMINATION-POLICY
-redis       redis                redis-8.0.33   Running   Delete
+Name: mycluster	 Created Time: Oct 24,2024 11:29 UTC+0800
+NAMESPACE   CLUSTER-DEFINITION   VERSION   STATUS     TERMINATION-POLICY
+redis       redis                          Creating   Delete
 
 Endpoints:
-COMPONENT   MODE        INTERNAL                                       EXTERNAL
-redis       ReadWrite   mycluster-redis.redis.svc.cluster.local:3306   <none>
+COMPONENT   MODE        INTERNAL                                             EXTERNAL
+redis       ReadWrite   mycluster-redis-redis.redis.svc.cluster.local:6379   <none>
 
 Topology:
-COMPONENT   INSTANCE            ROLE        STATUS    AZ       NODE                           CREATED-TIME
-redis       mycluster-redis-0   primary     Running   <none>   ceph01.dev1.lab/172.18.3.191   Oct 23,2024 22:42 UTC+0800
-redis       mycluster-redis-1   secondary   Running   <none>   ceph04.dev1.lab/172.18.3.194   Oct 23,2024 22:42 UTC+0800
+COMPONENT   INSTANCE            ROLE     STATUS    AZ       NODE                           CREATED-TIME
+redis       mycluster-redis-0   <none>   Running   <none>   ceph04.dev1.lab/172.18.3.194   Oct 24,2024 11:29 UTC+0800
 
 Resources Allocation:
 COMPONENT   DEDICATED   CPU(REQUEST/LIMIT)   MEMORY(REQUEST/LIMIT)   STORAGE-SIZE   STORAGE-CLASS
 redis       false       1 / 1                1Gi / 1Gi               data:20Gi      local-path
 
 Images:
-COMPONENT   TYPE    IMAGE
-redis       redis   docker.io/apecloud/redis:8.0.33
+COMPONENT   TYPE   IMAGE
+redis              apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/redis-stack-server:7.2.0-v10
 
 Data Protection:
 BACKUP-REPO   AUTO-BACKUP   BACKUP-SCHEDULE   BACKUP-METHOD   BACKUP-RETENTION   RECOVERABLE-TIME
@@ -103,37 +93,19 @@ Show cluster events: kbcli cluster list-events -n redis mycluster
 ## 开放Redis连接
 
 ```bash
-$ kubectl expose svc mycluster-redis --name mycluster-redis-lb --type LoadBalancer --port 3306 --target-port 3306
+$ kubectl expose svc mycluster-redis-redis --name mycluster-redis-redis-lb --type LoadBalancer --port 6379 --target-port 6379
 ```
 
 
-## 连接到Redis
+## 连接到Redis并创建用户
 
 ```bash
-$ redis -h 172.18.3.182 -udev -pdev
-redis: [Warning] Using a password on the command line interface can be insecure.
-Welcome to the Redis monitor.  Commands end with ; or \g.
-Your Redis connection id is 670
-Server version: 8.0.33 Redis Community Server - GPL
-
-Copyright (c) 2000, 2023, Oracle and/or its affiliates.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-redis> show databases;
-+--------------------+
-| Database           |
-+--------------------+
-| information_schema |
-| performance_schema |
-+--------------------+
-2 rows in set (0.02 sec)
-
-redis>
+$ kbcli cluster connect mycluster
+Connect to instance mycluster-redis-0
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+127.0.0.1:6379> acl setuser default on >I7kQpZUgmzxqw +@all -@dangerous ~*
+OK
+127.0.0.1:6379>
 ```
 
 
@@ -154,7 +126,7 @@ redis>
 加入要把现有Redis集群实例配置更改为2核4GB配置，则进行如下操作
 
 ```bash
-$ kbcli cluster vscale mycluster --components=redis --cpu=2 --memory=4Gi 
+$ kbcli cluster vscale mycluster --components=redis --cpu=2 --memory=4G 
 ```
 
 ### 水平扩容

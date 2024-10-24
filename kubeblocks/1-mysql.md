@@ -158,7 +158,7 @@ mysql>
 加入要把现有MySQL集群实例配置更改为2核4GB配置，则进行如下操作
 
 ```bash
-$ kbcli cluster vscale mycluster --components=mysql --cpu=2 --memory=4Gi 
+$ kbcli cluster vscale mycluster --components=mysql --cpu=2 --memory=4G 
 ```
 
 ### 水平扩容
