@@ -26,7 +26,7 @@ mysql-8.0.33         mysql                Available   true         Oct 21,2024 1
 mysql-8.4.2          mysql                Available   false        Oct 21,2024 18:07 UTC+0800
 ```
 
-这里建议选择NAME为mysql开头的版本，可以看到默认0.9.1版本的KubeBlocks目前提供了5.7.44、8.0.33和8.4.2三个MySQL版本。
+这里以NAME为mysql开头的版本为例，可以看到默认0.9.1版本的KubeBlocks目前提供了5.7.44、8.0.33和8.4.2三个MySQL版本。
 
 ## 创建单机版集群
 
@@ -40,6 +40,8 @@ $ kbcli cluster create mycluster --cluster-definition mysql --cluster-version my
 
 以上命令创建一个单节点的MySQL集群，MySQL版本为8.0.33。
 
+硬件配置为CPU为1核，内存1GB，数据盘20GB（/var/lib/mysql）
+
 ## 创建主备集群
 
 主备复制集群会启动一主一从实例，当主出现故障的时候自动切换。
@@ -50,6 +52,10 @@ $ kbcli cluster create mycluster --cluster-definition mysql --cluster-version my
 $ kbcli cluster create mycluster --cluster-definition mysql --cluster-version mysql-8.0.33 --pvc type=mysql,name=data,mode=ReadWriteOnce,size=20Gi --set cpu=1,memory=1Gi,replicas=2
 
 ```
+
+以上命令创建一套具有一主一从两个节点的MySQL集群，MySQL版本为8.0.33。
+
+硬件配置为CPU为1核，内存1GB，数据盘20GB（/var/lib/mysql）
 
 ## 创建用户
 
@@ -62,10 +68,35 @@ $ $ kbcli cluster create-account mycluster --component mysql --name dev --passwo
 +----------+---------+
 ```
 
-## 创建集群状态
+## 查询集群状态
 
 ```bash
+$ kbcli cluster describe mycluster
+Name: mycluster	 Created Time: Oct 23,2024 22:42 UTC+0800
+NAMESPACE   CLUSTER-DEFINITION   VERSION        STATUS    TERMINATION-POLICY
+mysql       mysql                mysql-8.0.33   Running   Delete
 
+Endpoints:
+COMPONENT   MODE        INTERNAL                                       EXTERNAL
+mysql       ReadWrite   mycluster-mysql.mysql.svc.cluster.local:3306   <none>
+
+Topology:
+COMPONENT   INSTANCE            ROLE        STATUS    AZ       NODE                           CREATED-TIME
+mysql       mycluster-mysql-0   primary     Running   <none>   ceph01.dev1.lab/172.18.3.191   Oct 23,2024 22:42 UTC+0800
+mysql       mycluster-mysql-1   secondary   Running   <none>   ceph04.dev1.lab/172.18.3.194   Oct 23,2024 22:42 UTC+0800
+
+Resources Allocation:
+COMPONENT   DEDICATED   CPU(REQUEST/LIMIT)   MEMORY(REQUEST/LIMIT)   STORAGE-SIZE   STORAGE-CLASS
+mysql       false       1 / 1                1Gi / 1Gi               data:20Gi      local-path
+
+Images:
+COMPONENT   TYPE    IMAGE
+mysql       mysql   docker.io/apecloud/mysql:8.0.33
+
+Data Protection:
+BACKUP-REPO   AUTO-BACKUP   BACKUP-SCHEDULE   BACKUP-METHOD   BACKUP-RETENTION   RECOVERABLE-TIME
+
+Show cluster events: kbcli cluster list-events -n mysql mycluster
 ```
 
 # 连接到MySQL集群
@@ -76,6 +107,7 @@ $ $ kbcli cluster create-account mycluster --component mysql --name dev --passwo
 ```bash
 $ kubectl expose svc mycluster-mysql --name mycluster-mysql-lb --type LoadBalancer --port 3306 --target-port 3306
 ```
+
 
 ## 连接到MySQL
 
@@ -111,7 +143,11 @@ mysql>
 
 ## 实例扩容
 
-实例扩容就是变更MySQL集群中每个角色的CPU核数和内存容量大小。
+实例扩容分为水平扩容和垂直扩容，不管哪种扩容目的就是提高整套集群的数据处理能力。
+
+垂直扩容就是变更MySQL集群中每个角色的CPU核数和内存容量大小。
+
+水平扩容就是增加相同配置的从节点以增加集群的副本数量和只读能力。
 
 ### 垂直扩容
 
