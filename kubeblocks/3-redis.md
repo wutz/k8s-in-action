@@ -92,10 +92,17 @@ Show cluster events: kbcli cluster list-events -n redis mycluster
 
 ## 开放Redis连接
 
+开放单机版Redis连接
+
 ```bash
 $ kubectl expose svc mycluster-redis-redis --name mycluster-redis-redis-lb --type LoadBalancer --port 6379 --target-port 6379
 ```
 
+开发主备集群Redis连接
+
+```bash
+kubectl expose svc mycluster-redis--name mycluster-redis-lb --type LoadBalancer --port 6379 --target-port 6379
+```
 
 ## 连接到Redis并创建用户
 

@@ -62,12 +62,40 @@ $ kbcli cluster create mycluster --cluster-definition mysql --cluster-version my
 ## 创建用户
 
 ```bash
-$ $ kbcli cluster create-account mycluster --component mysql --name dev --password dev
+$ kbcli cluster create-account mycluster --component mysql --name dev --password dev
 +----------+---------+
 | RESULT   | MESSAGE |
 +----------+---------+
 | password | dev     |
 +----------+---------+
+```
+
+## 为用户分配权限
+
+```bash
+$ kbcli cluster connect mycluster
+Connect to instance mycluster-mysql-0
+Defaulted container "mysql" out of: mysql, metrics, lorry, config-manager, init-data (init), init-syncer (init), init-xtrabackup (init)
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 17
+Server version: 8.0.33 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> create database testdb;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> grant all on testdb.* to 'dev'@'%';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> quit
 ```
 
 ## 查询集群状态
