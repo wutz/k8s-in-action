@@ -92,3 +92,4 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
 ### 其他
 
 * [部署 PyPI 镜像站](pypi/README.md)
+* [部署 Conda 镜像站](conda/README.md)

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: conda-data
+spec:
+  resources:
+    requests:
+      storage: 500Gi
