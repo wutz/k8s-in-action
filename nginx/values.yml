@@ -1,6 +1,19 @@
 controller:
+  replicaCount: 2
   ingressClassResource:
     default: true
   service:
     annotations:
-      metallb.universe.tf/loadBalancerIPs: "10.0.2.58"
+      metallb.universe.tf/loadBalancerIPs: "10.128.0.100"
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 50 
+          preference:
+            matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule

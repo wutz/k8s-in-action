@@ -1,0 +1,116 @@
+#global:
+#  storageClass: "shared-juice"
+
+manager:
+  metrics:
+    enable: true
+  config:
+    verbose: true
+    pprofPort: 18066
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Exists    
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - mn01.cluster.local
+            - mn02.cluster.local
+            - mn03.cluster.local   
+
+scheduler:
+  metrics:
+    enable: true
+  config:
+    verbose: true
+    pprofPort: 18066
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Exists    
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - mn01.cluster.local
+            - mn02.cluster.local
+            - mn03.cluster.local   
+
+seedClient:
+  metrics:
+    enable: true
+  config:
+    verbose: true
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Exists    
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - mn01.cluster.local
+            - mn02.cluster.local
+            - mn03.cluster.local   
+
+client:
+  metrics:
+    enable: true
+  config:
+    verbose: true
+  dfinit:
+    enable: true
+    config:
+      containerRuntime:
+        containerd:
+          configPath: /var/lib/rancher/k3s/agent/etc/containerd/config.toml
+          registries:
+            - hostNamespace: harbor.example.com
+              serverAddr: http://harbor.example.com
+              capabilities: ['pull', 'resolve']
+
+#mysql:
+#  enable: false
+#
+#externalMysql:
+#  # -- Running GORM migration.
+#  migrate: true
+#  # -- External mysql hostname.
+#  host: rm-ejrctet92gzt4rmwb.mysql.rds.hs5b-example.com
+#  # -- External mysql username.
+#  username: dragonfly
+#  # -- External mysql password.
+#  password: xxxxxxxx
+#  # -- External mysql database name.
+#  database: manager
+#  # -- External mysql port.
+#  port: 3306
+
+#redis:
+#  enable: false
+#
+#externalRedis:
+#  addrs:
+#    - "r-uvnz4dxcdnmzwshc2.redis.rds.hs5b-example.com:6379"
+#  password: "xxxxxxxxxx"
+#  # -- External redis db.
+#  db: 0
+#  # -- External redis broker db.
+#  brokerDB: 1
+#  # -- External redis backend db.
+#  backendDB: 2
+#  # -- External redis networkTopology db.
+#  networkTopologyDB: 3 
