@@ -8,21 +8,39 @@
 
 * 创建 Pool `juicefs`
 
-    ```bash
-    # 创建 pool
-    ceph osd pool create juicefs 128 128 rep_ssd --bulk
-    # 设置为 2 副本。通常 SSD 设置 2 副本，HDD 设置 3 副本
-    ceph osd pool set juicefs size 2
-    # 设置 pool 用途
-    ceph osd pool application enable juicefs juicefs
+    根据性能需求选择副本池或者纠删码池
 
-    # 查询 pool 信息
-    ceph osd pool get juicefs all
-    # 设置此 pool 预估占用空间比例, 这将自带调整 PG 数量（上面初始值为 128), 更大 PG 有助于提高吞吐量
-    ceph osd pool set juicefs target_size_ratio 0.3
-    # 查询各个 pool 实际分配 PG 数量
-    ceph osd pool autoscale-status
-    ```
+    * 创建副本 Pool
+
+        副本池适合高 IOPS 场景
+
+        ```bash
+        # 创建 pool
+        ceph osd pool create juicefs 128 128 rep_ssd --bulk
+        # 设置为 2 副本。通常 SSD 设置 2 副本，HDD 设置 3 副本
+        ceph osd pool set juicefs size 2
+        # 设置 pool 用途
+        ceph osd pool application enable juicefs juicefs
+
+        # 查询 pool 信息
+        ceph osd pool get juicefs all
+        # 设置此 pool 预估占用空间比例, 这将自带调整 PG 数量（上面初始值为 128), 更大 PG 有助于提高吞吐量
+        ceph osd pool set juicefs target_size_ratio 0.3
+        # 查询各个 pool 实际分配 PG 数量
+        ceph osd pool autoscale-status
+        ```
+
+    * 创建纠删码 Pool
+
+        纠删码池适合吞吐型及高得盘率场景
+
+        ```bash
+        ceph osd erasure-code-profile set ec_hdd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=hdd
+        ceph osd pool create juicefs erasure ec_hdd
+        ceph osd pool application enable juicefs juicefs
+        ceph osd pool set juicefs target_size_ratio 0.3
+        ceph osd pool autoscale-status
+        ```
 
 * 创建 key 用于客户端访问此 pool
 
