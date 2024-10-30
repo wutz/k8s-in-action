@@ -22,7 +22,7 @@
 
         # 查询 pool 信息
         ceph osd pool get mypool all
-        # 设置此 pool 预估占用空间比例, 这将自带调整 PG 数量（上面初始值为 128), 更大 PG 有助于提高吞吐量
+        # 设置此 pool 预估占用空间比例, 这将自带调整 PG 数量（上面初始值为 32), 更大 PG 有助于提高吞吐量
         ceph osd pool set mypool target_size_ratio 0.3
         # 查询各个 pool 实际分配 PG 数量
         ceph osd pool autoscale-status
@@ -33,8 +33,8 @@
         纠删码池适合吞吐型及高得盘率场景
 
         ```bash
-        ceph osd erasure-code-profile set ec_hdd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=hdd
-        ceph osd pool create mypool erasure ec_hdd --bulk
+        ceph osd erasure-code-profile set ec42_hdd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=hdd
+        ceph osd pool create mypool 32 32 erasure ec42_hdd --bulk
         ceph osd pool application enable mypool myapp
         ceph osd pool set mypool target_size_ratio 0.3
         ceph osd pool autoscale-status
