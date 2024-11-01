@@ -23,10 +23,12 @@
   configmaps                         cm                                  v1                                          true         ConfigMap
   events                             ev                                  v1                                          true         Event
   namespaces                         ns                                  v1                                          false        Namespace
+  storageclasses                     sc                                  storage.k8s.io/v1                           false        StorageClass
   ```
 
 - `namespaced` 资源通过 `Role` 控制权限，非 `namespaced` 资源使用 `ClusterRole` 控制权限
-- `APIVERSION` 是 `v1` 时，配置 `Role` 和 `ClusterRole` 时 `apiGroups` 以 `""` 表示
+- `APIVERSION` 是 `v1` 时，代表apiGroups为`core`，配置 `Role` 和 `ClusterRole` 时 `apiGroups` 以 `""` 表示
+- `APIVERSION` 是 `storage.k8s.io/v1` 时，代表apiGroups为`storage.k8s.io`，配置 `Role` 和 `ClusterRole` 时 `apiGroups` 以 `storage.k8s.io` 表示
 
 ## 示例
 
