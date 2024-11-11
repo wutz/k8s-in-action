@@ -13,6 +13,5 @@ parameters:
   pathPattern: "share-root"
 mountOptions:
   - cache-size=0
-  - buffer-size=4096
-reclaimPolicy: Retain
+reclaimPolicy: Delete
 allowVolumeExpansion: true     
