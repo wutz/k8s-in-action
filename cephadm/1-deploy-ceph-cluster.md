@@ -60,7 +60,14 @@
     * 添加集群 ssh public key 到其它新的节点
         - 从 bootstrap 节点的文件 `/etc/ceph/ceph.pub` 获取 ssh public key
         - 然后此 key 追加到所有新节点文件 `/root/.ssh/authorized_keys` 中
-    * 添加新节点到集群中 (在 bootstrap 节点执行）
+
+    * 访问 ceph dashboard 并修改配置
+
+        ```bash
+        ceph dashboard set-grafana-api-url https://172.19.12.1:3000/
+        ```
+
+    * 添加新节点到集群中 (在 bootstrap 节点执行)
         
         ```bash
         ceph orch host add sn002.play.local --labels _admin

@@ -7,7 +7,7 @@ version: "0.36.3"
   # the wait will be set automatically if atomic is true
   wait: true
   # time to wait for any individual Kubernetes operation .
-  timeout: 300s
+  timeout: 600s
   # limit the maximum number of revisions saved per release.
   max_history: 3
   # create the release namespace if not present.
@@ -24,11 +24,6 @@ releases:
     <<: *options
     chart:
       name: juicefs/juicefs-csi-driver
-      version: 0.20.7
+      version: 0.21.1
     values:
       - values.yml
-    lifecycle:
-      # post_up:
-      # - kubectl apply -k hooks
-      # pre_down:
-      # - kubectl delete -k hooks
