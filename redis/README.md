@@ -13,7 +13,7 @@ mkdir redis
 cd redis
 mkdir data
 
-cat << 'EOF' > redis.conf
+cat << 'EOF' > start.sh
 #!/bin/bash
 set -x
 

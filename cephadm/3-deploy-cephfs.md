@@ -160,8 +160,7 @@ ceph osd pool set cephfs1_data_ec allow_ec_overwrites true
 ceph fs add_data_pool cephfs1 cephfs1_data_ec
 
 # 设置 layout 需要 p 权限见 quota 配置
-mkdir /share/ecdir
-setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share/ecdir
+setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
 ```
 
 # 使用 K8S PVC

@@ -9,6 +9,7 @@
 1. [准备](docs/0-prepare.md)
 2. [安装 k3s](docs/1-k3s.md)
 3. [常用客户端](docs/2-tools.md)
+4. [备份和恢复](docs/3-backup-restore.md)
 
 ## 网络
 
@@ -91,3 +92,4 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
 ### 其他
 
 * [部署 PyPI 镜像站](pypi/README.md)
+* [部署 Conda 镜像站](conda/README.md)

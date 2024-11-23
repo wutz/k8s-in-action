@@ -10,9 +10,8 @@ parameters:
   csi.storage.k8s.io/node-publish-secret-namespace: juicefs
   csi.storage.k8s.io/controller-expand-secret-name: juicefs-prd-secret   
   csi.storage.k8s.io/controller-expand-secret-namespace: juicefs
-  pathPattern: "share-root"
+  pathPattern: "${.pvc.namespace}-${.pvc.name}"
 mountOptions:
   - cache-size=0
-  - buffer-size=4096
-reclaimPolicy: Retain
+reclaimPolicy: Delete
 allowVolumeExpansion: true     
