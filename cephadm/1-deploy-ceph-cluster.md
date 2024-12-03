@@ -4,6 +4,16 @@
 
 * 依赖: 参见 [环境准备](../docs/0-prepare.md)
 
+* 环境示例 
+
+    | 节点 | Public Network IP | Cluster Network IP |
+    | --- | --- | --- |
+    | sn01.example.local | 172.19.12.1/24 | 172.20.12.1/24 |
+    | sn02.example.local | 172.19.12.2/24 | 172.20.12.2/24 |
+    | sn03.example.local | 172.19.12.3/24 | 172.20.12.3/24 |
+    | sn04.example.local | 172.19.12.4/24 | 172.20.12.4/24 |
+    | --- | --- |
+
 * 配置 docker
 
     ```bash
@@ -12,8 +22,8 @@
     cat > daemon.json <<EOF
     {
         "proxies": {
-            "http-proxy": "http://172.19.1.100:3128",
-            "https-proxy": "http://172.19.1.100:3128",
+            "http-proxy": "http://172.19.12.201:3128",
+            "https-proxy": "http://172.19.12.201:3128",
             "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,localhost,.example.com"
         }
     }
@@ -41,7 +51,7 @@
 
 * 引导新集群
 
-    在 Bootstrap Node 执行
+    在 bootstrap 节点(sn01)执行
 
     ```bash
     cephadm bootstrap --allow-fqdn-hostname --mon-ip 172.19.12.1 --cluster-network 172.20.12.0/24 
@@ -70,8 +80,8 @@
     * 添加新节点到集群中 (在 bootstrap 节点执行)
         
         ```bash
-        ceph orch host add sn002.play.local --labels _admin
-        ceph orch host add sn003.play.local --labels _admin
+        ceph orch host add sn002.example.local --labels _admin
+        ceph orch host add sn003.example.local --labels _admin
         ceph orch host ls
         ```
         
@@ -86,7 +96,6 @@
 
 * [添加存储](https://docs.ceph.com/en/reef/cephadm/services/osd/#cephadm-deploy-osds)
 
-
     - 注意检查磁盘上存在分区
 
     - 查看可用磁盘
@@ -98,6 +107,7 @@
         - 检查磁盘是否支持 libstoragemgmt `cephadm shell lsmcli ldl`
         - 如果支持则执行开启 `ceph config set mgr mgr/cephadm/device_enhanced_scan true`
         - 不支持 NVMe 设备
+
     - 可以执行清除磁盘以使其可用 (可选)
         
         ```bash
