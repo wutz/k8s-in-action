@@ -152,8 +152,7 @@ getfattr -n ceph.dir.rbytes /share
 
 ```bash
 # 创建 ec pool
-ceph osd erasure-code-profile set ec_ssd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=ssd
-ceph osd pool create cephfs1_data_ec erasure ec_ssd
+ceph osd pool create cephfs1_data_ec erasure ec42_ssd
 ceph osd pool set cephfs1_data_ec allow_ec_overwrites true
 
 # 添加 ec pool 到 cephfs 中
