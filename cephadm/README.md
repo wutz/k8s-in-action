@@ -6,3 +6,4 @@
 2. [提供 Ceph RADOS 原生服务](2-ceph-rados.md)
 3. [部署 CephFS](3-deploy-cephfs.md)
 4. [部署 Ceph RBD 块存储](4-deploy-rbd.md)
+5. [部署 Ceph RGW 对象存储](5-deploy-rgw.md)
