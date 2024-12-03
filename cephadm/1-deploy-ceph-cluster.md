@@ -12,7 +12,6 @@
     | sn02.example.local | 172.19.12.2/24 | 172.20.12.2/24 |
     | sn03.example.local | 172.19.12.3/24 | 172.20.12.3/24 |
     | sn04.example.local | 172.19.12.4/24 | 172.20.12.4/24 |
-    | --- | --- |
 
 * 配置 docker
 
@@ -122,23 +121,7 @@
         ```
         
         ```yaml
-        # 根据磁盘属性和规划创建描述文件 osd_spec.yml
-        service_type: osd
-        service_id: default_drive_group
-        placement:
-            host_pattern: '*'
-        spec:
-            data_devices:
-                rotational: 1
-                model: 'ST4000NM0033-9ZM'
-                size: '3.64T'
-            db_devices:
-                rotational: 0
-                model: 'INTEL SSDPEDMX400G4'
-                size: '372.61G'
-        ```
-        
-        ```yaml
+        # osd-hdd.yaml
         service_type: osd
         service_id: hdd
         placement:
@@ -150,6 +133,7 @@
         ```
 
         ```yaml
+        # osd-ssd.yaml
         service_type: osd
         service_id: ssd
         placement:
@@ -159,18 +143,26 @@
                 rotational: 0
                 size: '6.99T'
         ```
+
+        * 如果 size 值不明确，也可以指定范围，例如 `size: '6T:7T'`
         
         ```bash
-        # 应用描述文件
-        > ceph orch apply osd -i ./osd_spec.yml [--dry-run]
+        # 部署 hdd
+        # --dry-run 不实际部署，用于检查配置是否正确, 执行 --dry-run 等待一段时间后再重复执行
+        ceph orch apply osd -i osd-hdd.yaml --dry-run
+        ceph orch apply osd -i osd-hdd.yaml 
+
+        # 部署 ssd
+        ceph orch apply osd -i osd-ssd.yaml --dry-run
+        ceph orch apply osd -i osd-ssd.yaml 
         ```
 
 * 创建 crush rule
     
     ```bash
     # ceph osd crush rule create-replicated <name> <root> <failure-domain> <class>
-    ceph osd crush rule create-replicated rep_ssd default host ssd
     ceph osd crush rule create-replicated rep_hdd default host hdd
+    ceph osd crush rule create-replicated rep_ssd default host ssd
 
     # ceph osd crush rule create-replicated <name> <root> <failure-domain> <class>
     # 创建 EC 4+2 纠删码，存储集群至少有 7 个节点
