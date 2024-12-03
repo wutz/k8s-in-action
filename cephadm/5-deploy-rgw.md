@@ -74,6 +74,75 @@ ceph orch ps --daemon_type ingress
 配置 DNS 解析（可选）：
 * 配置 s3.example.com 节点到 172.19.12.[101-103] 的 A 记录
 
+## 配置分层存储 (可选)
+
+如果对象存储存放大量小对象，缺省数据池使用 HDD 纠删码，这会带来空间放大和性能下降问题。
+
+可以通过为不同对象大小选择不同的存储池来解决这个问题。
+* 小于 16K 对象，存放在副本池 SSD 上 (由于 SSD 空间可能有限，需根据可用 SSD 空间调整这个大小)
+* 16K - 1M 对象，存放在副本池 HDD 上 
+* 大于等于 1M 对象，存放在缺省纠删码 HDD 上
+
+```bash
+# 创建小对象类 StorageClass
+radosgw-admin zonegroup placement add \
+	--rgw-zonegroup default \
+	--placement-id default-placement \
+    --storage-class SMALL_OBJ
+# 创建中等对象类 StorageClass
+radosgw-admin zonegroup placement add \
+	--rgw-zonegroup default \
+	--placement-id default-placement \
+  --storage-class MEDIUM_OBJ
+
+# 将数据池分配给不同的 StorageClass
+radosgw-admin zone placement add \
+	--rgw-zone default \
+	--placement-id default-placement \
+	--storage-class SMALL_OBJ \
+	--data-pool default.rgw.buckets.data-rep-ssd
+radosgw-admin zone placement add \
+	--rgw-zone default \
+	--placement-id default-placement \
+	--storage-class MEDIUM_OBJ \
+	--data-pool default.rgw.buckets.data-rep-hdd
+
+# 创建数据池
+ceph osd pool create default.rgw.buckets.data-rep-ssd rep_ssd --bulk
+ceph osd pool create default.rgw.buckets.data-rep-hdd rep_hdd --bulk 
+
+# 重启 RGW
+ceph orch restart rgw.default
+```
+
+```bash
+# 创建 Lua 脚本
+cat << 'EOF' > s3.lua
+-- Lua script to auto-tier S3 object PUT requests
+
+-- exit script quickly if it is not a PUT request
+if Request == nil or Request.RGWOp ~= "put_obj"
+then
+  return
+end
+
+-- apply StorageClass only if user hasn't already assigned a storage-class
+if Request.HTTP.StorageClass == nil or Request.HTTP.StorageClass == '' then
+  if Request.ContentLength < 16384 then
+    Request.HTTP.StorageClass = "SMALL_OBJ"
+  elseif Request.ContentLength < 1048576 then
+    Request.HTTP.StorageClass = "MEDIUM_OBJ"
+  else
+    Request.HTTP.StorageClass = "STANDARD"
+  end
+  RGWDebugLog("applied '" .. Request.HTTP.StorageClass .. "' to object '" .. Request.Object.Name .. "'")
+end
+EOF
+
+# 将脚本应用于 RGW
+radosgw-admin script put --infile=./s3.lua --context=preRequest
+```
+
 ## 创建用户
 
 ```bash
