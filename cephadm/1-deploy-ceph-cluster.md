@@ -160,11 +160,23 @@
     ```bash
     # ceph osd crush rule create-replicated <name> <root> <failure-domain> <class>
     ceph osd crush rule create-replicated rep_ssd default host ssd
-    ceph osd pool set .mgr crush_rule rep_ssd
+    ceph osd crush rule create-replicated rep_hdd default host hdd
+
+    # ceph osd crush rule create-replicated <name> <root> <failure-domain> <class>
+    # 创建 EC 4+2 纠删码，存储集群至少有 7 个节点
+    ceph osd erasure-code-profile set ec42_hdd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=hdd
+    # 创建 EC 8+3 纠删码，存储集群至少有 12 个节点
+    ceph osd erasure-code-profile set ec83_hdd k=8 m=3 crush-root=default crush-failure-domain=host crush-device-class=hdd
+    # 如果需要创建 SSD EC 纠删码，修改 `crush-device-class=ssd` 即可
     ```
 
     > * 缺省自带副本类 crush rule `replicated_rule`，如果系统中存在 HDD 和 SSD 两类设备这将混用在一起，这会带来不稳定性能。
     > * 一般显示创建副本类 crush rule 指定设备类型（例如上面明确 ssd 设备）
+
+    ```bash
+    # 解决 ceph osd pool autoscale-status 输出为空的问题
+    ceph osd pool set .mgr crush_rule rep_ssd
+    ```
 
 * 部署完 Ceph 集群后并不能提供对外服务，需要根据应用场景部署对应服务
 
