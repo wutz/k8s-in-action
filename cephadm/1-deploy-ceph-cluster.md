@@ -155,6 +155,12 @@
         # 部署 ssd
         ceph orch apply osd -i osd-ssd.yaml --dry-run
         ceph orch apply osd -i osd-ssd.yaml 
+
+        # 查看 cephadm 部署日志
+        ceph -W cephadm
+        ceph log last cephadm
+        ceph osd tree
+        ceph -s
         ```
 
 * 创建 crush rule
