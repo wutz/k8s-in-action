@@ -192,3 +192,23 @@
 
     * [提供 Ceph RADOS 原生服务](2-ceph-rados.md)
     * [部署 CephFS](3-deploy-cephfs.md)
+    * [部署 Ceph RBD 块存储](4-deploy-rbd.md)
+    * [部署 Ceph RGW 对象存储](5-deploy-rgw.md)
+
+* 其它
+
+    * 使用多路径设备，重启节点 lvm 别名设备丢失问题
+
+        这是因为重启节点时 lvm 先处理 /dev/sd* 设备导致被锁定，无法处理对应 /dev/mapper/mpath* 设备
+        
+        ```bash
+        # 打开文件
+        /etc/lvm/lvm.conf
+        # 添加一行, 让 lvm 只处理 /dev/mapper/mpath* 设备
+        filter = [ "a|/dev/mapper/mpath.*|", "r|.*|" ]
+        
+        # 然后执行 
+        update-initramfs -u
+        # 重启节点
+        reboot
+        ```
