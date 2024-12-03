@@ -11,7 +11,7 @@ ceph osd pool create default.rgw.buckets.index crush_rule rep_ssd
 ceph osd_pool create default.rgw.buckets.no_ec crush_rule rep_hdd
 
 # 可以根据实际硬件配置调整数据池的 crush rule
-ceph osd pool create default.rgw.buckets.data erasure ec42_hdd
+ceph osd pool create default.rgw.buckets.data erasure ec42_hdd --bulk
 ```
 
 ## 部署 RGW
@@ -21,7 +21,7 @@ ceph osd pool create default.rgw.buckets.data erasure ec42_hdd
 service_type: rgw
 service_id: default
 placement:
-  host_pattern: ceph*
+  host_pattern: sn*
   count_per_host: 2
 networks:
   - 172.19.12.0/24
@@ -49,18 +49,19 @@ ceph orch ps --daemon_type rgw
 service_type: ingress
 service_id: rgw.default
 placement:
-  host_pattern: ceph*
+  host_pattern: sn*
 spec:
   backend_service: rgw.default
   virtual_ips_list:
   - 172.19.12.101/24
   - 172.19.12.102/24
   - 172.19.12.103/24
+  - 172.19.12.104/24
   frontend_port: 80
   monitor_port: 1967
 ```
 
-* 其中 vip 列表从管理员获取 
+* 其中 vip 列表从管理员获取, 为了最大化负载均衡效果，一般与节点数量一致
 
 ```bash
 # 部署 Ingress 服务
@@ -72,7 +73,7 @@ ceph orch ps --daemon_type ingress
 ```
 
 配置 DNS 解析（可选）：
-* 配置 s3.example.com 节点到 172.19.12.[101-103] 的 A 记录
+* 配置 s3.example.com 节点到 172.19.12.[101-104] 的 A 记录
 
 ## 配置分层存储 (可选)
 
@@ -86,14 +87,14 @@ ceph orch ps --daemon_type ingress
 ```bash
 # 创建小对象类 StorageClass
 radosgw-admin zonegroup placement add \
-	--rgw-zonegroup default \
-	--placement-id default-placement \
+    --rgw-zonegroup default \
+    --placement-id default-placement \
     --storage-class SMALL_OBJ
 # 创建中等对象类 StorageClass
 radosgw-admin zonegroup placement add \
-	--rgw-zonegroup default \
-	--placement-id default-placement \
-  --storage-class MEDIUM_OBJ
+    --rgw-zonegroup default \
+    --placement-id default-placement \
+    --storage-class MEDIUM_OBJ
 
 # 将数据池分配给不同的 StorageClass
 radosgw-admin zone placement add \
@@ -108,8 +109,8 @@ radosgw-admin zone placement add \
 	--data-pool default.rgw.buckets.data-rep-hdd
 
 # 创建数据池
-ceph osd pool create default.rgw.buckets.data-rep-ssd rep_ssd --bulk
-ceph osd pool create default.rgw.buckets.data-rep-hdd rep_hdd --bulk 
+ceph osd pool create default.rgw.buckets.data-rep-ssd rep_ssd 
+ceph osd pool create default.rgw.buckets.data-rep-hdd rep_hdd 
 
 # 重启 RGW
 ceph orch restart rgw.default
