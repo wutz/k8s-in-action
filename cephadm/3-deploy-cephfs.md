@@ -36,9 +36,9 @@ CephFS 提供一些功能:
 1. 为用于部署 mds 服务节点打上 label
     
     ```bash
-    ceph orch host label add sn001.hs1.local mds
-    ceph orch host label add sn002.hs1.local mds
-    ceph orch host label add sn003.hs1.local mds
+    ceph orch host label add sn01.example.local mds
+    ceph orch host label add sn02.example.local mds
+    ceph orch host label add sn03.example.local mds
     ```
     
 2. 创建 2 个副本 Pool 分别用于 metadata 和 data
