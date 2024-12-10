@@ -3,11 +3,15 @@
 ## 创建 Pool
 
 ```bash
-# 创建使用纠删码的数据池, 用于缺省数据池
+# 创建索引池
+ceph osd pool create default.rgw.buckets.index rep_ssd
+ceph osd pool application enable default.rgw.buckets.index rgw
+
+# 创建数据池
 ceph osd pool create default.rgw.buckets.data erasure ec42_hdd --bulk
 ceph osd pool application enable default.rgw.buckets.data rgw
 
-# 创建不使用纠删码的数据池, 用于存放分段上传的文件
+# 创建用于存放分段上传的文件数据池
 ceph osd pool create default.rgw.buckets.non-ec rep_hdd
 ceph osd pool application enable default.rgw.buckets.non-ec rgw
 ```
@@ -38,12 +42,11 @@ ceph orch ls
 # 查询 RGW 进程
 ceph orch ps --daemon_type rgw
 
-# 将 RGW 索引池设置为 SSD 副本
+# 将 RGW 的控制池设置为 SSD 副本
 ceph osd pool set .rgw.root crush_rule rep_ssd
 ceph osd pool set default.rgw.log crush_rule rep_ssd
 ceph osd pool set default.rgw.control crush_rule rep_ssd
 ceph osd pool set default.rgw.meta crush_rule rep_ssd
-ceph osd pool set default.rgw.buckets.index crush_rule rep_ssd
 ```
 
 ## 部署 Ingress
