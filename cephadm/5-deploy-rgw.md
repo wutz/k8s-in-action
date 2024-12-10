@@ -5,9 +5,11 @@
 ```bash
 # 创建使用纠删码的数据池, 用于缺省数据池
 ceph osd pool create default.rgw.buckets.data erasure ec42_hdd --bulk
+ceph osd pool application enable default.rgw.buckets.data rgw
 
 # 创建不使用纠删码的数据池, 用于存放分段上传的文件
 ceph osd pool create default.rgw.buckets.non-ec rep_hdd
+ceph osd pool application enable default.rgw.buckets.non-ec rgw
 ```
 
 ## 部署 RGW
