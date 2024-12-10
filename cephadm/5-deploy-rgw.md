@@ -3,15 +3,11 @@
 ## 创建 Pool
 
 ```bash
-ceph osd pool create .rgw.root crush_rule rep_ssd
-ceph osd pool create default.rgw.log crush_rule rep_ssd
-ceph osd pool create default.rgw.control crush_rule rep_ssd
-ceph osd pool create default.rgw.meta crush_rule rep_ssd
-ceph osd pool create default.rgw.buckets.index crush_rule rep_ssd
-ceph osd_pool create default.rgw.buckets.no_ec crush_rule rep_hdd
-
-# 可以根据实际硬件配置调整数据池的 crush rule
+# 创建使用纠删码的数据池, 用于缺省数据池
 ceph osd pool create default.rgw.buckets.data erasure ec42_hdd --bulk
+
+# 创建不使用纠删码的数据池, 用于存放分段上传的文件
+ceph osd_pool create default.rgw.buckets.no_ec crush_rule rep_hdd
 ```
 
 ## 部署 RGW
@@ -38,6 +34,13 @@ ceph orch apply -i rgw.yaml
 ceph orch ls
 # 查询 RGW 进程
 ceph orch ps --daemon_type rgw
+
+# 将 RGW 索引池设置为 SSD 副本
+ceph osd pool set .rgw.root crush_rule rep_ssd
+ceph osd pool set default.rgw.log crush_rule rep_ssd
+ceph osd pool set default.rgw.control crush_rule rep_ssd
+ceph osd pool set default.rgw.meta crush_rule rep_ssd
+ceph osd pool set default.rgw.buckets.index crush_rule rep_ssd
 ```
 
 ## 部署 Ingress
