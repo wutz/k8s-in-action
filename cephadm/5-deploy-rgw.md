@@ -7,7 +7,7 @@
 ceph osd pool create default.rgw.buckets.data erasure ec42_hdd --bulk
 
 # 创建不使用纠删码的数据池, 用于存放分段上传的文件
-ceph osd_pool create default.rgw.buckets.no_ec crush_rule rep_hdd
+ceph osd pool create default.rgw.buckets.non-ec rep_hdd
 ```
 
 ## 部署 RGW
