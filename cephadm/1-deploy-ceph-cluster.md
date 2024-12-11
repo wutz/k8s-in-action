@@ -181,10 +181,15 @@
     > * 缺省自带副本类 crush rule `replicated_rule`，如果系统中存在 HDD 和 SSD 两类设备这将混用在一起，这会带来不稳定性能。
     > * 一般显示创建副本类 crush rule 指定设备类型（例如上面明确 ssd 设备）
 
+* 使 PG Autoscale 工作
+
+    每个 Pool 中的 PG 数量会影响到性能，Ceph 提供自动调整 PG 数量功能。
+
     ```bash
-    # 解决 ceph osd pool autoscale-status 输出为空的问题
+    # 解决 ceph osd pool autoscale-status 输出为空以及 PG Autoscale 不工作问题
     ceph osd pool set .mgr crush_rule rep_ssd
     ```
+
 
 * 部署完 Ceph 集群后并不能提供对外服务，需要根据应用场景部署对应服务
 
