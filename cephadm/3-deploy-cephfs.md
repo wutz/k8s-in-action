@@ -44,17 +44,23 @@ CephFS 提供一些功能:
 2. 创建 2 个副本 Pool 分别用于 metadata 和 data
     
     ```bash
+    # 创建 metadata pool
     ceph osd pool create cephfs1_metadata 32 32 rep_ssd
     ceph osd pool application enable cephfs1_metadata cephfs
+    # 设置副本数量
     ceph osd pool set cephfs1_metadata size 2
+    # 查看 pool 信息
     ceph osd pool get cephfs1_metadata all
     
+    # 创建 data pool, 使用 bulk 模式使用更多 PG 以提升性能
     ceph osd pool create cephfs1_data 128 128 rep_ssd --bulk
     ceph osd pool application enable cephfs1_data cephfs
+    # 设置副本数量
     ceph osd pool set cephfs1_data size 2
-    ceph osd pool set cephfs1_data bulk true
+    # 查看 pool 信息
     ceph osd pool get cephfs1_data all
-    
+
+    # 查看 PG 自动缩放状态
     ceph osd pool autoscale-status
     ```
 
@@ -64,20 +70,21 @@ CephFS 提供一些功能:
 3. 创建 CephFS
     
     ```bash
+    # 创建 CephFS，名字为 cephfs1
     ceph fs new cephfs1 cephfs1_metadata cephfs1_data
     
+    # 查看 CephFS
     ceph fs ls
     ceph fs get cephfs1
     ```
     
-    > `cephfs1` 为自定义的名称
 4. 部署 MDS 到节点上
     
     ```bash
-    ceph orch apply mds cephfs1 --placement=2
-    # or
+    # 部署 MDS 到 2 个节点
     ceph orch apply mds cephfs1 --placement="2 label:mds"
     
+    # 查看 MDS 状态
     ceph mds stat
     ```
     
