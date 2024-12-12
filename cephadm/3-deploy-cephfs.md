@@ -57,6 +57,9 @@ CephFS 提供一些功能:
     
     ceph osd pool autoscale-status
     ```
+
+    > * 使用 HDD 必须使用缺省 3 副本
+    > * 使用 SSD 可以使用 2 或者 3 副本
     
 3. 创建 CephFS
     
