@@ -44,13 +44,14 @@ CephFS 提供一些功能:
 2. 创建 2 个副本 Pool 分别用于 metadata 和 data
     
     ```bash
-    ceph osd pool create cephfs1_metadata 128 128 rep_ssd
+    ceph osd pool create cephfs1_metadata 32 32 rep_ssd
+    ceph osd pool application enable cephfs1_metadata cephfs
     ceph osd pool set cephfs1_metadata size 2
     ceph osd pool get cephfs1_metadata all
     
     ceph osd pool create cephfs1_data 128 128 rep_ssd --bulk
+    ceph osd pool application enable cephfs1_data cephfs
     ceph osd pool set cephfs1_data size 2
-    ceph osd pool set cephfs1_data target_size_ratio 0.3
     ceph osd pool set cephfs1_data bulk true
     ceph osd pool get cephfs1_data all
     
@@ -70,9 +71,9 @@ CephFS 提供一些功能:
 4. 部署 MDS 到节点上
     
     ```bash
-    ceph orch apply mds cephfs1 --placement=3
+    ceph orch apply mds cephfs1 --placement=2
     # or
-    ceph orch apply mds cephfs1 --placement="3 label:mds"
+    ceph orch apply mds cephfs1 --placement="2 label:mds"
     
     ceph mds stat
     ```
@@ -146,7 +147,7 @@ getfattr -d -m ceph.dir.* /share
 getfattr -n ceph.dir.rbytes /share
 ```
 
-# 添加 EC POOL
+# 添加 EC POOL (可选)
 
 > 可选，根据需求决定是否使用
 
@@ -247,7 +248,7 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
     kubectl apply -f pod-pvc.yaml
     ```
 
-# 多 MDS
+# 多 MDS (可选)
 
 - 使用多个 mds 服务 一个 cephfs 可以分担请求压力，以及分散元数据缓存到不同的 mds 上
 - 为 HA，max_mds 数量必须小于 mds service 数量（即执行 `ceph orch apply mds cephfs1 --placement=3`  数量）
