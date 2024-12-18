@@ -131,6 +131,9 @@ netplan apply
 # 所有节点根据自身名字进行设置
 hostnamectl set-hostname mn01.bj1a.local
 ...
+
+# 设置登录显示长主机名
+pdsh -w ^all sed -i 's/\\\\h/\\\\H/g' '~/.bashrc'
 ```
 
 ### 设置时间同步和时区
