@@ -143,7 +143,7 @@ pdsh -w ^all sed -i 's/\\\\h/\\\\H/g' '~/.bashrc'
 ### 设置时间同步和时区
 
 ```sh
-pdsh -w ^all sed -i 's/#NTP=/NTP=ntp.aliyun.com/g' /etc/systemd/timesyncd.conf
+pdsh -w ^all sed -i 's/^#NTP=/NTP=ntp.aliyun.com/g' /etc/systemd/timesyncd.conf
 pdsh -w ^all systemctl restart systemd-timesyncd
 pdsh -w ^all timedatectl timesync-status
 
