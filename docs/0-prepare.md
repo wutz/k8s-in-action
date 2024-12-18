@@ -64,6 +64,35 @@
 
 > 以下均已 mn[01-03],gn001 作为代表所有节点示例
 
+### 管理工具 pdsh
+
+> * 为了安全性，后续所有 ssh 访问均从本地发起
+
+```sh
+# Ubuntu
+apt install pdsh -y
+# macOS
+brew install pdsh
+
+# 生成 hosts 用于后续执行 pdsh / pdcp
+cat << 'EOF' > all
+root@10.128.0.[1-3]
+root@10.128.1.1
+EOF
+```
+
+### 设置 ssh 无密码登录
+
+> 为了安全性，后续关闭所有节点密码登录
+
+```sh
+# 如果本地没有 ssh 密钥，则生成
+ssh-keygen -t ecdsa
+
+# ssh-copy 设置无密码登录所有节点
+pdsh -w ^all -R exec ssh-copy-id %h
+```
+
 ### 设置节点统一 interface 名称
 
 > * 后续一些服务依赖一致的 interface 名称
@@ -90,6 +119,7 @@ network:
         macaddress: fa:16:3e:f1:c3:fd
       set-name: eth0
 EOF
+
 netplan apply
 ```
 
@@ -100,62 +130,7 @@ netplan apply
 ```sh
 # 所有节点根据自身名字进行设置
 hostnamectl set-hostname mn01.bj1a.local
-```
-
-```sh
-# 在 mn01 节点配置 hosts
-cat << 'EOF' >> /etc/hosts
-# mn
-10.128.0.1  mn01.bj1a.local mn01
-10.128.0.2  mn02.bj1a.local mn02
-10.128.0.3  mn03.bj1a.local mn03
-
-# gn
-10.128.1.1  gn001.bj1a.local gn001
-EOF
-```
-
-### 设置 ssh 无密码登录
-
-```sh
-# 在 mn01 节点执行生成 ssh 密钥
-ssh-keygen -t ecdsa
-```
-
-> ecdsa 相比 rsa 更安全，以及 rsa 被逐渐废弃
-
-```sh
-# 在 mn01 节点执行配置无密码登录
-cat ~/.ssh/id_ecdsa.pub >> ~/.ssh/authorized_keys
-# 在 mn01 节点同步 ssh 密钥到其他 mn 节点
-rsync -avP ~/.ssh/ mn02:~/.ssh
-rsync -avP ~/.ssh/ mn03:~/.ssh
-# 在 mn01 节点同步 hosts 到其他 mn 节点
-rsync -avP /etc/hosts mn02:/etc/hosts
-rsync -avP /etc/hosts mn03:/etc/hosts
-
-# 在 mn01 节点执行 ssh-copy 设置无密码登录其他节点
-ssh-copy gn001
-```
-
-> 设置 mn 节点对等
-
-### 管理工具 pdsh
-
-```sh
-# 所有节点执行
-apt install pdsh -y
-
-# 在 mn 节点执行
-cat << 'EOF' > /etc/profile.d/pdsh.sh
-export PDSH_RCMD_TYPE=ssh
-EOF
-source /etc/profile.d/pdsh.sh
-
-# 在 mn01 节点生成 hosts 用于后续执行 pdsh / pdcp
-cat << 'EOF' > all
-mn[01-03],gn001
-EOF
+...
 ```
 
 ### 设置时间同步和时区
@@ -228,7 +203,7 @@ EOF
 pdcp -w ^all nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
 ```
 
-### [推荐]关闭密码登录增强安全性
+### [必须]关闭密码登录增强安全性
 
 ```sh
 pdsh -w ^all "sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config.d/50-cloud-init.conf"
