@@ -235,3 +235,23 @@ pdcp -w ^all nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
 pdsh -w ^all "sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config.d/50-cloud-init.conf"
 pdsh -w ^all systemctl reload ssh
 ```
+
+## 基础测试
+
+### 网络性能测试
+
+```sh
+pdsh -w ^all apt install -y iperf
+
+# 启动 iperf 服务
+pdsh -w ^all iperf -i1 -s
+
+# 打开另外终端
+# 测试上行
+pdsh -w 10.128.0.1 iperf -i1 -c 10.128.0.2 -P8
+# 测试下行
+pdsh -w 10.128.0.1 iperf -i1 -c 10.128.0.2 -P8 -R
+
+# 依次测试两两节点间网络性能
+```
+
