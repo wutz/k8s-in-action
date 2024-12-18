@@ -79,6 +79,10 @@ cat << 'EOF' > all
 root@10.128.0.[1-3]
 root@10.128.1.1
 EOF
+
+# 设置 pdsh 远程 pdcp 路径
+pdsh -w ^all apt install -y pdsh
+export PDSH_REMOTE_PDCP_PATH=pdcp
 ```
 
 ### 设置 ssh 无密码登录
