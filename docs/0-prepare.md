@@ -127,6 +127,13 @@ EOF
 netplan apply
 ```
 
+```bash
+# 检查网络配置
+pdsh -w ^all ip r
+# 检查 dns 配置
+pdsh -w ^all resolvectl dns
+```
+
 * 如果是 bonding 设备，把 `bond0` 替换为 `eth0` 即可
 
 ### 设置节点名称
@@ -158,6 +165,18 @@ pdsh -w ^all timedatectl set-timezone Asia/Shanghai
 pdsh -w ^all sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list
 pdsh -w ^all sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
 pdsh -w ^all sed -i 's/http:/https:/g' /etc/apt/sources.list
+pdsh -w ^all apt update
+```
+
+如果需要使用代理，可以设置 apt 代理：
+
+```bash
+cat << 'EOF' > 80proxy
+Acquire::http::Proxy "http://10.128.0.200:3128";
+Acquire::https::Proxy "http://10.128.0.200:3128";
+EOF
+
+pdcp -w ^all 80proxy /etc/apt/apt.conf.d/80proxy
 pdsh -w ^all apt update
 ```
 
