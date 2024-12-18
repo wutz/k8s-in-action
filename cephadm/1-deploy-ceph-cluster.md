@@ -84,6 +84,12 @@
     - 复制一份用户 `client.admin` secret 到 `/etc/ceph/ceph.client.admin.keyring`
     - 增加 label `_admin` 到引导节点
 
+    如果节点数量小于 5 个，则把 mon 服务设置为 3 个
+    
+    ```bash
+    ceph orch apply mon --placement="3"
+    ```
+
 * 添加节点
 
     * 添加集群 ssh public key 到其它新的节点
