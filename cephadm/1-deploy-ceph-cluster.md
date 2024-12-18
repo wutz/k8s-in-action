@@ -13,6 +13,26 @@
     | sn03.example.local | 172.19.12.3/24 | 172.20.12.3/24 |
     | sn04.example.local | 172.19.12.4/24 | 172.20.12.4/24 |
 
+* 配置 hosts 文件
+
+    * 小于 5 个节点，使用 3 个管理节点
+    * 大于等于 5 个节点，使用 5 个管理节点
+
+    ```bash
+    cat > admin <<EOF
+    root@172.19.12.[1-3]
+    EOF
+
+    cat > hosts <<EOF
+    172.19.12.1 sn01.example.local
+    172.19.12.2 sn02.example.local
+    172.19.12.3 sn03.example.local
+    172.19.12.4 sn04.example.local
+    EOF
+
+    pdcp -w ^admin hosts /etc/hosts
+    ```
+
 * 配置 docker
 
     ```bash
@@ -23,7 +43,7 @@
         "proxies": {
             "http-proxy": "http://172.19.12.201:3128",
             "https-proxy": "http://172.19.12.201:3128",
-            "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,localhost,.example.com"
+            "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,.example.com"
         }
     }
     EOF
