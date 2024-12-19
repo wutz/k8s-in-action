@@ -40,7 +40,7 @@ ceph orch apply -i rgw.yaml
 
 ceph orch ls
 # 查询 RGW 进程
-ceph orch ps --daemon_type rgw
+ceph orch ps --service_name rgw.default
 
 # 将 RGW 的控制池设置为 SSD 副本
 ceph osd pool set .rgw.root crush_rule rep_ssd
@@ -66,12 +66,37 @@ spec:
   - 172.19.12.102/24
   - 172.19.12.103/24
   - 172.19.12.104/24
+  first_virtual_router_id: 150
   frontend_port: 80
   monitor_port: 1967
 ```
+> 其中 vip 列表从管理员获取, 为了最大化负载均衡效果，一般与节点数量一致
 
-* vip 与 networks 设置一致
-* 其中 vip 列表从管理员获取, 为了最大化负载均衡效果，一般与节点数量一致
+如果需要使用 https 则需要配置 ssl_cert 和 frontend_port 为 443
+
+```yaml
+service_type: ingress
+service_id: rgw.default
+placement:
+  host_pattern: sn*
+spec:
+  backend_service: rgw.default
+  virtual_ips_list:
+  - 172.19.12.101/24
+  - 172.19.12.102/24
+  - 172.19.12.103/24
+  - 172.19.12.104/24
+  first_virtual_router_id: 150
+  frontend_port: 443
+  monitor_port: 1967
+  ssl_cert: |                         
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+    -----BEGIN PRIVATE KEY-----
+    ...
+    -----END PRIVATE KEY-----
+```
 
 ```bash
 # 部署 Ingress 服务
@@ -79,7 +104,7 @@ ceph orch apply -i ingress.yaml
 
 ceph orch ls
 # 查询 Ingress 进程
-ceph orch ps --daemon_type ingress
+ceph orch ps --service_name ceph orch ps --service_name ingress.rgw.default
 ```
 
 配置 DNS 解析（可选）：
