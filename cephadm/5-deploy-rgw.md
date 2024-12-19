@@ -179,12 +179,28 @@ EOF
 radosgw-admin script put --infile=./s3.lua --context=preRequest
 ```
 
-## 创建用户
+## 使用
+
+### 创建用户
 
 ```bash
 radosgw-admin user create --uid=wutz --display-name="Taizeng Wu"
 radosgw-admin user info --uid=wutz
 radosgw-admin user rm --uid=wutz
+```
+
+### 设置 quota
+
+```bash
+# 按照用户设置 quota
+# --max-size 单位可以使用 B/K/M/G/T
+radosgw-admin quota set --uid=wutz --quota-scope=user --max-size=10G --max-objects=10240
+radosgw-admin quota enable --quota-scope=user --uid=wutz
+
+# 查询 quota
+radosgw-admin user info --uid=wutz
+# 查询用户使用情况
+radosgw-admin user stats --uid=wutz
 ```
 
 ## 性能测试
