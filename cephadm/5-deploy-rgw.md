@@ -53,50 +53,68 @@ ceph osd pool set default.rgw.meta crush_rule rep_ssd
 
 缺省 RGW 服务只监听在每个节点上，不提供负载均衡服务，故而需要部署 Ingress 服务
 
-```yaml
-# 创建文件 ingress.yaml
-service_type: ingress
-service_id: rgw.default
-placement:
-  host_pattern: sn*
-spec:
-  backend_service: rgw.default
-  virtual_ips_list:
-  - 172.19.12.101/24
-  - 172.19.12.102/24
-  - 172.19.12.103/24
-  - 172.19.12.104/24
-  first_virtual_router_id: 150
-  frontend_port: 80
-  monitor_port: 1967
-```
-> 其中 vip 列表从管理员获取, 为了最大化负载均衡效果，一般与节点数量一致
+以下方式二选一
 
-如果需要使用 https 则需要配置 ssl_cert 和 frontend_port 为 443
+* 仅支持 http 部署
 
-```yaml
-service_type: ingress
-service_id: rgw.default
-placement:
-  host_pattern: sn*
-spec:
-  backend_service: rgw.default
-  virtual_ips_list:
-  - 172.19.12.101/24
-  - 172.19.12.102/24
-  - 172.19.12.103/24
-  - 172.19.12.104/24
-  first_virtual_router_id: 150
-  frontend_port: 443
-  monitor_port: 1967
-  ssl_cert: |                         
-    -----BEGIN CERTIFICATE-----
-    ...
-    -----END CERTIFICATE-----
-    -----BEGIN PRIVATE KEY-----
-    ...
-    -----END PRIVATE KEY-----
-```
+  ```yaml
+  # 创建文件 ingress.yaml
+  service_type: ingress
+  service_id: rgw.default
+  placement:
+    host_pattern: sn*
+  spec:
+    backend_service: rgw.default
+    virtual_ips_list:
+    - 172.19.12.101/24
+    - 172.19.12.102/24
+    - 172.19.12.103/24
+    - 172.19.12.104/24
+    first_virtual_router_id: 150
+    frontend_port: 80
+    monitor_port: 1967
+  ```
+  > 其中 vip 列表从管理员获取, 为了最大化负载均衡效果，一般与节点数量一致
+
+* 仅支持 https 部署
+
+  如果需要使用 https 则需要配置 ssl_cert 和 frontend_port 为 443
+
+  ```yaml
+  service_type: ingress
+  service_id: rgw.default
+  placement:
+    host_pattern: sn*
+  spec:
+    backend_service: rgw.default
+    virtual_ips_list:
+    - 172.19.12.101/24
+    - 172.19.12.102/24
+    - 172.19.12.103/24
+    - 172.19.12.104/24
+    first_virtual_router_id: 150
+    frontend_port: 443
+    monitor_port: 1967
+    ssl_cert: |                         
+      -----BEGIN CERTIFICATE-----
+      ...
+      -----END CERTIFICATE-----
+      -----BEGIN PRIVATE KEY-----
+      ...
+      -----END PRIVATE KEY-----
+  ```
+
+  如果证书即将过期，执行以下步骤更新证书：
+
+  ```bash
+  # 1. 更新 ingress.yaml 的 ssl_cert
+
+  # 2. 应用 ingress.yaml
+  ceph orch apply -i ingress.yaml
+
+  # 3. 重新部署 ingress
+  ceph orch redeploy ingress.rgw.default
+  ```
 
 ```bash
 # 部署 Ingress 服务
