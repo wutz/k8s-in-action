@@ -312,3 +312,18 @@ done
 
 $ELBENCHO --hosts $HOSTS --quit
 ```
+
+# 其它
+
+## 调整同时最大 backfills 数
+
+主要用于提升恢复速度
+
+调大 backfills 可能影响业务请求性能，通常只适合配置 NVMe SSD 的集群
+
+```bash
+# 设置 osd 的最大回填数
+ceph config set osd osd_max_backfills 4
+# v18 及以上版本
+ceph config set osd osd_mclock_override_recovery_settings true
+```
