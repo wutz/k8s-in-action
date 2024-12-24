@@ -4,45 +4,46 @@
 
 ![k8s-arch](images/k8s-arch.png)
 
-### 集群名称
+### DC 数据中心命名
 
-* 格式：<2位字母城市缩写><1位数字序号><1位字母后缀>
+* 格式：<2位字母城市缩写><1位数字序号>
 * 城市缩写：例如北京 bj, 上海 sh 和广州 gz 等
-* 数字序号：同一城市下使用内网互联的机房，从数字 1 开始
-* 字母后缀：同一机房下区分不同集群
-  * 编号 a-g: 用于内部生产集群
-  * 编号 h-n: 用于用户集群
-  * 编号 u-z: 用于内部测试集群
+* 数字序号：同一城市下使用内网互联的数据中心，从数字 1 开始
 * 示例：
-  * bj1a: 北京第一个机房内部生产集群
-  * sh3u: 上海第三个机房内部测试集群
-  * gz2h: 广州第二个机房用户集群
+  * bj1: 北京第一个机房内部生产集群
+  * sh3: 上海第三个机房内部测试集群
+  * gz2: 广州第二个机房用户集群
 
 ### DNS 命名
 
-> example.com 为示例域名，根据实际情况进行替换
+* 对外服务：*.<DC>.example.com, 例如 *.bj1.example.com
+* 对内服务：*.<DC>i.example.com, 例如 *.bj1i.example.com
+* 如果提供用户计算集群，需要使用DNS域名解析
+  * 内网：*.<USER>.<DC>.example.com, 例如 *.user1.bj1.example.com
+  * 外网：*.<USER>.<DC>.example.com, 例如 *.user1.bj1.example.com
 
-* 对外服务：*.<集群名称>.example.com, 例如 *.bj1a.example.com
-* 对内服务：*.<集群名称>-int.example.com, 例如 *.bj1a-int.example.com
-
-> int 是 internal 的缩写，表示内部服务
+> * example.com 为示例域名，根据实际情况进行替换
+> * i 是 internal 的缩写，表示内部服务
 
 ### 节点命名
 
-* 管理节点：mn[01-07].<集群名称>.local, 例如 mn01.bj1a.local
-  * 生产集群至少 3 节点满足 HA 需要，最大 7 节点
-  * 测试集群至少 1 节点，可以与计算节点复用
-* 网络负载均衡节点：ln[01-99].<集群名称>.local, 例如 ln01.bj1a.local
-  * 生产集群至少 2 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
-  * 测试集群复用管理节点
-* 存储节点：sn[01-99].<集群名称>.local, 例如 sn01.bj1a.local
-  * 生产集群至少 3 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
-  * 测试集群复用管理节点
-* 数据库节点：dn[01-99].<集群名称>.local, 例如 dn01.bj1a.local
-  * 生产集群至少 2 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
-  * 测试集群复用管理节点
-* CPU 计算节点：cn[001-999].<集群名称>.local, 例如 cn001.bj1a.local
-* GPU 计算节点：gn[001-999].<集群名称>.local, 例如 gn001.bj1a.local
+* 格式：<IP>.<DC>.local
+  * 短名称使用 IP 地址短横线分隔
+  * 示例：10-128-0-1.bj1.local
+* 节点角色
+  * 控制节点 control-plane
+    * 生产集群至少 3 节点满足 HA 需要，最大 7 节点
+    * 测试集群至少 1 节点，可以与计算节点复用
+  * 网络负载均衡节点 load-balancer
+    * 生产集群至少 2 节点满足 HA 需要, 可复用管理节点
+  * 存储节点 storage
+    * 生产集群至少 3 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
+    * 测试集群复用管理节点
+  * 数据库节点 database
+    * 生产集群至少 2 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
+    * 测试集群复用管理节点
+  * CPU 计算节点 cpu
+  * GPU 计算节点 gpu
 
 ### 网络
 
@@ -55,14 +56,25 @@
 ### 软件
 
 - OS: ubuntu 22.04
-- K8S: [k3s](https://k3s.io/) v1.30
+- K8S: [k3s](https://k3s.io/) v1.31
 - Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v18.2
 
 > 更多需求可以参考 [k3s requirements](https://docs.k3s.io/zh/installation/requirements)
 
 ## 所有节点初始化
 
-> 以下均已 mn[01-03],gn001 作为代表所有节点示例
+| 节点 | 角色 |
+| --- | --- |
+| 10-128-0-1.bj1.local | control-plane,load-balancer,database |
+| 10-128-0-2.bj1.local | control-plane,load-balancer,database |
+| 10-128-0-3.bj1.local | control-plane,load-balancer,database |
+| 10-128-0-101.bj1.local | storage |
+| 10-128-0-102.bj1.local | storage |
+| 10-128-0-103.bj1.local | storage |
+| 10-128-0-104.bj1.local | storage |
+| 10-128-1-1.bj1.local | gpu |
+| 10-128-1-2.bj1.local | gpu |
+| 10-128-1-3.bj1.local | gpu |
 
 ### 管理工具 pdsh
 
@@ -76,8 +88,8 @@ brew install pdsh
 
 # 生成 hosts 用于后续执行 pdsh / pdcp
 cat << 'EOF' > all
-root@10.128.0.[1-3]
-root@10.128.1.1
+root@10.128.0.[1-3,100-104]
+root@10.128.1.[1-3]
 EOF
 
 # 设置 pdsh 远程 pdcp 路径
@@ -134,14 +146,11 @@ pdsh -w ^all ip r
 pdsh -w ^all resolvectl dns
 ```
 
-* 如果是 bonding 设备，把 `bond0` 替换为 `eth0` 即可
-
 ### 设置节点名称
 
 ```sh
-# 所有节点根据自身名字进行设置
-hostnamectl set-hostname mn01.bj1a.local
-...
+# 设置节点名称
+pdsh -w ^all hostnamectl set-hostname $(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | sed 's/\./-/g').bj1.local
 
 # 设置登录显示长主机名
 pdsh -w ^all sed -i 's/\\\\h/\\\\H/g' '~/.bashrc'
