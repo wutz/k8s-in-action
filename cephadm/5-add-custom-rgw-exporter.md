@@ -6,11 +6,11 @@
 
 经过调研最终选型https://github.com/galexrt/extended-ceph-exporter。
 
-本文档只适用于Ceph 18及以下版本，Ceph 19版本开始已经开始提供更细粒度的客户端和桶性能数据。
+本文档只适用于Ceph 18及以下版本，Ceph 19版本已经开始提供更细粒度的客户端和桶性能数据。
 
-# 操作步骤
+# 一、操作步骤
 
-## 创建用户
+## 1.1. 创建用户
 
 本步骤说明创建一个专为rgw-exporter使用的监控用户，步骤如下
 
@@ -22,7 +22,7 @@ radosgw-admin user info --uid extended-ceph-exporter | jq '.keys[0].access_key'
 radosgw-admin user info --uid extended-ceph-exporter | jq '.keys[0].secret_key'
 ```
 
-## 编写定制化rgw-exporter服务配置文件
+## 1.2. 编写定制化rgw-exporter服务配置文件
 
 本章节所描述配置文件内容参考如下官方文档
 
@@ -53,7 +53,7 @@ extra_entrypoint_args:
   - argument: "--rgw-secret-key=xxxxxxx"		   # 这里填入上一步获取到的SecretKey值
 ```
 
-## 创建定制服务
+## 1.3. 创建定制服务
 
 将上面的内容保存到一个文件，这里约定文件名称为rgw-exporter.yaml。执行如下命令创建定制的rgw-exporter服务。
 
@@ -74,11 +74,11 @@ extra_entrypoint_args:
 上面命令重点看是否存在ceph_rgw_bucket_size指标项，如果存在表示获取成功，否则失败。
 ```
 
-## 定制话Ceph内嵌的prometheus配置模板
+## 1.4. 定制Ceph内嵌的prometheus配置模板
 
-默认情况下，Ceph内嵌的Prometheus不支持获取用户自定义的服务数据，需要修改其模板使其支持改功能.
+默认情况下，Ceph内嵌的Prometheus不支持获取用户自定义服务的性能数据，需要修改其模板使其支持该功能.
 
-该部分如下官方文档有描述
+该部分参考如下官方文档
 
 ```bash
 https://docs.ceph.com/en/latest/cephadm/services/monitoring/#option-names
@@ -90,7 +90,7 @@ https://docs.ceph.com/en/latest/cephadm/services/monitoring/#option-names
 https://github.com/ceph/ceph/blob/main/src/pybind/mgr/cephadm/templates/services/prometheus/prometheus.yml.j2
 ```
 
-将上面的文件prometheus.yml.j2下载到本地然后编辑改文件，增加定制的rgw-exporter的配置
+将上面的文件prometheus.yml.j2下载到本地并编辑该文件，增加定制的rgw-exporter配置
 
 ```yaml
   - job_name: 'rgw-exporter'
@@ -98,7 +98,7 @@ https://github.com/ceph/ceph/blob/main/src/pybind/mgr/cephadm/templates/services
     - targets: ['127.0.0.1:9138']
 ```
 
-## 更新Prometheus
+## 1.5. 更新Prometheus
 
 按照官方文档的讲解执行如下命令更新prometheus的配置
 
@@ -119,7 +119,7 @@ ceph config-key set mgr/cephadm/services/prometheus/prometheus.yml \
 ceph orch reconfig prometheus
 ```
 
-## 验证数据是否已经接入
+## 1.6. 验证数据是否已经接入
 
 通常Ceph内嵌的Prometheus默认端口为9095，通过Prometheus的Webui页面查看指标数据ceph_rgw_bucket_size是否已存在。有代表成功，否则失败。
 
