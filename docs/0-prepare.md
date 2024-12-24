@@ -16,11 +16,12 @@
 
 ### DNS 命名
 
-* 对外服务：*.<DC>.example.com, 例如 *.bj1.example.com
-* 对内服务：*.<DC>i.example.com, 例如 *.bj1i.example.com
-* 如果提供用户计算集群，需要使用DNS域名解析
-  * 内网：*.<USER>.<DC>.example.com, 例如 *.user1.bj1.example.com
-  * 外网：*.<USER>.<DC>.example.com, 例如 *.user1.bj1.example.com
+* 基础服务使用域名
+  * 内网：*.<DC>i.example.com, 例如 *.bj1i.example.com
+  * 外网：*.<DC>.example.com, 例如 *.bj1.example.com
+* 计算集群中服务使用域名 
+  * 内网：*.<CLUSTER>.<DC>i.example.com, 例如 *.prod.bj1i.example.com
+  * 外网：*.<CLUSTER>.<DC>.example.com, 例如 *.prod.bj1.example.com
 
 > * example.com 为示例域名，根据实际情况进行替换
 > * i 是 internal 的缩写，表示内部服务
@@ -128,9 +129,9 @@ network:
         via: 10.128.255.254
       nameservers:
         addresses:
+        - 119.29.29.29
         - 223.5.5.5
         - 223.6.6.6
-        - 114.114.114.114
       match:
         macaddress: fa:16:3e:f1:c3:fd
       set-name: eth0

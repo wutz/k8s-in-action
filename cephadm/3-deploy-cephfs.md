@@ -199,9 +199,9 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
     csiConfig:
       - clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
         monitors:
-          - 172.19.12.1:6789
-          - 172.19.12.2:6789
-          - 172.19.12.3:6789
+          - 10.128.0.100:6789
+          - 10.128.0.101:6789
+          - 10.128.0.102:6789
     ```
     
     - clusterID, monitors 来自配置 ceph.conf

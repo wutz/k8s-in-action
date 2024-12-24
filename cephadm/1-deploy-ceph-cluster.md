@@ -8,10 +8,10 @@
 
     | 节点 | Public Network IP | Cluster Network IP |
     | --- | --- | --- |
-    | sn01.example.local | 172.19.12.1/24 | 172.20.12.1/24 |
-    | sn02.example.local | 172.19.12.2/24 | 172.20.12.2/24 |
-    | sn03.example.local | 172.19.12.3/24 | 172.20.12.3/24 |
-    | sn04.example.local | 172.19.12.4/24 | 172.20.12.4/24 |
+    | 10-128-0-100.bj1.local | 10.128.0.101/16 | 10.129.0.100/16 |
+    | 10-128-0-101.bj1.local | 10.128.0.102/16 | 10.129.0.101/16 |
+    | 10-128-0-102.bj1.local | 10.128.0.103/16 | 10.129.0.102/16 |
+    | 10-128-0-103.bj1.local | 10.128.0.104/16 | 10.129.0.103/16 |
 
 * 配置 hosts 文件
 
@@ -20,14 +20,14 @@
 
     ```bash
     cat > admin <<EOF
-    root@172.19.12.[1-3]
+    root@10.128.0.[100-103]
     EOF
 
     cat > hosts <<EOF
-    172.19.12.1 sn01.example.local
-    172.19.12.2 sn02.example.local
-    172.19.12.3 sn03.example.local
-    172.19.12.4 sn04.example.local
+    10.128.0.100 10-128-0-100.bj1.local 10-128-0-100
+    10.128.0.101 10-128-0-101.bj1.local 10-128-0-101
+    10.128.0.102 10-128-0-102.bj1.local 10-128-0-102
+    10.128.0.103 10-128-0-103.bj1.local 10-128-0-103
     EOF
 
     pdcp -w ^admin hosts /etc/hosts
@@ -41,8 +41,8 @@
     cat > daemon.json <<EOF
     {
         "proxies": {
-            "http-proxy": "http://172.19.12.201:3128",
-            "https-proxy": "http://172.19.12.201:3128",
+            "http-proxy": "http://10.128.0.200:3128",
+            "https-proxy": "http://10.128.0.200:3128",
             "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,.example.com"
         }
     }
@@ -73,7 +73,7 @@
     在 bootstrap 节点(sn01)执行
 
     ```bash
-    cephadm bootstrap --allow-fqdn-hostname --mon-ip 172.19.12.1 --cluster-network 172.20.12.0/24 
+    cephadm bootstrap --allow-fqdn-hostname --mon-ip 10.128.0.100 --cluster-network 10.129.0.100/16 
     ceph -s
     ```
 
@@ -99,7 +99,7 @@
     * 访问 ceph dashboard 并修改配置
 
         ```bash
-        ceph dashboard set-grafana-api-url https://172.19.12.1:3000/
+        ceph dashboard set-grafana-api-url https://10.128.0.100:3000/
         ```
 
     * 添加新节点到集群中 (在 bootstrap 节点执行)
@@ -115,8 +115,8 @@
         - 如果添加节点属于不同的网络，需要指定 `public_network` 和 `cluster_network` 参数
 
             ```bash
-            ceph config set mon public_network "172.19.12.0/24,172.29.12.0/24"
-            ceph config set global cluster_network "172.20.12.0/24,172.30.12.0/24"
+            ceph config set mon public_network "10.128.0.0/16,10.130.0.0/16"
+            ceph config set global cluster_network "10.129.0.0/16,10.131.0.0/16"
             ```
 
 * [添加存储](https://docs.ceph.com/en/reef/cephadm/services/osd/#cephadm-deploy-osds)
