@@ -17,20 +17,20 @@
 ### DNS 命名
 
 * 基础服务使用域名
-  * 内网：*.<DC>i.example.com, 例如 *.bj1i.example.com
-  * 外网：*.<DC>.example.com, 例如 *.bj1.example.com
+  * 内网：`*.<DC>i.example.com`, 例如 `*.bj1i.example.com`
+  * 外网：`*.<DC>.example.com`, 例如 `*.bj1.example.com`
 * 计算集群中服务使用域名 
-  * 内网：*.<CLUSTER>.<DC>i.example.com, 例如 *.prod.bj1i.example.com
-  * 外网：*.<CLUSTER>.<DC>.example.com, 例如 *.prod.bj1.example.com
+  * 内网：`*.<CLUSTER>.<DC>i.example.com`, 例如 `*.prod.bj1i.example.com`
+  * 外网：`*.<CLUSTER>.<DC>.example.com`, 例如 `*.prod.bj1.example.com`
 
 > * example.com 为示例域名，根据实际情况进行替换
 > * i 是 internal 的缩写，表示内部服务
 
 ### 节点命名
 
-* 格式：<IP>.<DC>.local
+* 格式：`<IP>.<DC>.local`
   * 短名称使用 IP 地址短横线分隔
-  * 示例：10-128-0-1.bj1.local
+  * 示例：`10-128-0-1.bj1.local`
 * 节点角色
   * 控制节点 control-plane
     * 生产集群至少 3 节点满足 HA 需要，最大 7 节点
