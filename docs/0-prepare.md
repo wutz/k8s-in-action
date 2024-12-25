@@ -151,7 +151,7 @@ pdsh -w ^all resolvectl dns
 
 ```sh
 # 设置节点名称
-pdsh -w ^all hostnamectl set-hostname $(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | sed 's/\./-/g' |head -1).bj1.local
+pdsh -w ^all 'hostnamectl set-hostname $(ip -4 addr show eth0 | grep -oP "(?<=inet\s)\d+(\.\d+){3}" | sed "s/\./-/g" | head -1).bj1.local'
 
 # 设置登录显示长主机名
 pdsh -w ^all sed -i 's/\\\\h/\\\\H/g' '~/.bashrc'
