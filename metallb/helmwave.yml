@@ -24,9 +24,6 @@ releases:
     <<: *options
     chart:
       name: metallb/metallb
-      version: v0.14.8
+      version: v0.14.9
     values:
       - values.yml
-    lifecycle:
-      post_up:
-        - kubectl apply -k hooks
