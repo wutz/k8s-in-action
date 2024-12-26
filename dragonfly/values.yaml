@@ -1,5 +1,5 @@
-#global:
-#  storageClass: "shared-juice"
+global:
+  storageClass: "shared-juice"
 
 manager:
   metrics:
@@ -7,6 +7,13 @@ manager:
   config:
     verbose: true
     pprofPort: 18066
+    log:
+      level: info
+    job:
+      preheat:
+        registryTimeout: 600m
+        tls:
+          insecureSkipVerify: true
   tolerations:
     - effect: NoSchedule
       key: node-role.kubernetes.io/control-plane
@@ -19,15 +26,17 @@ manager:
           - key: kubernetes.io/hostname
             operator: In
             values:
-            - mn01.cluster.local
-            - mn02.cluster.local
-            - mn03.cluster.local   
+            - mn01.hs1h.local
+            - mn02.hs1h.local
+            - mn03.hs1h.local   
 
 scheduler:
   metrics:
     enable: true
   config:
     verbose: true
+    log:
+      level: info
     pprofPort: 18066
   tolerations:
     - effect: NoSchedule
@@ -41,19 +50,21 @@ scheduler:
           - key: kubernetes.io/hostname
             operator: In
             values:
-            - mn01.cluster.local
-            - mn02.cluster.local
-            - mn03.cluster.local   
+            - mn01.hs1h.local
+            - mn02.hs1h.local
+            - mn03.hs1h.local   
 
 seedClient:
   metrics:
     enable: true
   config:
     verbose: true
-  tolerations:
-    - effect: NoSchedule
-      key: node-role.kubernetes.io/control-plane
-      operator: Exists    
+    download:
+      pieceTimeout: 3600s
+    scheduler:
+      scheduleTimeout: 3600s
+    log:
+      level: info
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -62,15 +73,23 @@ seedClient:
           - key: kubernetes.io/hostname
             operator: In
             values:
-            - mn01.cluster.local
-            - mn02.cluster.local
-            - mn03.cluster.local   
+            - gn001.hs1h.local  
+            - gn002.hs1h.local
+            - gn003.hs1h.local   
 
 client:
   metrics:
     enable: true
   config:
     verbose: true
+    log:
+      level: info
+    proxy:
+      registryMirror:
+        addr: https://cr.hs1h-int.example.com
+        basicAuth:
+          username: admin
+          password: base64_password
   dfinit:
     enable: true
     config:
@@ -78,39 +97,40 @@ client:
         containerd:
           configPath: /var/lib/rancher/k3s/agent/etc/containerd/config.toml
           registries:
-            - hostNamespace: harbor.example.com
-              serverAddr: http://harbor.example.com
+            - hostNamespace: cr.hs1h-int.example.com
+              serverAddr: https://cr.hs1h-int.example.com
               capabilities: ['pull', 'resolve']
+              skipVerify: true
 
-#mysql:
-#  enable: false
-#
-#externalMysql:
-#  # -- Running GORM migration.
-#  migrate: true
-#  # -- External mysql hostname.
-#  host: rm-ejrctet92gzt4rmwb.mysql.rds.hs5b-example.com
-#  # -- External mysql username.
-#  username: dragonfly
-#  # -- External mysql password.
-#  password: xxxxxxxx
-#  # -- External mysql database name.
-#  database: manager
-#  # -- External mysql port.
-#  port: 3306
+mysql:
+  enable: false
 
-#redis:
-#  enable: false
-#
-#externalRedis:
-#  addrs:
-#    - "r-uvnz4dxcdnmzwshc2.redis.rds.hs5b-example.com:6379"
-#  password: "xxxxxxxxxx"
-#  # -- External redis db.
-#  db: 0
-#  # -- External redis broker db.
-#  brokerDB: 1
-#  # -- External redis backend db.
-#  backendDB: 2
-#  # -- External redis networkTopology db.
-#  networkTopologyDB: 3 
+externalMysql:
+  # -- Running GORM migration.
+  migrate: true
+  # -- External mysql hostname.
+  host: rm-ejrctet92gzt4rmwb.mysql.rds.hs1b-int.example.com
+  # -- External mysql username.
+  username: dragonfly
+  # -- External mysql password.
+  password: password
+  # -- External mysql database name.
+  database: dragonfly
+  # -- External mysql port.
+  port: 3306
+
+redis:
+  enable: false
+
+externalRedis:
+  addrs:
+    - "r-uvnz4dxcdnmzwshd3.redis.rds.hs1b-int.example.com:6379"
+  password: "password"
+  # -- External redis db.
+  db: 2
+  # -- External redis broker db.
+  brokerDB: 1
+  # -- External redis backend db.
+  backendDB: 2
+  # -- External redis networkTopology db.
+  networkTopologyDB: 3 
