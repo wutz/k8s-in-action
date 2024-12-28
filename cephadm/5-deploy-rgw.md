@@ -66,10 +66,10 @@ ceph osd pool set default.rgw.meta crush_rule rep_ssd
   spec:
     backend_service: rgw.default
     virtual_ips_list:
-    - 10.128.0.150/16
     - 10.128.0.151/16
     - 10.128.0.152/16
     - 10.128.0.153/16
+    - 10.128.0.154/16
     first_virtual_router_id: 150
     frontend_port: 80
     monitor_port: 1967
@@ -88,10 +88,10 @@ ceph osd pool set default.rgw.meta crush_rule rep_ssd
   spec:
     backend_service: rgw.default
     virtual_ips_list:
-    - 10.128.0.150/16
     - 10.128.0.151/16
     - 10.128.0.152/16
     - 10.128.0.153/16
+    - 10.128.0.154/16
     first_virtual_router_id: 150
     frontend_port: 443
     monitor_port: 1967
@@ -126,7 +126,7 @@ ceph orch ps --service_name ceph orch ps --service_name ingress.rgw.default
 ```
 
 配置 DNS 解析（可选）：
-* 配置 s3.example.com 节点到 10.128.0.[150-153] 的 A 记录
+* 配置 s3.example.com 节点到 10.128.0.[151-154] 的 A 记录
 
 ## 配置分层存储 (可选)
 

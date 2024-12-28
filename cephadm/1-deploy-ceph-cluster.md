@@ -8,10 +8,10 @@
 
     | 节点 | Public Network IP | Cluster Network IP |
     | --- | --- | --- |
-    | 10-128-0-100.bj1.local | 10.128.0.101/16 | 10.129.0.100/16 |
-    | 10-128-0-101.bj1.local | 10.128.0.102/16 | 10.129.0.101/16 |
-    | 10-128-0-102.bj1.local | 10.128.0.103/16 | 10.129.0.102/16 |
-    | 10-128-0-103.bj1.local | 10.128.0.104/16 | 10.129.0.103/16 |
+    | bj1sn01 | 10.128.0.101/16 | 10.129.0.101/16 |
+    | bj1sn02 | 10.128.0.102/16 | 10.129.0.101/16 |
+    | bj1sn03 | 10.128.0.103/16 | 10.129.0.102/16 |
+    | bj1sn04 | 10.128.0.104/16 | 10.129.0.103/16 |
 
 * 配置 hosts 文件
 
@@ -20,14 +20,14 @@
 
     ```bash
     cat > admin <<EOF
-    root@10.128.0.[100-103]
+    root@10.128.0.[101-104]
     EOF
 
     cat > hosts <<EOF
-    10.128.0.100 10-128-0-100.bj1.local 10-128-0-100
-    10.128.0.101 10-128-0-101.bj1.local 10-128-0-101
-    10.128.0.102 10-128-0-102.bj1.local 10-128-0-102
-    10.128.0.103 10-128-0-103.bj1.local 10-128-0-103
+    10.128.0.101 bj1sn01
+    10.128.0.102 bj1sn02
+    10.128.0.103 bj1sn03
+    10.128.0.104 bj1sn04
     EOF
 
     pdcp -w ^admin hosts /etc/hosts
@@ -41,8 +41,8 @@
     cat > daemon.json <<EOF
     {
         "proxies": {
-            "http-proxy": "http://10.128.0.200:3128",
-            "https-proxy": "http://10.128.0.200:3128",
+            "http-proxy": "http://10.128.0.90:3128",
+            "https-proxy": "http://10.128.0.90:3128",
             "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,.example.com"
         }
     }
@@ -73,7 +73,7 @@
     在 bootstrap 节点(sn01)执行
 
     ```bash
-    cephadm bootstrap --allow-fqdn-hostname --mon-ip 10.128.0.100 --cluster-network 10.129.0.100/16 
+    cephadm bootstrap --allow-fqdn-hostname --mon-ip 10.128.0.101 --cluster-network 10.129.0.0/16 
     ceph -s
     ```
 
@@ -99,7 +99,7 @@
     * 访问 ceph dashboard 并修改配置
 
         ```bash
-        ceph dashboard set-grafana-api-url https://10.128.0.100:3000/
+        ceph dashboard set-grafana-api-url https://10.128.0.101:3000/
         ```
 
     * 添加新节点到集群中 (在 bootstrap 节点执行)

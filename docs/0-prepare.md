@@ -4,47 +4,47 @@
 
 ![k8s-arch](images/k8s-arch.png)
 
-### DC 数据中心命名
+### 集群命名
 
-* 格式：<2位字母城市缩写><1位数字序号>
-* 城市缩写：例如北京 bj, 上海 sh 和广州 gz 等
-* 数字序号：同一城市下使用内网互联的数据中心，从数字 1 开始
+* 格式：`<2位字母城市缩写><1位数字序号>`
+  * 数字序号：
+    * 总是跳过数字 4
+    * 数字 1-9 用于内部生产集群
+    * 数字 10-89 用于外部生产集群
+    * 数字 90-99 用于内部测试集群
 * 示例：
-  * bj1: 北京第一个机房内部生产集群
-  * sh3: 上海第三个机房内部测试集群
-  * gz2: 广州第二个机房用户集群
-
-### DNS 命名
-
-* 基础服务使用域名
-  * 内网：`*.<DC>i.example.com`, 例如 `*.bj1i.example.com`
-  * 外网：`*.<DC>.example.com`, 例如 `*.bj1.example.com`
-* 计算集群中服务使用域名 
-  * 内网：`*.<CLUSTER>.<DC>i.example.com`, 例如 `*.prod.bj1i.example.com`
-  * 外网：`*.<CLUSTER>.<DC>.example.com`, 例如 `*.prod.bj1.example.com`
-
-> * example.com 为示例域名，根据实际情况进行替换
-> * i 是 internal 的缩写，表示内部服务
+  * bj1: 北京一个内部生产集群
+  * sh10: 上海一个外部生产集群
+  * gz90: 广州一个内部测试集群
 
 ### 节点命名
 
-* 格式：`<IP>.<DC>.local`
-  * 短名称使用 IP 地址短横线分隔
-  * 示例：`10-128-0-1.bj1.local`
-* 节点角色
-  * 控制节点 control-plane
-    * 生产集群至少 3 节点满足 HA 需要，最大 7 节点
-    * 测试集群至少 1 节点，可以与计算节点复用
-  * 网络负载均衡节点 load-balancer
-    * 生产集群至少 2 节点满足 HA 需要, 可复用管理节点
-  * 存储节点 storage
-    * 生产集群至少 3 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
-    * 测试集群复用管理节点
-  * 数据库节点 database
-    * 生产集群至少 2 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
-    * 测试集群复用管理节点
-  * CPU 计算节点 cpu
-  * GPU 计算节点 gpu
+* 格式：`<集群名称><2位字母节点角色缩写><2-3数字序号>`
+  * 数字序号：功能节点使用 2 位数字，计算节点使用 3 位数字
+* 控制节点 mn
+  * 生产集群至少 3 节点满足 HA 需要，最大 7 节点
+  * 示例：`bj1mn01`, `bj1mn02`, `bj1mn03`
+* 网络负载均衡节点 ln
+  * 生产集群至少 2 节点满足 HA 需要, 可复用管理节点
+  * 示例：`bj1ln01`, `bj1ln02`
+* 存储节点 sn
+  * 生产集群至少 3 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
+  * 示例：`bj1sn01`, `bj1sn02`, `bj1sn03`
+* 数据库节点 dn
+  * 生产集群至少 2 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
+  * 示例：`bj1dn01`, `bj1dn02`
+* CPU 计算节点 cn
+  * 示例：`bj1cn001`, `bj1cn002`, `bj1cn003`
+* GPU 计算节点 gn
+  * 示例：`bj1gn001`, `bj1gn002`, `bj1gn003`
+
+### DNS 命名
+
+* 内网：`*.<CLUSTER>i.example.com`, 例如 `*.bj1i.example.com`
+* 外网：`*.<CLUSTER>.example.com`, 例如 `*.bj1.example.com`
+
+> * example.com 为示例域名，根据实际情况进行替换
+> * i 是 internal 的缩写，表示内部服务
 
 ### 网络
 
@@ -64,18 +64,21 @@
 
 ## 所有节点初始化
 
-| 节点 | 角色 |
+| 节点 | IP |
 | --- | --- |
-| 10-128-0-1.bj1.local | control-plane,load-balancer,database |
-| 10-128-0-2.bj1.local | control-plane,load-balancer,database |
-| 10-128-0-3.bj1.local | control-plane,load-balancer,database |
-| 10-128-0-101.bj1.local | storage |
-| 10-128-0-102.bj1.local | storage |
-| 10-128-0-103.bj1.local | storage |
-| 10-128-0-104.bj1.local | storage |
-| 10-128-1-1.bj1.local | gpu |
-| 10-128-1-2.bj1.local | gpu |
-| 10-128-1-3.bj1.local | gpu |
+| bj1mn01 | 10.128.0.1/24 |
+| bj1mn02 | 10.128.0.2/24 |
+| bj1mn03 | 10.128.0.3/24 |
+| bj1sn01 | 10.128.0.101/24 |
+| bj1sn02 | 10.128.0.102/24 |
+| bj1sn03 | 10.128.0.103/24 |
+| bj1sn04 | 10.128.0.104/24 |
+| bj1dn01 | 10.128.0.201/24 |
+| bj1dn02 | 10.128.0.202/24 |
+| bj1dn03 | 10.128.0.203/24 |
+| bj1gn001 | 10.128.1.1/24 |
+| bj1gn002 | 10.128.1.2/24 |
+| bj1gn003 | 10.128.1.3/24 |
 
 ### 管理工具 pdsh
 
@@ -89,7 +92,7 @@ brew install pdsh
 
 # 生成 hosts 用于后续执行 pdsh / pdcp
 cat << 'EOF' > all
-root@10.128.0.[1-3,100-104]
+root@10.128.0.[1-3,100-104,201-203]
 root@10.128.1.[1-3]
 EOF
 
@@ -182,8 +185,8 @@ pdsh -w ^all apt update
 
 ```bash
 cat << 'EOF' > 80proxy
-Acquire::http::Proxy "http://10.128.0.200:3128";
-Acquire::https::Proxy "http://10.128.0.200:3128";
+Acquire::http::Proxy "http://10.128.0.90:3128";
+Acquire::https::Proxy "http://10.128.0.90:3128";
 EOF
 
 pdcp -w ^all 80proxy /etc/apt/apt.conf.d/80proxy

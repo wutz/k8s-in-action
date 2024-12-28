@@ -36,9 +36,9 @@ CephFS 提供一些功能:
 1. 为用于部署 mds 服务节点打上 label
     
     ```bash
-    ceph orch host label add sn01.example.local mds
-    ceph orch host label add sn02.example.local mds
-    ceph orch host label add sn03.example.local mds
+    ceph orch host label add bj1sn01 mds
+    ceph orch host label add bj1sn02 mds
+    ceph orch host label add bj1sn03 mds
     ```
     
 2. 创建 2 个副本 Pool 分别用于 metadata 和 data
@@ -199,9 +199,9 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
     csiConfig:
       - clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
         monitors:
-          - 10.128.0.100:6789
           - 10.128.0.101:6789
           - 10.128.0.102:6789
+          - 10.128.0.103:6789
     ```
     
     - clusterID, monitors 来自配置 ceph.conf
