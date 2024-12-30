@@ -122,7 +122,7 @@ ceph orch apply -i ingress.yaml
 
 ceph orch ls
 # 查询 Ingress 进程
-ceph orch ps --service_name ceph orch ps --service_name ingress.rgw.default
+ceph orch ps --service_name ingress.rgw.default
 ```
 
 配置 DNS 解析（可选）：
