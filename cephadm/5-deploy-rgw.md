@@ -163,7 +163,9 @@ radosgw-admin zone placement add \
 
 # 创建数据池
 ceph osd pool create default.rgw.buckets.smallobj rep_ssd 
+ceph osd pool application enable default.rgw.buckets.smallobj rgw
 ceph osd pool create default.rgw.buckets.mediumobj rep_hdd 
+ceph osd pool application enable default.rgw.buckets.mediumobj rgw
 
 # 重启 RGW
 ceph orch restart rgw.default
