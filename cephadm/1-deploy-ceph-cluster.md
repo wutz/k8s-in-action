@@ -15,19 +15,17 @@
 
 * 配置 hosts 文件
 
-    * 小于 5 个节点，使用 3 个管理节点
-    * 大于等于 5 个节点，使用 5 个管理节点
+    使用 3 个管理节点
 
     ```bash
     cat > admin <<EOF
-    root@10.128.0.[101-104]
+    root@10.128.0.[101-103]
     EOF
 
     cat > hosts <<EOF
     10.128.0.101 bj1sn01
     10.128.0.102 bj1sn02
     10.128.0.103 bj1sn03
-    10.128.0.104 bj1sn04
     EOF
 
     pdcp -w ^admin hosts /etc/hosts

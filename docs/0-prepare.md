@@ -225,7 +225,7 @@ pdsh -w ^all systemctl restart cpufrequtils
 # 查看当前 CPU 频率 (执行任意命令即可)
 pdsh -w ^all cpufreq-info
 pdsh -w ^all grep MHz /proc/cpuinfo
-pdsh -w ^all cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors
+pdsh -w ^all 'cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors'
 ```
 
 ### 锁定内核版本，避免驱动失效
