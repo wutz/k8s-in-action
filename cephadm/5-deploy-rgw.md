@@ -161,11 +161,16 @@ radosgw-admin zone placement add \
 	--storage-class MEDIUM_OBJ \
 	--data-pool default.rgw.buckets.mediumobj
 
-# 创建数据池
+# 创建小对象池使用 SSD 副本
 ceph osd pool create default.rgw.buckets.smallobj rep_ssd 
 ceph osd pool application enable default.rgw.buckets.smallobj rgw
+ceph osd pool set default.rgw.buckets.smallobj target_size_ratio 0.7
+
+# 创建中对象池使用 HDD 副本
 ceph osd pool create default.rgw.buckets.mediumobj rep_hdd 
 ceph osd pool application enable default.rgw.buckets.mediumobj rgw
+ceph osd pool set default.rgw.buckets.mediumobj target_size_ratio 0.3
+ceph osd pool set default.rgw.buckets.data target_size_ratio 0.7
 
 # 重启 RGW
 ceph orch restart rgw.default
