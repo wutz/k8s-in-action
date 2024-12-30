@@ -58,7 +58,7 @@
 
     ```bash
     pdsh -w ^all apt install -y cephadm
-    pdsh -w ^all cephadm add-repo --release reef --repo-url http://mirrors.ustc.edu.cn/ceph
+    pdsh -w ^all cephadm add-repo --release reef --repo-url http://mirrors.ustc.edu.cn/ceph --gpg-url http://mirrors.ustc.edu.cn/ceph/keys/release.gpg
     pdsh -w ^all cephadm install
     pdsh -w ^all cephadm version
     ```
