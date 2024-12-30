@@ -154,10 +154,9 @@ pdsh -w ^all resolvectl dns
 
 ```sh
 # 设置节点名称
-pdsh -w ^all 'hostnamectl set-hostname $(ip -4 addr show eth0 | grep -oP "(?<=inet\s)\d+(\.\d+){3}" | sed "s/\./-/g" | head -1).bj1.local'
-
-# 设置登录显示长主机名
-pdsh -w ^all sed -i 's/\\\\h/\\\\H/g' '~/.bashrc'
+hostnamectl set-hostname bj1mn01
+hostnamectl set-hostname bj1mn02
+...
 ```
 
 ### 设置时间同步和时区
@@ -231,7 +230,13 @@ pdsh -w ^all cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governor
 
 ### 锁定内核版本，避免驱动失效
 
-> 确保所有节点使用一致的内核版本后，再进行锁定
+确保所有节点使用一致的内核版本后，再进行锁定
+
+```bash
+pdsh -w ^all apt update
+pdsh -w ^all apt upgrade -y
+pdsh -w ^all uname -r
+```
 
 ```sh
 cat << 'EOF' > nolinuxupgrades
@@ -239,6 +244,7 @@ Package: linux-*
 Pin: version *
 Pin-Priority: -1
 EOF
+
 pdcp -w ^all nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
 ```
 
