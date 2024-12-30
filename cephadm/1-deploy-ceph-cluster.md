@@ -23,13 +23,16 @@
     EOF
 
     cat > hosts <<EOF
-    10.128.0.101 bj1sn01
-    10.128.0.102 bj1sn02
-    10.128.0.103 bj1sn03
-    EOF
 
-    pdcp -w ^admin hosts /etc/hosts
+    # sn
+    10.128.0.101    bj1sn01
+    10.128.0.102    bj1sn02
+    10.128.0.103    bj1sn03
+    10.128.0.104    bj1sn04
+    EOF
     ```
+    pdcp -w ^admin hosts /tmp/hosts
+    pdsh -w ^admin "cat /tmp/hosts >> /etc/hosts"
 
 * 配置 docker
 
