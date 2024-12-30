@@ -154,16 +154,16 @@ radosgw-admin zone placement add \
 	--rgw-zone default \
 	--placement-id default-placement \
 	--storage-class SMALL_OBJ \
-	--data-pool default.rgw.buckets.data-rep-ssd
+	--data-pool default.rgw.buckets.smallobj
 radosgw-admin zone placement add \
 	--rgw-zone default \
 	--placement-id default-placement \
 	--storage-class MEDIUM_OBJ \
-	--data-pool default.rgw.buckets.data-rep-hdd
+	--data-pool default.rgw.buckets.mediumobj
 
 # 创建数据池
-ceph osd pool create default.rgw.buckets.data-rep-ssd rep_ssd 
-ceph osd pool create default.rgw.buckets.data-rep-hdd rep_hdd 
+ceph osd pool create default.rgw.buckets.smallobj rep_ssd 
+ceph osd pool create default.rgw.buckets.mediumobj rep_hdd 
 
 # 重启 RGW
 ceph orch restart rgw.default
@@ -182,7 +182,7 @@ end
 
 -- apply StorageClass only if user hasn't already assigned a storage-class
 if Request.HTTP.StorageClass == nil or Request.HTTP.StorageClass == '' then
-  if Request.ContentLength < 16384 then
+  if Request.ContentLength < 8192 then
     Request.HTTP.StorageClass = "SMALL_OBJ"
   elseif Request.ContentLength < 1048576 then
     Request.HTTP.StorageClass = "MEDIUM_OBJ"
