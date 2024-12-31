@@ -109,7 +109,7 @@ tiup cluster check ./topology.yaml --user root
 tiup cluster check ./topology.yaml --user root --apply
 
 # 部署 TiKV 集群
-tiup cluster deploy tikv01 v8.1.1 ./topology.yaml --user root
+tiup cluster deploy tikv01 v8.1.2 ./topology.yaml --user root
 # 查看集群状态
 tiup cluster list
 # 查看集群详情
