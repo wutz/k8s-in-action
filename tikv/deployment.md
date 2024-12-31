@@ -55,6 +55,17 @@ pdcp -w ^all 99-tikv.conf /etc/sysctl.d/
 pdsh -w ^all sysctl --system
 ```
 
+## 格式化和挂载磁盘设备
+
+```bash
+pdsh -w ^all mkfs.ext4 /dev/nvme0n1
+pdsh -w ^all e2label /dev/nvme0n1 tikv
+pdsh -w ^all mkdir -p /tikv
+pdsh -w ^all cp /etc/fstab /etc/fstab.bak
+pdsh -w ^all echo "LABEL=tikv /tikv ext4 defaults,nodelalloc,noatime 0 2" >> /etc/fstab
+pdsh -w ^all mount -a
+```
+
 ## 部署与启动
 
 
