@@ -15,35 +15,11 @@ TiKV 相比 Redis 更适合作为分布式 KV 存储，支持分布式事务，�
 
 ## [系统配置](https://docs.pingcap.com/zh/tidb/stable/check-before-deployment)
 
+执行 [准备节点](../docs/0-prepare.md)
+
+配置内核参数
+
 ```bash
-# 配置 apt 源
-pdsh -w ^all sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list
-pdsh -w ^all sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
-pdsh -w ^all sed -i 's/http:/https:/g' /etc/apt/sources.list
-pdsh -w ^all apt update
-
-# 设置时间同步和时区
-pdsh -w ^all sed -i 's/#NTP=/NTP=ntp.aliyun.com/g' /etc/systemd/timesyncd.conf
-pdsh -w ^all systemctl restart systemd-timesyncd
-pdsh -w ^all timedatectl timesync-status
-pdsh -w ^all timedatectl set-timezone Asia/Shanghai
-
-# 关闭防火墙
-pdsh -w ^all ufw disable
-
-# 关闭 swap 分区
-pdsh -w ^all swapoff -a
-
-# 调整 CPU 频率的 cpufreq 模块选用 performance 模式
-cat << 'EOF' > cpufrequtils
-GOVERNOR="performance"
-EOF
-pdsh -w ^all apt install cpufrequtils -y
-pdcp -w ^all cpufrequtils /etc/default
-pdsh -w ^all systemctl restart cpufrequtils
-pdsh -w ^all cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors
-
-# 配置内核参数
 cat << EOF > 99-tikv.conf
 vm.swappiness = 0
 net.ipv4.tcp_syncookies = 0
@@ -55,7 +31,13 @@ pdcp -w ^all 99-tikv.conf /etc/sysctl.d/
 pdsh -w ^all sysctl --system
 ```
 
-## 格式化和挂载磁盘设备
+安装 numactl
+
+```bash
+pdsh -w ^all apt install numactl -y
+```
+
+格式化和挂载磁盘设备
 
 ```bash
 pdsh -w ^all mkfs.ext4 /dev/nvme0n1
@@ -67,7 +49,6 @@ pdsh -w ^all mount -a
 ```
 
 ## 部署与启动
-
 
 ### [使用 TiUP 部署 TiKV 集群](https://docs.pingcap.com/zh/tidb/stable/production-deployment-using-tiup)
 
@@ -111,6 +92,9 @@ tikv_servers:
     resource_control:
       memory_limit: "64G"
       cpu_quota: "1600%"
+
+monitored:
+  node_exporter_port: 9200
 
 monitoring_servers:
   - host: 172.19.12.1
