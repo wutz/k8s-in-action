@@ -267,9 +267,9 @@ ELBENCHO=/usr/local/bin/elbencho
 FILES=4096
 RESFILE=s3.log
 
-HOSTS=$(echo ceph01 |tr ' ' ,)
-#HOSTS=$(echo ceph0{1..2} |tr ' ' ,)
-#HOSTS=$(echo ceph0{1..3} |tr ' ' ,)
+HOSTS=ceph01
+#HOSTS=ceph0[1-3]
+#HOSTS=ceph0[1-3,5]
 
 echo $HOSTS |tr , '\n' |xargs -I{} ssh {} $ELBENCHO --service
 sleep 3
