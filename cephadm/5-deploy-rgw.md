@@ -209,8 +209,15 @@ radosgw-admin script put --infile=./s3.lua --context=preRequest
 ### 创建用户
 
 ```bash
+# 创建用户
 radosgw-admin user create --uid=wutz --display-name="Taizeng Wu"
+# 如果配置分层存储，则需要设置缺省的存储类, 否则一些元数据会存放在 STANDARD 机械池中
+radosgw-admin user modify --uid wutz --storage-class=SMALL_OBJ  --placement-id=default-placement
+
+# 查询用户
 radosgw-admin user info --uid=wutz
+
+# 删除用户
 radosgw-admin user rm --uid=wutz
 ```
 
