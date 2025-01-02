@@ -138,11 +138,11 @@ ceph orch ps --service_name ingress.rgw.default
 * 大于等于 1M 对象，存放在缺省纠删码 HDD 上
 
 ```bash
-# 创建小对象类 StorageClass
+# 创建大对象类 StorageClass
 radosgw-admin zonegroup placement add \
     --rgw-zonegroup default \
     --placement-id default-placement \
-    --storage-class SMALL_OBJ
+    --storage-class LARGE_OBJ
 # 创建中等对象类 StorageClass
 radosgw-admin zonegroup placement add \
     --rgw-zonegroup default \
@@ -153,13 +153,18 @@ radosgw-admin zonegroup placement add \
 radosgw-admin zone placement add \
 	--rgw-zone default \
 	--placement-id default-placement \
-	--storage-class SMALL_OBJ \
-	--data-pool default.rgw.buckets.smallobj
+	--storage-class LARGE_OBJ \
+	--data-pool default.rgw.buckets.data
 radosgw-admin zone placement add \
 	--rgw-zone default \
 	--placement-id default-placement \
 	--storage-class MEDIUM_OBJ \
 	--data-pool default.rgw.buckets.mediumobj
+radosgw-admin zone placement modify \
+	--rgw-zone default \
+	--placement-id default-placement \
+	--storage-class STANDARD \
+	--data-pool default.rgw.buckets.smallobj
 
 # 创建小对象池使用 SSD 副本
 ceph osd pool create default.rgw.buckets.smallobj rep_ssd 
@@ -190,11 +195,11 @@ end
 -- apply StorageClass only if user hasn't already assigned a storage-class
 if Request.HTTP.StorageClass == nil or Request.HTTP.StorageClass == '' then
   if Request.ContentLength < 8192 then
-    Request.HTTP.StorageClass = "SMALL_OBJ"
+    Request.HTTP.StorageClass = "STANDARD"
   elseif Request.ContentLength < 1048576 then
     Request.HTTP.StorageClass = "MEDIUM_OBJ"
   else
-    Request.HTTP.StorageClass = "STANDARD"
+    Request.HTTP.StorageClass = "LARGE_OBJ"
   end
   RGWDebugLog("applied '" .. Request.HTTP.StorageClass .. "' to object '" .. Request.Object.Name .. "'")
 end
@@ -211,8 +216,6 @@ radosgw-admin script put --infile=./s3.lua --context=preRequest
 ```bash
 # 创建用户
 radosgw-admin user create --uid=wutz --display-name="Taizeng Wu"
-# 如果配置分层存储，则需要设置缺省的存储类, 否则一些元数据会存放在 STANDARD 机械池中
-radosgw-admin user modify --uid wutz --storage-class=SMALL_OBJ  --placement-id=default-placement
 
 # 查询用户
 radosgw-admin user info --uid=wutz
