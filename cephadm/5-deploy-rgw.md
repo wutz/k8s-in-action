@@ -271,22 +271,23 @@ S3KEY=xxx
 S3SECRET=xxxxxx
 S3BUCKET=benchmark
 ELBENCHO=/usr/local/bin/elbencho
-FILES=4096
 RESFILE=s3.log
 
-HOSTS=ceph01
-#HOSTS=ceph0[1-3]
-#HOSTS=ceph0[1-3,5]
+DIRS=1
+FILES=128
+THREADS="1 4 16 64"
+SIZE="4m 128k 4k"
 
-echo $HOSTS |tr , '\n' |xargs -I{} ssh {} $ELBENCHO --service
-sleep 3
+HOSTS=ceph01
+#HOSTS=ceph0[1-4]
+#HOSTS=ceph0[1-4,7-10,13-16,19-22]
+
+pdsh -w root@$HOSTS $ELBENCHO --service
 
 set -x
 
-for T in {1,4,16,64}; do
-#for T in 64; do
-
-        N=$(($FILES/$T))
+for T in $THREADS; do
+  for S in $SIZE; do
 
         # Create bucket "S3BUCKET" for big object size
         $ELBENCHO --hosts $HOSTS --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
@@ -294,34 +295,16 @@ for T in {1,4,16,64}; do
 
         # Test T threads, each creating 1 directories with N 4MiB objects inside
         $ELBENCHO --hosts $HOSTS --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                -w -t $T -n 1 -N $N -s 4m -b 4m --resfile $RESFILE $S3BUCKET
+                -w -t $T -n $DIRS -N $FILES -s $S -b $S --resfile $RESFILE $S3BUCKET
 
         # Test T threads, each reading 1 directories with N 4MiB objects inside
         $ELBENCHO --hosts $HOSTS --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                -r -t $T -n 1 -N $N -s 4m -b 4m --resfile $RESFILE $S3BUCKET
+                -r -t $T -n $DIRS -N $FILES -s $S -b $S --resfile $RESFILE $S3BUCKET
 
         # Delete objects and bucket created by above
         $ELBENCHO --hosts $HOSTS --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                -D -F -t $T -n 1 -N $N $S3BUCKET
-
-        #-------
-
-        # Create bucket "S3BUCKET" for small object size
-        $ELBENCHO --hosts $HOSTS --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                -d $S3BUCKET
-
-        # Test T threads, each creating 4 directories with N 4KiB objects inside
-        $ELBENCHO --hosts $HOSTS --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                -w -t $T -n 4 -N $N -s 4k -b 4k --resfile $RESFILE $S3BUCKET
-
-        # Test T threads, each reading 4 directories with N 4KiB objects inside
-        $ELBENCHO --hosts $HOSTS --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                -r -t $T -n 4 -N $N -s 4k -b 4k --resfile $RESFILE $S3BUCKET
-
-        # Delete objects and bucket created by above
-        $ELBENCHO --hosts $HOSTS --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                -D -F -t $T -n 4 -N $N $S3BUCKET
-
+                -D -F -t $T -n $DIRS -N $FILES $S3BUCKET
+  done
 done
 
 $ELBENCHO --hosts $HOSTS --quit
