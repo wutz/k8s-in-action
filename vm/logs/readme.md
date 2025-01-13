@@ -3,17 +3,17 @@
 * loki：grafana 的 loki 组件
   * 部署需要 对象存储支持，建议使用对象存储
   * 底层日志收集组件为 promtail
-* vl: victoraMetricsLogs 日志采集组件
+* vl: victoralogs 日志采集组件
   * grafana 查询需要安装独立的 plugins，请执行安装，可参考 vm.vm 的配置
   * 底层日志收集组件为 fluent-bit
 
 * collectors：采集器
   * Kubernetes-event-exporter: k8s 事件采集组件
-    * 已配置 往 victoraMetricsLogs 中的写入，需先部署 victoraMetricsLogs
+    * 已配置 往 victoralogs 中的写入，需先部署 victoralogs
 
 
 
-> 在写入和查询上，victoraMetricsLogs 更灵活 
+> 在写入和查询上，victoralogs 更灵活 
 
 
 
@@ -103,7 +103,7 @@ cd loki
 
 ![image-20250113175028702](assets/readme/image-20250113175028702.png) 
 
-## VictoriaMetricsLogs 部署
+## Victorialogs 部署
 
 部署依赖 helm,helmwave,kubectl，请先确保相关工具已安装
 
@@ -121,7 +121,7 @@ cd loki
 ### 部署:
 
 ```bash
-cd vml
+cd vl
 
 # build 要部署的 manafist，build 后可进行检查
 ENV=prod helmwave build --yml
@@ -132,7 +132,7 @@ ENV=prod helmwave up
 
 > 默认的配置中已开启 fluent-bit 日志收集组件，无需额外部署
 
-### grafana 中安装 victoriaMetricsLogs 查询 plugin
+### grafana 中安装 victorialogs 查询 plugin
 
 ```yaml
 # 在部署 vm.vm 时，取消以下注释即可，如果是自己部署的 grafana，参考下面的配置即可
@@ -146,9 +146,9 @@ grafana:
 
 ```
 
-### grafana 中添加 victoriaMetricsLogs 数据源
+### grafana 中添加 VictoriaLogs 数据源
 
-新增 victoriaMetricsLogs 数据源，在 HTTP 中 URL 配置 `http://vl-victoria-logs-single-server.vm.svc:9428`  即可
+新增 VictoriaLogs 数据源，在 HTTP 中 URL 配置 `http://vl-victoria-logs-single-server.vm.svc:9428`  即可
 
 注意：本配置文件默认部署到 `vm` namespace，如果修改部署的 namespace，上述配置应做对应的修改
 
