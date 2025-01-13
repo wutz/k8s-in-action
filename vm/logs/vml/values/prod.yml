@@ -1,0 +1,18 @@
+server:
+  persistentVolume:
+    enabled: true
+    size: 2Ti
+
+  resources:
+    limits:
+      cpu: 8
+      memory: 8Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  extraArgs:
+    retentionPeriod: 60d
+
+fluent-bit:
+  enabled: true

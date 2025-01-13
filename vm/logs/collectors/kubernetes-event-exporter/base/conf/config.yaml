@@ -1,0 +1,131 @@
+logLevel: debug
+logFormat: json
+kubeQPS: 100
+kubeBurst: 500
+maxEventAgeSeconds: 60
+metricsNamePrefix: event_exporter_
+route:
+  routes:
+  - match:
+    #- receiver: "stdout"
+    - receiver: "victotialogs"
+    - receiver: "loki"
+
+receivers:
+- name: "stdout"
+  stdout: {}
+
+# - name: "victotialogs"
+#   loki:
+#     headers: # optional
+#       AccountID: 0
+#       ProjectID: 0
+#     # streamLabels:
+#     #   cluster: dev
+#     #   namespace: "{{ .Namespace }}"
+#     url: http://vl-victoria-logs-single-server:9428/insert/loki/api/v1/push
+#     layout:
+#       stream:
+#         region   : "dev"
+#         namespace: "{{ .Namespace }}"
+#         type     : "kubernetes-event"
+#       details:
+#         message: "{{ .Message }}"
+#         reason: "{{ .Reason }}"
+#         type: "{{ .Type }}"
+#         count: "{{ .Count }}"
+#         kind: "{{ .InvolvedObject.Kind }}"
+#         name: "{{ .InvolvedObject.Name }}"
+#         namespace: "{{ .Namespace }}"
+#         component: "{{ .Source.Component }}"
+#         host: "{{ .Source.Host }}"
+#         labels: "{{ toJson .InvolvedObject.Labels}}"
+
+
+- name: "victotialogs"
+  # 参考：https://docs.victoriametrics.com/victorialogs/data-ingestion/fluentbit/
+  webhook:
+    headers: # optional
+      AccountID: 0
+      ProjectID: 0
+    #endpoint: http://vl-victoria-logs-single-server:9428/insert/jsonline?_stream_fields=region,namespace&_msg_field=_msg&_time_field=_time
+    endpoint: http://vl-victoria-logs-single-server:9428/insert/jsonline?_stream_fields=cluster,classify,namespace&_msg_field=msg&_time_field=time
+    layout:
+
+      # 自定义
+      cluster  : "{{ .ClusterName }}"
+      classify : "k8s-event"
+
+      time     : "{{ .FirstTimestamp.Format \"2006-01-02T15:04:05Z\" }}"
+      namespace: "{{ .InvolvedObject.Namespace }}"
+      msg      : "{{ .Message }}"
+
+      start    : "{{ .FirstTimestamp }}"
+      end      : "{{ .LastTimestamp }}"
+      host     : "{{ .Source.Host }}"
+      component: "{{ .Source.Component }}"
+        
+      type     : "{{ .Type }}"
+      reason   : "{{ .Reason }}"
+      count    : "{{ .Count }}"
+      kind     : "{{ .InvolvedObject.Kind }}"
+      name     : "{{ .InvolvedObject.Name }}"
+      uid      : "{{ .InvolvedObject.UID }}"
+      apiVersion: "{{ .InvolvedObject.APIVersion }}"
+      resourceVersion : "{{ .InvolvedObject.ResourceVersion }}"
+      fieldPath: "{{ .InvolvedObject.FieldPath }}"
+
+      labels: "{{ toJson .InvolvedObject.Labels}}"
+      ownerReferences: "{{ toJson .InvolvedObject.OwnerReferences }}"
+      deleted : "{{ .InvolvedObject.Deleted }}"
+
+
+# - name: "loki"
+#   loki:
+#     headers: # optional
+#       X-Scope-OrgID: 0
+#       Content-Type: application/json
+#     streamLabels:
+#       classify: k8s-event
+#     url: http://loki-gateway/loki/api/v1/push
+#     layout:
+#       streams:
+#       - stream: 
+#           namespace: "{{ .Namespace }}"
+#           host     : "{{ .Source.Host }}"
+#           component: "{{ .Source.Component }}"
+            
+#           type     : "{{ .Type }}"
+#           reason   : "{{ .Reason }}"
+          
+#           kind     : "{{ .InvolvedObject.Kind }}"
+#           name     : "{{ .InvolvedObject.Name }}"
+#           uid      : "{{ .InvolvedObject.UID }}"
+#           apiVersion: "{{ .InvolvedObject.APIVersion }}"
+#           resourceVersion : "{{ .InvolvedObject.ResourceVersion }}"
+#           fieldPath: "{{ .InvolvedObject.FieldPath }}"
+
+#           ownerReferences: "{{ toJson .InvolvedObject.OwnerReferences }}"
+#           deleted : "{{ .InvolvedObject.Deleted }}"
+#         values: 
+#         - [ "{{ .FirstTimestamp.Unix }}" , {message: "{{ .Message }}", labels: "{{ toJson .InvolvedObject.Labels}}", count: "{{ .Count }}"} ]
+
+# - name: "my_pipe"
+#   pipe:
+#     path: "/dev/stdout"
+#     deDot: true|false
+
+# - name: "file"
+#   file:
+#     path: "/data/events.log"
+#     deDot: true|false
+#     rotate: true
+#     maxAge: 7d
+#     maxBackups: 5
+#     maxLogSize: 100m
+#     compress: false
+#     localTime: true
+#     perm: 0644
+#     timeKey: "time"
+#     timeFormat: "2006-01-02T15:04:05.000Z
+#     layout: # Optional
