@@ -6,6 +6,21 @@ vmsingle:
       resources:
         requests:
           storage: 1Ti
+    # resources:                reset resources if needed
+    #   requests:
+    #     cpu   : 2
+    #     memory: 32Gi
+    #   limits:
+    #     cpu   : 16
+    #     memory: 48Gi
+    extraArgs:
+      search.maxQueueDuration: 1m
+      search.maxQueryDuration: 1m
+      search.maxConcurrentRequests: '120'
+      search.maxQueryLen: '163840'
+      search.maxWorkersPerQuery: '8'
+      maxLabelsPerTimeseries: "1024"     # 解除 label数 限制，1024 已适合绝大多数情况，注意：会增加内存占用
+      memory.allowedPercent: '90'        # k8s 中无需考虑宿主机的资源占用，由 k8s 管理，配置为 90/95 以免达到 k8s 限制被杀掉
 
 grafana:
   # env:
@@ -26,6 +41,10 @@ grafana:
       - hosts:
           - g.play.example.com
         secretName: grafana-tls
+  env:
+  #   # 安装 victorialogs-datasource，用于查询 victorialogs 的日志
+  #   GF_INSTALL_PLUGINS: https://github.com/VictoriaMetrics/victorialogs-datasource/releases/download/v0.3.0/victorialogs-datasource-v0.3.0.zip;victorialogs-datasource
+  #   GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: victorialogs-datasource
 
 victoria-metrics-operator:
   operator:
@@ -34,3 +53,14 @@ victoria-metrics-operator:
     # -- Enables ownership reference for converted prometheus-operator objects,
     # it will remove corresponding victoria-metrics objects in case of deletion prometheus one.
     enable_converter_ownership: true
+
+# Comma-separated list of additional Kubernetes label keys that will be used in the resource's
+# labels metric. By default the metric contains only name and namespace labels.
+# To include additional labels, provide a list of resource names in their plural form and Kubernetes
+# label keys you would like to allow for them (Example: '=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'.
+# A single '*' can be provided per resource instead to allow any labels, but that has
+# severe performance implications (Example: '=pods=[*]').
+kube-state-metrics:
+  metricLabelsAllowlist:
+    - nodes=[node.kubernetes.io/cpu,nvidia.com/gpu,node-role.kubernetes.io/maintenance]
+    - pods=[*]                  # 拉取 pod 的 所有label
