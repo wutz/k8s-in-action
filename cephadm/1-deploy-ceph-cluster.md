@@ -4,6 +4,37 @@
 
 * 依赖: 参见 [环境准备](../docs/0-prepare.md)
 
+* 环境示例 
+
+    | 节点 | Public Network IP | Cluster Network IP |
+    | --- | --- | --- |
+    | bj1sn01 | 10.128.0.101/16 | 10.129.0.101/16 |
+    | bj1sn02 | 10.128.0.102/16 | 10.129.0.101/16 |
+    | bj1sn03 | 10.128.0.103/16 | 10.129.0.102/16 |
+    | bj1sn04 | 10.128.0.104/16 | 10.129.0.103/16 |
+
+* 配置 hosts 文件
+
+    使用 3 个管理节点
+
+    ```bash
+    cat > admin <<EOF
+    root@10.128.0.[101-103]
+    EOF
+
+    cat > hosts <<EOF
+
+    # sn
+    10.128.0.101    bj1sn01
+    10.128.0.102    bj1sn02
+    10.128.0.103    bj1sn03
+    10.128.0.104    bj1sn04
+    EOF
+
+    pdcp -w ^admin hosts /tmp/hosts
+    pdsh -w ^admin "cat /tmp/hosts >> /etc/hosts"
+    ```
+
 * 配置 docker
 
     ```bash
@@ -12,9 +43,9 @@
     cat > daemon.json <<EOF
     {
         "proxies": {
-            "http-proxy": "http://172.19.1.100:3128",
-            "https-proxy": "http://172.19.1.100:3128",
-            "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,localhost,.example.com"
+            "http-proxy": "http://10.128.0.90:3128",
+            "https-proxy": "http://10.128.0.90:3128",
+            "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,.example.com"
         }
     }
     EOF
@@ -27,7 +58,7 @@
 
     ```bash
     pdsh -w ^all apt install -y cephadm
-    pdsh -w ^all cephadm add-repo --release reef --repo-url http://mirrors.ustc.edu.cn/ceph
+    pdsh -w ^all cephadm add-repo --release reef --repo-url http://mirrors.ustc.edu.cn/ceph --gpg-url http://mirrors.ustc.edu.cn/ceph/keys/release.gpg
     pdsh -w ^all cephadm install
     pdsh -w ^all cephadm version
     ```
@@ -41,10 +72,10 @@
 
 * 引导新集群
 
-    在 Bootstrap Node 执行
+    在 bootstrap 节点(sn01)执行
 
     ```bash
-    cephadm bootstrap --allow-fqdn-hostname --mon-ip 172.19.12.1 --cluster-network 172.20.12.0/24 
+    cephadm bootstrap --allow-fqdn-hostname --mon-ip 10.128.0.101 --cluster-network 10.129.0.0/16 
     ceph -s
     ```
 
@@ -55,6 +86,12 @@
     - 复制一份用户 `client.admin` secret 到 `/etc/ceph/ceph.client.admin.keyring`
     - 增加 label `_admin` 到引导节点
 
+    如果节点数量小于 5 个，则把 mon 服务设置为 3 个
+    
+    ```bash
+    ceph orch apply mon --placement="3"
+    ```
+
 * 添加节点
 
     * 添加集群 ssh public key 到其它新的节点
@@ -64,14 +101,14 @@
     * 访问 ceph dashboard 并修改配置
 
         ```bash
-        ceph dashboard set-grafana-api-url https://172.19.12.1:3000/
+        ceph dashboard set-grafana-api-url https://10.128.0.101:3000/
         ```
 
     * 添加新节点到集群中 (在 bootstrap 节点执行)
         
         ```bash
-        ceph orch host add sn002.play.local --labels _admin
-        ceph orch host add sn003.play.local --labels _admin
+        ceph orch host add sn002.example.local --labels _admin
+        ceph orch host add sn003.example.local --labels _admin
         ceph orch host ls
         ```
         
@@ -80,12 +117,11 @@
         - 如果添加节点属于不同的网络，需要指定 `public_network` 和 `cluster_network` 参数
 
             ```bash
-            ceph config set mon public_network "172.19.12.0/24,172.29.12.0/24"
-            ceph config set global cluster_network "172.20.12.0/24,172.30.12.0/24"
+            ceph config set mon public_network "10.128.0.0/16,10.130.0.0/16"
+            ceph config set global cluster_network "10.129.0.0/16,10.131.0.0/16"
             ```
 
 * [添加存储](https://docs.ceph.com/en/reef/cephadm/services/osd/#cephadm-deploy-osds)
-
 
     - 注意检查磁盘上存在分区
 
@@ -98,6 +134,7 @@
         - 检查磁盘是否支持 libstoragemgmt `cephadm shell lsmcli ldl`
         - 如果支持则执行开启 `ceph config set mgr mgr/cephadm/device_enhanced_scan true`
         - 不支持 NVMe 设备
+
     - 可以执行清除磁盘以使其可用 (可选)
         
         ```bash
@@ -112,23 +149,7 @@
         ```
         
         ```yaml
-        # 根据磁盘属性和规划创建描述文件 osd_spec.yml
-        service_type: osd
-        service_id: default_drive_group
-        placement:
-            host_pattern: '*'
-        spec:
-            data_devices:
-                rotational: 1
-                model: 'ST4000NM0033-9ZM'
-                size: '3.64T'
-            db_devices:
-                rotational: 0
-                model: 'INTEL SSDPEDMX400G4'
-                size: '372.61G'
-        ```
-        
-        ```yaml
+        # osd-hdd.yaml
         service_type: osd
         service_id: hdd
         placement:
@@ -140,6 +161,7 @@
         ```
 
         ```yaml
+        # osd-ssd.yaml
         service_type: osd
         service_id: ssd
         placement:
@@ -149,24 +171,75 @@
                 rotational: 0
                 size: '6.99T'
         ```
+
+        * 如果 size 值不明确，也可以指定范围，例如 `size: '6T:7T'`
         
         ```bash
-        # 应用描述文件
-        > ceph orch apply osd -i ./osd_spec.yml [--dry-run]
+        # 部署 hdd
+        # --dry-run 不实际部署，用于检查配置是否正确, 执行 --dry-run 等待一段时间后再重复执行
+        ceph orch apply osd -i osd-hdd.yaml --dry-run
+        ceph orch apply osd -i osd-hdd.yaml 
+
+        # 部署 ssd
+        ceph orch apply osd -i osd-ssd.yaml --dry-run
+        ceph orch apply osd -i osd-ssd.yaml 
+
+        # 查看 cephadm 部署日志
+        ceph -W cephadm
+        ceph log last cephadm
+        ceph osd tree
+        ceph -s
         ```
 
 * 创建 crush rule
     
     ```bash
     # ceph osd crush rule create-replicated <name> <root> <failure-domain> <class>
+    ceph osd crush rule create-replicated rep_hdd default host hdd
     ceph osd crush rule create-replicated rep_ssd default host ssd
-    ceph osd pool set .mgr crush_rule rep_ssd
+
+    # ceph osd crush rule create-replicated <name> <root> <failure-domain> <class>
+    # 创建 EC 4+2 纠删码，存储集群至少有 7 个节点
+    ceph osd erasure-code-profile set ec42_hdd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=hdd
+    # 创建 EC 8+3 纠删码，存储集群至少有 12 个节点
+    ceph osd erasure-code-profile set ec83_hdd k=8 m=3 crush-root=default crush-failure-domain=host crush-device-class=hdd
+    # 如果需要创建 SSD EC 纠删码，修改 `crush-device-class=ssd` 即可
     ```
 
     > * 缺省自带副本类 crush rule `replicated_rule`，如果系统中存在 HDD 和 SSD 两类设备这将混用在一起，这会带来不稳定性能。
     > * 一般显示创建副本类 crush rule 指定设备类型（例如上面明确 ssd 设备）
 
+* 使 PG Autoscale 工作
+
+    每个 Pool 中的 PG 数量会影响到性能，Ceph 提供自动调整 PG 数量功能。
+
+    ```bash
+    # 解决 ceph osd pool autoscale-status 输出为空以及 PG Autoscale 不工作问题
+    ceph osd pool set .mgr crush_rule rep_ssd
+    ```
+
+
 * 部署完 Ceph 集群后并不能提供对外服务，需要根据应用场景部署对应服务
 
     * [提供 Ceph RADOS 原生服务](2-ceph-rados.md)
     * [部署 CephFS](3-deploy-cephfs.md)
+    * [部署 Ceph RBD 块存储](4-deploy-rbd.md)
+    * [部署 Ceph RGW 对象存储](5-deploy-rgw.md)
+
+* 其它
+
+    * 使用多路径设备，重启节点 lvm 别名设备丢失问题
+
+        这是因为重启节点时 lvm 先处理 /dev/sd* 设备导致被锁定，无法处理对应 /dev/mapper/mpath* 设备
+        
+        ```bash
+        # 打开文件
+        /etc/lvm/lvm.conf
+        # 添加一行, 让 lvm 只处理 /dev/mapper/mpath* 设备
+        filter = [ "a|/dev/mapper/mpath.*|", "r|.*|" ]
+        
+        # 然后执行 
+        update-initramfs -u
+        # 重启节点
+        reboot
+        ```

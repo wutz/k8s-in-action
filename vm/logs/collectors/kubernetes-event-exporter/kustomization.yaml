@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: vm
+
+resources:
+#  - base/roles.yaml
+  - base/deployment.yaml
+
+configMapGenerator:
+- name: event-exporter-cfg
+  files:
+  - ./base/conf/config.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true

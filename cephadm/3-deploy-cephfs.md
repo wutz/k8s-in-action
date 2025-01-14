@@ -36,44 +36,55 @@ CephFS 提供一些功能:
 1. 为用于部署 mds 服务节点打上 label
     
     ```bash
-    ceph orch host label add sn001.hs1.local mds
-    ceph orch host label add sn002.hs1.local mds
-    ceph orch host label add sn003.hs1.local mds
+    ceph orch host label add bj1sn01 mds
+    ceph orch host label add bj1sn02 mds
+    ceph orch host label add bj1sn03 mds
     ```
     
 2. 创建 2 个副本 Pool 分别用于 metadata 和 data
     
     ```bash
-    ceph osd pool create cephfs1_metadata 128 128 rep_ssd
+    # 创建 metadata pool
+    ceph osd pool create cephfs1_metadata 32 32 rep_ssd
+    ceph osd pool application enable cephfs1_metadata cephfs
+    # 设置副本数量
     ceph osd pool set cephfs1_metadata size 2
+    # 查看 pool 信息
     ceph osd pool get cephfs1_metadata all
     
+    # 创建 data pool, 使用 bulk 模式使用更多 PG 以提升性能
     ceph osd pool create cephfs1_data 128 128 rep_ssd --bulk
+    ceph osd pool application enable cephfs1_data cephfs
+    # 设置副本数量
     ceph osd pool set cephfs1_data size 2
-    ceph osd pool set cephfs1_data target_size_ratio 0.3
-    ceph osd pool set cephfs1_data bulk true
+    # 查看 pool 信息
     ceph osd pool get cephfs1_data all
-    
+
+    # 查看 PG 自动缩放状态
     ceph osd pool autoscale-status
     ```
+
+    > * 使用 HDD 必须使用缺省 3 副本
+    > * 使用 SSD 可以使用 2 或者 3 副本
     
 3. 创建 CephFS
     
     ```bash
+    # 创建 CephFS，名字为 cephfs1
     ceph fs new cephfs1 cephfs1_metadata cephfs1_data
     
+    # 查看 CephFS
     ceph fs ls
     ceph fs get cephfs1
     ```
     
-    > `cephfs1` 为自定义的名称
 4. 部署 MDS 到节点上
     
     ```bash
-    ceph orch apply mds cephfs1 --placement=3
-    # or
-    ceph orch apply mds cephfs1 --placement="3 label:mds"
+    # 部署 MDS 到 2 个节点
+    ceph orch apply mds cephfs1 --placement="2 label:mds"
     
+    # 查看 MDS 状态
     ceph mds stat
     ```
     
@@ -146,14 +157,13 @@ getfattr -d -m ceph.dir.* /share
 getfattr -n ceph.dir.rbytes /share
 ```
 
-# 添加 EC POOL
+# 添加 EC POOL (可选)
 
 > 可选，根据需求决定是否使用
 
 ```bash
 # 创建 ec pool
-ceph osd erasure-code-profile set ec_ssd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=ssd
-ceph osd pool create cephfs1_data_ec erasure ec_ssd
+ceph osd pool create cephfs1_data_ec erasure ec42_ssd
 ceph osd pool set cephfs1_data_ec allow_ec_overwrites true
 
 # 添加 ec pool 到 cephfs 中
@@ -189,9 +199,9 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
     csiConfig:
       - clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
         monitors:
-          - 172.19.12.1:6789
-          - 172.19.12.2:6789
-          - 172.19.12.3:6789
+          - 10.128.0.101:6789
+          - 10.128.0.102:6789
+          - 10.128.0.103:6789
     ```
     
     - clusterID, monitors 来自配置 ceph.conf
@@ -248,7 +258,7 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
     kubectl apply -f pod-pvc.yaml
     ```
 
-# 多 MDS
+# 多 MDS (可选)
 
 - 使用多个 mds 服务 一个 cephfs 可以分担请求压力，以及分散元数据缓存到不同的 mds 上
 - 为 HA，max_mds 数量必须小于 mds service 数量（即执行 `ceph orch apply mds cephfs1 --placement=3`  数量）

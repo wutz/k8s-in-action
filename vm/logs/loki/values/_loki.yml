@@ -1,0 +1,74 @@
+
+mn_tolerations: &mn_tolerations_spec
+  tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/control-plane
+    operator: Exists
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: "true"
+
+lokiCanary:
+  <<: *mn_tolerations_spec
+
+adminApi:
+  <<: *mn_tolerations_spec
+
+gateway:
+  <<: *mn_tolerations_spec
+
+singleBinary:
+  <<: *mn_tolerations_spec
+
+write:
+  <<: *mn_tolerations_spec
+
+read:
+  <<: *mn_tolerations_spec
+
+backend:
+  <<: *mn_tolerations_spec
+
+ingester:
+  <<: *mn_tolerations_spec
+
+distributor:
+  <<: *mn_tolerations_spec
+
+querier:
+  <<: *mn_tolerations_spec
+
+queryFrontend:
+  <<: *mn_tolerations_spec
+
+queryScheduler:
+  <<: *mn_tolerations_spec
+
+indexGateway:
+  <<: *mn_tolerations_spec
+
+compactor:
+  <<: *mn_tolerations_spec
+
+bloomGateway:
+  <<: *mn_tolerations_spec
+
+bloomPlanner:
+  <<: *mn_tolerations_spec
+
+bloomBuilder:
+  <<: *mn_tolerations_spec
+
+patternIngester:
+  <<: *mn_tolerations_spec
+
+ruler:
+  <<: *mn_tolerations_spec
+
+resultsCache:
+  <<: *mn_tolerations_spec
+
+chunksCache:
+  <<: *mn_tolerations_spec
+
+tableManager:
+  <<: *mn_tolerations_spec

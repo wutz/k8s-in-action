@@ -1,0 +1,20 @@
+server:
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Exists
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: "true"
+
+fluent-bit:
+
+  # tolerations:
+  # - key: node-role.kubernetes.io/control-plane
+  #   operator: Exists
+  #   effect: NoSchedule
+
+  nodeSelector:
+    kubernetes.io/os: linux
+  tolerations:
+  - effect: NoSchedule
+    operator: Exists
