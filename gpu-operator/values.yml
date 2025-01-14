@@ -23,3 +23,12 @@ toolkit:
       value: "true"
     - name: NVIDIA_CONTAINER_RUNTIME_LOG_LEVEL
       value: "warning"
+
+operator:
+  resources:
+    limits:
+      cpu: "1"
+      memory: 2Gi
+    requests:
+      cpu: 200m
+      memory: 100Mi
