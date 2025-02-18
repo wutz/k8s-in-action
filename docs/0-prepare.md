@@ -58,7 +58,7 @@
 
 - OS: ubuntu 22.04
 - K8S: [k3s](https://k3s.io/) v1.31
-- Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v18.2
+- Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v19.2
 
 > 更多需求可以参考 [k3s requirements](https://docs.k3s.io/zh/installation/requirements)
 
@@ -69,13 +69,13 @@
 | bj1mn01 | 10.128.0.1/24 |
 | bj1mn02 | 10.128.0.2/24 |
 | bj1mn03 | 10.128.0.3/24 |
-| bj1sn01 | 10.128.0.101/24 |
-| bj1sn02 | 10.128.0.102/24 |
-| bj1sn03 | 10.128.0.103/24 |
-| bj1sn04 | 10.128.0.104/24 |
-| bj1dn01 | 10.128.0.201/24 |
-| bj1dn02 | 10.128.0.202/24 |
-| bj1dn03 | 10.128.0.203/24 |
+| bj1osd001 | 10.128.0.101/24 |
+| bj1osd002 | 10.128.0.102/24 |
+| bj1osd003 | 10.128.0.103/24 |
+| bj1osd004 | 10.128.0.104/24 |
+| bj1rds01 | 10.128.0.201/24 |
+| bj1rds02 | 10.128.0.202/24 |
+| bj1rds03 | 10.128.0.203/24 |
 | bj1gn001 | 10.128.1.1/24 |
 | bj1gn002 | 10.128.1.2/24 |
 | bj1gn003 | 10.128.1.3/24 |
