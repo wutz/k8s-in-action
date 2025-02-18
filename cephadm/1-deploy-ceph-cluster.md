@@ -42,6 +42,11 @@
 
     cat > daemon.json <<EOF
     {
+        "log-driver": "json-file",
+        "log-opts": {
+            "max-size": "250m",
+            "max-file": "3"
+        },
         "proxies": {
             "http-proxy": "http://10.128.0.90:3128",
             "https-proxy": "http://10.128.0.90:3128",
