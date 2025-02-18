@@ -32,33 +32,25 @@ CephFS 提供一些功能:
 - Affinity: 配置偏好使用的 MDS, 通过设置 `mds_join_fs` 在 Standby MDS 上
 
 ## 部署
-
-1. 为用于部署 mds 服务节点打上 label
     
-    ```bash
-    ceph orch host label add bj1sn01 mds
-    ceph orch host label add bj1sn02 mds
-    ceph orch host label add bj1sn03 mds
-    ```
-    
-2. 创建 2 个副本 Pool 分别用于 metadata 和 data
+1. 创建 2 个副本 Pool 分别用于 metadata 和 data
     
     ```bash
     # 创建 metadata pool
-    ceph osd pool create cephfs1_metadata 32 32 rep_ssd
-    ceph osd pool application enable cephfs1_metadata cephfs
+    ceph osd pool create bj1cfs01_metadata 32 32 rep_ssd
+    ceph osd pool application enable bj1cfs01_metadata cephfs
     # 设置副本数量
-    ceph osd pool set cephfs1_metadata size 2
+    ceph osd pool set bj1cfs01_metadata size 2
     # 查看 pool 信息
-    ceph osd pool get cephfs1_metadata all
+    ceph osd pool get bj1cfs01_metadata all
     
     # 创建 data pool, 使用 bulk 模式使用更多 PG 以提升性能
-    ceph osd pool create cephfs1_data 128 128 rep_ssd --bulk
-    ceph osd pool application enable cephfs1_data cephfs
+    ceph osd pool create bj1cfs01_data 128 128 rep_ssd --bulk
+    ceph osd pool application enable bj1cfs01_data cephfs
     # 设置副本数量
-    ceph osd pool set cephfs1_data size 2
+    ceph osd pool set bj1cfs01_data size 2
     # 查看 pool 信息
-    ceph osd pool get cephfs1_data all
+    ceph osd pool get bj1cfs01_data all
 
     # 查看 PG 自动缩放状态
     ceph osd pool autoscale-status
@@ -70,19 +62,19 @@ CephFS 提供一些功能:
 3. 创建 CephFS
     
     ```bash
-    # 创建 CephFS，名字为 cephfs1
-    ceph fs new cephfs1 cephfs1_metadata cephfs1_data
+    # 创建 CephFS，名字为 bj1cfs01
+    ceph fs new bj1cfs01 bj1cfs01_metadata bj1cfs01_data
     
     # 查看 CephFS
     ceph fs ls
-    ceph fs get cephfs1
+    ceph fs get bj1cfs01
     ```
     
 4. 部署 MDS 到节点上
     
     ```bash
     # 部署 MDS 到 2 个节点
-    ceph orch apply mds cephfs1 --placement="2 label:mds"
+    ceph orch apply mds bj1cfs01 --placement="2 label:mds"
     
     # 查看 MDS 状态
     ceph mds stat
@@ -91,8 +83,8 @@ CephFS 提供一些功能:
 5. 生成 Client 访问 Key
     
     ```bash
-    ceph fs authorize cephfs1 client.cephfs1 / rw |sudo tee /etc/ceph/ceph.client.cephfs1.keyring
-    chmod 600 /etc/ceph/ceph.client.cephfs1.keyring
+    ceph fs authorize bj1cfs01 client.bj1cfs01 / rw |sudo tee /etc/ceph/ceph.client.bj1cfs01.keyring
+    chmod 600 /etc/ceph/ceph.client.bj1cfs01.keyring
     ```
     
 6. 发送配置和 Key 到 Client
@@ -100,14 +92,14 @@ CephFS 提供一些功能:
     ```bash
     ssh client "mkdir /etc/ceph"
     scp /etc/ceph/ceph.conf client:/etc/ceph
-    scp ceph.client.cephfs1.keyring client:/etc/ceph
+    scp ceph.client.bj1cfs01.keyring client:/etc/ceph
     ```
     
 7. 挂载
     
     ```bash
-    # Ubuntu 20.04
-    apt install epel-release ceph-common 
+    # Ubuntu 20.04 及以上
+    apt install ceph-common 
     
     # CentOS 7
     cat > /etc/yum.repos.d/ceph.repo << 'EOF'
@@ -122,8 +114,7 @@ CephFS 提供一些功能:
     yum install ceph-common
     
     mkdir /share
-    mount -t ceph :/ /share -o name=cephfs1,fs=cephfs1
-    
+    mount -t ceph :/ /share -o name=bj1cfs01,fs=bj1cfs01
     ```
     
 8. 设置开机挂载
@@ -131,7 +122,7 @@ CephFS 提供一些功能:
     ```bash
     vim /etc/fstab
     # auto mount cephfs
-    :/ /cephfs1 ceph name=cephfs1,fs=cephfs1 0 0
+    :/ /share ceph name=bj1cfs01,fs=bj1cfs01 0 0
     ```
 
 # 设置 quota
@@ -143,10 +134,10 @@ CephFS 提供一些功能:
 如果需要设置 quota 则需要额外 p 权限。设置 quota 还会改变 df 大小与 quota 一致。
 
 ```bash
-ceph fs authorize cephfs1 client.cephfs1p / rwp |tee /etc/ceph/ceph.client.cephfs1p.keyring
-chmod 600 /etc/ceph/ceph.client.cephfs1p.keyring
-scp ceph.client.cephfs1p.keyring client:/etc/ceph
-mount -t ceph :/ /share -o name=cephfs1p,fs=cephfs1
+ceph fs authorize bj1cfs01 client.bj1cfs01p / rwp |tee /etc/ceph/ceph.client.bj1cfs01p.keyring
+chmod 600 /etc/ceph/ceph.client.bj1cfs01p.keyring
+scp ceph.client.bj1cfs01p.keyring client:/etc/ceph
+mount -t ceph :/ /share -o name=bj1cfs01p,fs=bj1cfs01
 
 # 设置 10TiB 配额
 setfattr -n ceph.quota.max_bytes -v 10995116277760 /share
@@ -163,14 +154,14 @@ getfattr -n ceph.dir.rbytes /share
 
 ```bash
 # 创建 ec pool
-ceph osd pool create cephfs1_data_ec erasure ec42_ssd
-ceph osd pool set cephfs1_data_ec allow_ec_overwrites true
+ceph osd pool create bj1cfs01_data_ec erasure ec42_ssd
+ceph osd pool set bj1cfs01_data_ec allow_ec_overwrites true
 
 # 添加 ec pool 到 cephfs 中
-ceph fs add_data_pool cephfs1 cephfs1_data_ec
+ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec
 
 # 设置 layout 需要 p 权限见 quota 配置
-setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
+setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 ```
 
 # 使用 K8S PVC
@@ -180,8 +171,8 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
 1. 在 ceph cluster 中准备 key
     
     ```bash
-    ceph auth get-or-create client.cephfs1k osd 'allow rw tag cephfs *=cephfs1' mon 'allow r fsname=cephfs1' mds 'allow rw fsname=cephfs1' mgr 'allow rw' |sudo tee /etc/ceph/ceph.client.cephfs1k.keyring
-    ceph fs subvolumegroup create cephfs1 csi
+    ceph auth get-or-create client.bj1cfs01k osd 'allow rw tag cephfs *=bj1cfs01' mon 'allow r fsname=bj1cfs01' mds 'allow rw fsname=bj1cfs01' mgr 'allow rw' |sudo tee /etc/ceph/ceph.client.bj1cfs01k.keyring
+    ceph fs subvolumegroup create bj1cfs01 csi
     ```
     
 2. 准备 helm values.yaml
@@ -191,10 +182,10 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
       create: true
       name: csi-cephfs-sc
       clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
-      fsName: cephfs1
+      fsName: bj1cfs01
     secret:
       create: true
-      adminID: cephfs1k
+      adminID: bj1cfs01k
       adminKey: <---key--->
     csiConfig:
       - clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
@@ -202,10 +193,12 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
           - 10.128.0.101:6789
           - 10.128.0.102:6789
           - 10.128.0.103:6789
+          - 10.128.0.104:6789
+          - 10.128.0.105:6789
     ```
     
     - clusterID, monitors 来自配置 ceph.conf
-    - adminID, adminKey 来自配置 ceph.client.cephfs1k.keyring
+    - adminID, adminKey 来自配置 ceph.client.bj1cfs01k.keyring
 
 3. 安装 ceph-csi
     
@@ -267,16 +260,16 @@ setfattr -n ceph.dir.layout.pool -v cephfs1_data_ec /share
 # 关闭 mds balance （https://github.com/ceph/ceph/pull/52196/files）
 ceph config set mds mds_bal_interval 0
 
-# 静态均衡 /cephfs1/home 的子目录
-setfattr -n ceph.dir.pin.distributed -v 1 /cephfs1/home
+# 静态均衡 /share/home 的子目录
+setfattr -n ceph.dir.pin.distributed -v 1 /share/home
 
 # 增加 mds 数量到 2
-ceph fs set <fs_name> max_mds 2
+ceph fs set bj1cfs01 max_mds 2
 # 缩减 mds 数量到 1
-ceph fs set <fs_name> max_mds 1
+ceph fs set bj1cfs01 max_mds 1
 
 # 查询
-ceph fs get cephfs1
+ceph fs get bj1cfs01
 ceph mds stat
 ceph fs status
 ```
