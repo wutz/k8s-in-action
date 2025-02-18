@@ -27,13 +27,19 @@ CephFS 提供一些功能:
 - Fail: 当 Active MDS 不响应时, Mon 会等待 `mds_beacon_grace` 时间后, 如果还不响应则标记 MDS 为 `laggy` . 然后 Standy MDS 变成 Active 状态
 - Rank: 定义最大 Active MDS 数量用于分担元数据负载, `max_mds` 配置 rank 数量
 - Cache:
-    - `mds_cache_memory_limit` 设置 MDS 使用内存大小 `ceph config set global mds_cache_memory_limit 68719476736`
+    - `mds_cache_memory_limit` 设置 MDS 使用内存大小 `ceph config set global mds_cache_memory_limit 34359738368`
     - `mds_cache_size` 设置 MDS 使用 `inode` 数量
 - Affinity: 配置偏好使用的 MDS, 通过设置 `mds_join_fs` 在 Standby MDS 上
 
 ## 部署
-    
-1. 创建 2 个副本 Pool 分别用于 metadata 和 data
+
+1. 调整 mds 缺省使用内存大小
+  
+    ```bash
+    ceph config set global mds_cache_memory_limit 34359738368
+    ```
+
+2. 创建 2 个副本 Pool 分别用于 metadata 和 data
     
     ```bash
     # 创建 metadata pool
