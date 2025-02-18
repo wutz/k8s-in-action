@@ -8,27 +8,37 @@
 
     | 节点 | Public Network IP | Cluster Network IP |
     | --- | --- | --- |
-    | bj1sn01 | 10.128.0.101/16 | 10.129.0.101/16 |
-    | bj1sn02 | 10.128.0.102/16 | 10.129.0.101/16 |
-    | bj1sn03 | 10.128.0.103/16 | 10.129.0.102/16 |
-    | bj1sn04 | 10.128.0.104/16 | 10.129.0.103/16 |
+    | bj1osd001 | 10.128.0.101/16 | 10.129.0.101/16 |
+    | bj1osd002 | 10.128.0.102/16 | 10.129.0.102/16 |
+    | bj1osd003 | 10.128.0.103/16 | 10.129.0.103/16 |
+    | bj1osd004 | 10.128.0.104/16 | 10.129.0.104/16 |
+    | bj1osd005 | 10.128.0.105/16 | 10.129.0.105/16 |
+    | bj1osd006 | 10.128.0.106/16 | 10.129.0.106/16 |
+    | bj1osd007 | 10.128.0.107/16 | 10.129.0.107/16 |
+    | bj1mds01 | 10.128.0.201/16 | N/A |
+    | bj1mds02 | 10.128.0.202/16 | N/A |
+    | bj1mds03 | 10.128.0.203/16 | N/A |
 
 * 配置 hosts 文件
 
-    使用 3 个管理节点
-
     ```bash
+    # 使用前 5 个节点作为管理角色
     cat > admin <<EOF
-    root@10.128.0.[101-103]
+    root@10.128.0.[101-105]
     EOF
 
     cat > hosts <<EOF
+    # osd
+    10.128.0.101    bj1osd001
+    10.128.0.102    bj1osd002
+    10.128.0.103    bj1osd003
+    10.128.0.104    bj1osd004
+    10.128.0.105    bj1osd005
 
-    # sn
-    10.128.0.101    bj1sn01
-    10.128.0.102    bj1sn02
-    10.128.0.103    bj1sn03
-    10.128.0.104    bj1sn04
+    # mds
+    10.128.0.201    bj1mds01
+    10.128.0.202    bj1mds02
+    10.128.0.203    bj1mds03
     EOF
 
     pdcp -w ^admin hosts /tmp/hosts
@@ -63,7 +73,7 @@
 
     ```bash
     pdsh -w ^all apt install -y cephadm
-    pdsh -w ^all cephadm add-repo --release reef --repo-url http://mirrors.ustc.edu.cn/ceph --gpg-url http://mirrors.ustc.edu.cn/ceph/keys/release.gpg
+    pdsh -w ^all cephadm add-repo --release squid --repo-url http://mirrors.ustc.edu.cn/ceph --gpg-url http://mirrors.ustc.edu.cn/ceph/keys/release.gpg
     pdsh -w ^all cephadm install
     pdsh -w ^all cephadm version
     ```
@@ -80,7 +90,7 @@
     在 bootstrap 节点(sn01)执行
 
     ```bash
-    cephadm bootstrap --allow-fqdn-hostname --mon-ip 10.128.0.101 --cluster-network 10.129.0.0/16 
+    cephadm bootstrap --mon-ip 10.128.0.101 --cluster-network 10.129.0.0/16 
     ceph -s
     ```
 
@@ -112,8 +122,16 @@
     * 添加新节点到集群中 (在 bootstrap 节点执行)
         
         ```bash
-        ceph orch host add sn002.example.local --labels _admin
-        ceph orch host add sn003.example.local --labels _admin
+        ceph orch host add bj1osd001 --labels _admin
+        ceph orch host add bj1osd002 --labels _admin
+        ceph orch host add bj1osd003 --labels _admin
+        ceph orch host add bj1osd004 --labels _admin
+        ceph orch host add bj1osd005 --labels _admin
+        ceph orch host add bj1osd006 
+        ceph orch host add bj1osd007
+        ceph orch host add bj1mds01 --labels mds
+        ceph orch host add bj1mds02 --labels mds
+        ceph orch host add bj1mds03 --labels mds
         ceph orch host ls
         ```
         
@@ -158,7 +176,7 @@
         service_type: osd
         service_id: hdd
         placement:
-            host_pattern: sn*
+            host_pattern: osd*
         spec:
             data_devices:
                 rotational: 1
@@ -170,7 +188,7 @@
         service_type: osd
         service_id: ssd
         placement:
-            host_pattern: sn*
+            host_pattern: osd*
         spec:
             data_devices:
                 rotational: 0
