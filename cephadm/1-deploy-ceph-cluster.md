@@ -151,9 +151,10 @@
     - 查看可用磁盘
         
         ```bash
-        ceph orch device ls [--wide]
+        ceph orch device ls --refresh 
         ```
         
+        - 通过加上参数 `--refresh` 可以刷新识别磁盘列表
         - 检查磁盘是否支持 libstoragemgmt `cephadm shell lsmcli ldl`
         - 如果支持则执行开启 `ceph config set mgr mgr/cephadm/device_enhanced_scan true`
         - 不支持 NVMe 设备
