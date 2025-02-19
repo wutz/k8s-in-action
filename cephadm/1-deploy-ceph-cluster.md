@@ -13,8 +13,6 @@
     | bj1osd003 | 10.128.0.103/16 | 10.129.0.103/16 |
     | bj1osd004 | 10.128.0.104/16 | 10.129.0.104/16 |
     | bj1osd005 | 10.128.0.105/16 | 10.129.0.105/16 |
-    | bj1osd006 | 10.128.0.106/16 | 10.129.0.106/16 |
-    | bj1osd007 | 10.128.0.107/16 | 10.129.0.107/16 |
     | bj1mds01 | 10.128.0.201/16 | N/A |
     | bj1mds02 | 10.128.0.202/16 | N/A |
     | bj1mds03 | 10.128.0.203/16 | N/A |
@@ -22,9 +20,9 @@
 * 配置 hosts 文件
 
     ```bash
-    # 使用前 5 个节点作为管理角色
+    # 使用前 3 个节点作为管理角色
     cat > admin <<EOF
-    root@10.128.0.[101-105]
+    root@10.128.0.[101-103]
     EOF
 
     cat > hosts <<EOF
@@ -34,8 +32,6 @@
     10.128.0.103    bj1osd003
     10.128.0.104    bj1osd004
     10.128.0.105    bj1osd005
-    10.128.0.106    bj1osd006
-    10.128.0.107    bj1osd007
 
     # mds
     10.128.0.201    bj1mds01
@@ -127,10 +123,8 @@
         ceph orch host add bj1osd001 --labels _admin
         ceph orch host add bj1osd002 --labels _admin
         ceph orch host add bj1osd003 --labels _admin
-        ceph orch host add bj1osd004 --labels _admin
-        ceph orch host add bj1osd005 --labels _admin
-        ceph orch host add bj1osd006 
-        ceph orch host add bj1osd007
+        ceph orch host add bj1osd004 
+        ceph orch host add bj1osd005 
         ceph orch host add bj1mds01 --labels mds
         ceph orch host add bj1mds02 --labels mds
         ceph orch host add bj1mds03 --labels mds
