@@ -280,3 +280,25 @@ pdsh -w 10.128.0.1 iperf -i1 -c 10.128.0.2 -P8 -R
 # 依次测试两两节点间网络性能
 ```
 
+### 磁盘性能测试
+
+访问 [elbencho](https://github.com/breuner/elbencho/releases) 下载 elbencho 二进制文件
+
+```sh
+tar zxvf elbencho-static-x86_64.tar.gz
+# 解压后将 elbencho 文件拷贝到 /usr/local/bin
+pdcp -w ^all elbencho /usr/local/bin
+pdsh -w ^all apt install -y nvme-cli sysstat
+
+# 依次测试每个节点裸盘性能
+# 获取所有 nvme 设备
+nvme list
+# 假如查询到 12 个设备, 则指定设备列表 /dev/nvme{0..11}n1
+# 测试写, -t 48 指定线程数, 取值为设备数乘以 4
+elbencho -w -b 4M -t 48 --direct -s 100g /dev/nvme{0..11}n1
+# 测试读, 修改 -w 为 -r
+elbencho -r -b 4M -t 48 --direct -s 100g /dev/nvme{0..11}n1
+
+# 同时监控 io 性能是否满足设备官方性能标称（通常写比官方高，读略低于官方）
+iostat -xm 1
+```
