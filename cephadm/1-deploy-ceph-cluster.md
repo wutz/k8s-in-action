@@ -177,7 +177,7 @@
         service_type: osd
         service_id: hdd
         placement:
-            host_pattern: osd*
+            host_pattern: bj1osd*
         spec:
             data_devices:
                 rotational: 1
@@ -189,7 +189,7 @@
         service_type: osd
         service_id: ssd
         placement:
-            host_pattern: osd*
+            host_pattern: bj1osd*
         spec:
             data_devices:
                 rotational: 0
