@@ -96,12 +96,15 @@ root@10.128.0.[1-3,100-104,201-203]
 root@10.128.1.[1-3]
 EOF
 
-# 设置 pdsh 远程 pdcp 路径
-pdsh -w ^all apt install -y pdsh
-# 必须, 设置 pdsh 使用 ssh 而非缺省的 rsh
+# 设置 pdsh 使用 ssh 而非缺省的 rsh
+cat << 'EOF' > /etc/profile.d/pdsh.sh
 export PDSH_RCMD_TYPE=ssh
-# 可选, 如果远程机器 pdcp 命令路径与本地不同则需要设置
 export PDSH_REMOTE_PDCP_PATH=pdcp
+EOF
+source /etc/profile.d/pdsh.sh
+
+# 所有节点安装 pdsh
+pdsh -w ^all apt install -y pdsh
 ```
 
 ### 设置 ssh 无密码登录
