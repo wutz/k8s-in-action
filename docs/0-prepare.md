@@ -98,6 +98,9 @@ EOF
 
 # 设置 pdsh 远程 pdcp 路径
 pdsh -w ^all apt install -y pdsh
+# 必须, 设置 pdsh 使用 ssh 而非缺省的 rsh
+export PDSH_RCMD_TYPE=ssh
+# 可选, 如果远程机器 pdcp 命令路径与本地不同则需要设置
 export PDSH_REMOTE_PDCP_PATH=pdcp
 ```
 
