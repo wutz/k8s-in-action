@@ -71,7 +71,11 @@
 
     ```bash
     pdsh -w ^all apt install -y cephadm
+    # 如果机器无法访问外网，则需要临时设置代理
+    # export https_proxy=http://10.128.0.90:3128
     pdsh -w ^all cephadm add-repo --release squid --repo-url http://mirrors.ustc.edu.cn/ceph --gpg-url http://mirrors.ustc.edu.cn/ceph/keys/release.gpg
+    # 如果临时设置代理，则需要取消
+    # unset https_proxy
     pdsh -w ^all cephadm install
     pdsh -w ^all cephadm version
     ```
