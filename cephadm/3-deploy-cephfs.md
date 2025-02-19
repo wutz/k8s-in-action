@@ -45,25 +45,18 @@ CephFS 提供一些功能:
     # 创建 metadata pool
     ceph osd pool create bj1cfs01_metadata 32 32 rep_ssd
     ceph osd pool application enable bj1cfs01_metadata cephfs
-    # 设置副本数量
-    ceph osd pool set bj1cfs01_metadata size 2
     # 查看 pool 信息
     ceph osd pool get bj1cfs01_metadata all
     
-    # 创建 data pool, 使用 bulk 模式使用更多 PG 以提升性能
-    ceph osd pool create bj1cfs01_data 128 128 rep_ssd --bulk
+    # 创建 data pool
+    ceph osd pool create bj1cfs01_data 32 32 rep_ssd 
     ceph osd pool application enable bj1cfs01_data cephfs
-    # 设置副本数量
-    ceph osd pool set bj1cfs01_data size 2
     # 查看 pool 信息
     ceph osd pool get bj1cfs01_data all
 
     # 查看 PG 自动缩放状态
     ceph osd pool autoscale-status
     ```
-
-    > * 使用 HDD 必须使用缺省 3 副本
-    > * 使用 SSD 可以使用 2 或者 3 副本
     
 3. 创建 CephFS
     
@@ -131,6 +124,21 @@ CephFS 提供一些功能:
     :/ /share ceph name=bj1cfs01,fs=bj1cfs01 0 0
     ```
 
+# 添加 EC POOL 
+
+```bash
+# 创建 ec pool
+# 使用 bulk 模式使用更多 PG 以提升性能
+ceph osd pool create bj1cfs01_data_ec erasure ec42_ssd --bulk
+ceph osd pool set bj1cfs01_data_ec allow_ec_overwrites true
+
+# 添加 ec pool 到 cephfs 中
+ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec
+
+# 设置 layout 需要 p 权限见 quota 配置
+setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
+```
+
 # 设置 quota
 
 > 参考：
@@ -152,22 +160,6 @@ getfattr -n ceph.quota.max_bytes /share
 getfattr -d -m ceph.dir.* /share 
 # 新 kernel 使用
 getfattr -n ceph.dir.rbytes /share
-```
-
-# 添加 EC POOL (可选)
-
-> 可选，根据需求决定是否使用
-
-```bash
-# 创建 ec pool
-ceph osd pool create bj1cfs01_data_ec erasure ec42_ssd
-ceph osd pool set bj1cfs01_data_ec allow_ec_overwrites true
-
-# 添加 ec pool 到 cephfs 中
-ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec
-
-# 设置 layout 需要 p 权限见 quota 配置
-setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 ```
 
 # 使用 K8S PVC
@@ -257,7 +249,17 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
     kubectl apply -f pod-pvc.yaml
     ```
 
-# 多 MDS (可选)
+## 自定义 MDS 缓存大小
+
+每个热 inode 大约占 3500 字节，需要根据实际情况调大 mds 缓存大小，否则会造成频繁回收引起元数据响应延迟过大
+
+下面是设置指定文件系统 mds.bj1cfs01 缓存大小为 64GiB
+
+```bash
+ceph config set mds.bj1cfs01 mds_cache_memory_limit 68719476736
+```
+
+## 多 MDS (可选)
 
 - 使用多个 mds 服务 一个 cephfs 可以分担请求压力，以及分散元数据缓存到不同的 mds 上
 - 为 HA，max_mds 数量必须小于 mds service 数量（即执行 `ceph orch apply mds cephfs1 --placement=3`  数量）
