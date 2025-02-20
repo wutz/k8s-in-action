@@ -146,7 +146,16 @@
 
 * [添加存储](https://docs.ceph.com/en/reef/cephadm/services/osd/#cephadm-deploy-osds)
 
-    - 注意检查磁盘上存在分区
+    - 注意检查磁盘上存在分区。
+      如果存在分区，需要尝试执行如下命令清除分区表
+
+      ```bash
+      以下三个命令根据自己的环境可以任选其一进行尝试，dd和sgdisk抹除的最彻底
+      # dd if=/dev/zero of=/dev/xxx bs=1M count=1
+      # wipefs -fa /dev/sda
+      # sgdisk --zap-all /dev/sda
+      ```
+      上述抹除分区表命令执行完成后一定要执行一遍下面的 ceph orch device ls --refresh命令。
 
     - 查看可用磁盘
         
@@ -154,7 +163,7 @@
         ceph orch device ls --refresh 
         ```
         
-        - 通过加上参数 `--refresh` 可以刷新识别磁盘列表
+        - 通过加上参数 `--refresh` 可以刷新识别磁盘列表。
         - 检查磁盘是否支持 libstoragemgmt `cephadm shell lsmcli ldl`
         - 如果支持则执行开启 `ceph config set mgr mgr/cephadm/device_enhanced_scan true`
         - 不支持 NVMe 设备
@@ -169,8 +178,28 @@
         
         ```bash
         # 查看磁盘属性
+        $ cephadm shell
         > ceph-volume inventory </path/to/disk>
+            ====== Device report /dev/xxxxxx ======
+    
+         path                      /dev/xxxxxx
+         ceph device               False
+         being replaced            False
+         lsm data                  {}
+         available                 True      #该值为True表示可被Ceph使用
+         rejected reasons                    #该值为一个字符数组，表示不能被Ceph使用的原因，可根据原因做出相应处理。
+         device id
+         removable                 0
+         ro                        0
+         vendor
+         model                     xxxxxx
+         sas address
+         rotational                0
+         actuators                 None
+         scheduler mode            none
+         human readable size       7.28 TB   #这个大小作为下面osd-ssd.yaml中指定的size大小
         ```
+        
         
         ```yaml
         # osd-hdd.yaml
