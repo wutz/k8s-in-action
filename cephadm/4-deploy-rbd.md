@@ -13,6 +13,8 @@ Ceph RBD 是 Ceph 提供的块存储服务，常用于数据库、虚拟机、�
     ```bash
     # 创建副本 pool 用于 rbd
     ceph osd pool create bj1rbd01 32 32 rep_ssd --bulk
+    # (可选) 设置 pool 预计大小 (有助于 PG 数量分配到合理值)
+    ceph osd pool set bj1rbd01 target_size_bytes 200T
     # 查看 pool 配置
     ceph osd pool get bj1rbd01 all
 
