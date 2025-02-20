@@ -126,24 +126,6 @@ CephFS 提供一些功能:
     :/ /share ceph name=bj1cfs01,fs=bj1cfs01 0 0
     ```
 
-# 添加 EC POOL 
-
-```bash
-# 创建 ec pool
-# (推荐) 设置 bulk 标记，以最大 PG 数量分配，有助于利用更多 OSD 提升性能
-ceph osd pool create bj1cfs01_data_ec erasure ec42_ssd --bulk
-# (可选) 设置此 pool 预计大小，有助于 PG 数量分配到合理值
-ceph osd pool set bj1cfs01_data_ec target_size_bytes 200T
-# (必须) 设置此 pool 允许 EC 覆盖写
-ceph osd pool set bj1cfs01_data_ec allow_ec_overwrites true
-
-# 添加 ec pool 到 cephfs 中
-ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec
-
-# 设置 layout 需要 p 权限见 quota 配置
-setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
-```
-
 # 设置 quota
 
 > 参考：
@@ -165,6 +147,24 @@ getfattr -n ceph.quota.max_bytes /share
 getfattr -d -m ceph.dir.* /share 
 # 新 kernel 使用
 getfattr -n ceph.dir.rbytes /share
+```
+
+# 添加 EC POOL 
+
+```bash
+# 创建 ec pool
+# (推荐) 设置 bulk 标记，以最大 PG 数量分配，有助于利用更多 OSD 提升性能
+ceph osd pool create bj1cfs01_data_ec erasure ec42_ssd --bulk
+# (可选) 设置此 pool 预计大小，有助于 PG 数量分配到合理值
+ceph osd pool set bj1cfs01_data_ec target_size_bytes 200T
+# (必须) 设置此 pool 允许 EC 覆盖写
+ceph osd pool set bj1cfs01_data_ec allow_ec_overwrites true
+
+# 添加 ec pool 到 cephfs 中
+ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec
+
+# 设置 layout 需要 p 权限见 quota 配置 (任意挂载节点执行一次)
+setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 ```
 
 # 使用 K8S PVC
