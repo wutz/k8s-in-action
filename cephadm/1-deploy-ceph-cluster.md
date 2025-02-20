@@ -253,11 +253,11 @@
 
     # ceph osd crush rule create-replicated <name> <root> <failure-domain> <class>
     # 创建 EC 2+2 纠删码，存储集群推荐 5 个节点
-    ceph osd erasure-code-profile set ec22_hdd k=2 m=2 crush-root=default crush-failure-domain=host crush-device-class=ssd
+    ceph osd erasure-code-profile set ec22_ssd k=2 m=2 crush-root=default crush-failure-domain=host crush-device-class=ssd
     # 创建 EC 4+2 纠删码，存储集群推荐 7 个节点
-    ceph osd erasure-code-profile set ec42_hdd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=ssd
+    ceph osd erasure-code-profile set ec42_ssd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=ssd
     # 创建 EC 8+3 纠删码，存储集群推荐 12 个节点
-    ceph osd erasure-code-profile set ec83_hdd k=8 m=3 crush-root=default crush-failure-domain=host crush-device-class=ssd
+    ceph osd erasure-code-profile set ec83_ssd k=8 m=3 crush-root=default crush-failure-domain=host crush-device-class=ssd
     # 如果需要创建 HDD EC 纠删码，修改 `crush-device-class=hdd` 即可
     ```
 
