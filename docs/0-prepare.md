@@ -265,6 +265,8 @@ pdsh -w ^all systemctl reload ssh
 
 ### 网络性能测试
 
+首先使用 ping 测试节点间延迟，值必须小于 `0.1ms`
+
 ```sh
 pdsh -w ^all apt install -y iperf
 
