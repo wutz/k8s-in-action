@@ -155,7 +155,6 @@ getfattr -n ceph.dir.rbytes /share
 # 创建 ec pool
 # (推荐) 设置 bulk 标记，以最大 PG 数量分配，有助于利用更多 OSD 提升性能
 ceph osd pool create bj1cfs01_data_ec erasure ec42_ssd --bulk
-ceph osd pool application enable bj1cfs01_data_ec cephfs
 # (可选) 设置此 pool 预计大小，有助于 PG 数量分配到合理值
 ceph osd pool set bj1cfs01_data_ec target_size_bytes 200T
 # (必须) 设置此 pool 允许 EC 覆盖写
