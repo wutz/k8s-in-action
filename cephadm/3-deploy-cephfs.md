@@ -44,13 +44,11 @@ CephFS 提供一些功能:
     ```bash
     # 创建 metadata pool
     ceph osd pool create bj1cfs01_metadata 32 32 rep_ssd
-    ceph osd pool application enable bj1cfs01_metadata cephfs
     # 查看 pool 信息
     ceph osd pool get bj1cfs01_metadata all
     
     # 创建 data pool
     ceph osd pool create bj1cfs01_data 32 32 rep_ssd 
-    ceph osd pool application enable bj1cfs01_data cephfs
     # (可选) 设置此 pool 预计大小，有助于 PG 数量分配到合理值, 如果后续主要使用 EC POOL 则不需要设置
     ceph osd pool set bj1cfs01_data target_size_bytes 200T
     # 查看 pool 信息
