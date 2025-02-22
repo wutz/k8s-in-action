@@ -231,6 +231,8 @@ pdsh -w ^all 'apt install linux-tools-common linux-tools-`uname -r` -y'
 turbostat --interval 1
 ```
 
+如果节点间 `ping` 延迟大于 `0.1ms`， 则需要在 BIOS 中禁用 `SpeedStep` 和 `C1E` 模式
+
 ### 锁定内核版本，避免驱动失效
 
 确保所有节点使用一致的内核版本后，再进行锁定
