@@ -8,35 +8,35 @@
 
     | 节点 | Public Network IP | Cluster Network IP |
     | --- | --- | --- |
-    | bj1osd001 | 10.128.0.101/16 | 10.129.0.101/16 |
-    | bj1osd002 | 10.128.0.102/16 | 10.129.0.102/16 |
-    | bj1osd003 | 10.128.0.103/16 | 10.129.0.103/16 |
-    | bj1osd004 | 10.128.0.104/16 | 10.129.0.104/16 |
-    | bj1osd005 | 10.128.0.105/16 | 10.129.0.105/16 |
-    | bj1mds01 | 10.128.0.201/16 | N/A |
-    | bj1mds02 | 10.128.0.202/16 | N/A |
-    | bj1mds03 | 10.128.0.203/16 | N/A |
+    | bj1osd001 | 10.128.2.1/24 | 10.129.2.1/24 |
+    | bj1osd002 | 10.128.2.2/24 | 10.129.2.2/24 |
+    | bj1osd003 | 10.128.2.3/24 | 10.129.2.3/24 |
+    | bj1osd004 | 10.128.2.4/24 | 10.129.2.4/24 |
+    | bj1osd005 | 10.128.2.5/24 | 10.129.2.5/24 |
+    | bj1mds01 | 10.128.2.201/24 | N/A |
+    | bj1mds02 | 10.128.2.202/24 | N/A |
+    | bj1mds03 | 10.128.2.203/24 | N/A |
 
 * 配置 hosts 文件
 
     ```bash
     # 使用前 3 个节点作为管理角色
     cat > admin <<EOF
-    root@10.128.0.[101-103]
+    root@10.128.2.[1-3]
     EOF
 
     cat > hosts <<EOF
     # osd
-    10.128.0.101    bj1osd001
-    10.128.0.102    bj1osd002
-    10.128.0.103    bj1osd003
-    10.128.0.104    bj1osd004
-    10.128.0.105    bj1osd005
+    10.128.2.1    bj1osd001
+    10.128.2.2    bj1osd002
+    10.128.2.3    bj1osd003
+    10.128.2.4    bj1osd004
+    10.128.2.5    bj1osd005
 
     # mds
-    10.128.0.201    bj1mds01
-    10.128.0.202    bj1mds02
-    10.128.0.203    bj1mds03
+    10.128.2.201    bj1mds01
+    10.128.2.202    bj1mds02
+    10.128.2.203    bj1mds03
     EOF
 
     pdcp -w ^admin hosts /tmp/hosts
@@ -92,7 +92,7 @@
     在 bootstrap 节点(sn01)执行
 
     ```bash
-    cephadm bootstrap --mon-ip 10.128.0.101 --cluster-network 10.129.0.0/16 
+    cephadm bootstrap --mon-ip 10.128.2.1 --cluster-network 10.129.2.0/24 
     ceph -s
     ```
 
@@ -118,7 +118,7 @@
     * 访问 ceph dashboard 并修改配置
 
         ```bash
-        ceph dashboard set-grafana-api-url https://10.128.0.101:3000/
+        ceph dashboard set-grafana-api-url https://10.128.2.1:3000/
         ```
 
     * 添加新节点到集群中 (在 bootstrap 节点执行)
@@ -140,8 +140,8 @@
         - 如果添加节点属于不同的网络，需要指定 `public_network` 和 `cluster_network` 参数
 
             ```bash
-            ceph config set mon public_network "10.128.0.0/16,10.130.0.0/16"
-            ceph config set global cluster_network "10.129.0.0/16,10.131.0.0/16"
+            ceph config set mon public_network "10.128.2.0/24,10.130.2.0/24"
+            ceph config set global cluster_network "10.129.2.0/24,10.131.2.0/24"
             ```
 
 * [添加存储](https://docs.ceph.com/en/reef/cephadm/services/osd/#cephadm-deploy-osds)
