@@ -69,16 +69,16 @@
 | bj1mn01 | 10.128.0.1/24 |
 | bj1mn02 | 10.128.0.2/24 |
 | bj1mn03 | 10.128.0.3/24 |
-| bj1osd001 | 10.128.0.101/24 |
-| bj1osd002 | 10.128.0.102/24 |
-| bj1osd003 | 10.128.0.103/24 |
-| bj1osd004 | 10.128.0.104/24 |
-| bj1rds01 | 10.128.0.201/24 |
-| bj1rds02 | 10.128.0.202/24 |
-| bj1rds03 | 10.128.0.203/24 |
 | bj1gn001 | 10.128.1.1/24 |
 | bj1gn002 | 10.128.1.2/24 |
 | bj1gn003 | 10.128.1.3/24 |
+| bj1osd001 | 10.128.2.1/24 |
+| bj1osd002 | 10.128.2.2/24 |
+| bj1osd003 | 10.128.2.3/24 |
+| bj1osd004 | 10.128.2.4/24 |
+| bj1rds01 | 10.128.3.1/24 |
+| bj1rds02 | 10.128.3.2/24 |
+| bj1rds03 | 10.128.3.3/24 |
 
 ### 管理工具 pdsh
 
@@ -253,11 +253,45 @@ EOF
 pdcp -w ^all nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
 ```
 
-### [必须]关闭密码登录增强安全性
+## 安全
+
+### 关闭密码登录增强安全性
 
 ```sh
 pdsh -w ^all "sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config.d/50-cloud-init.conf"
 pdsh -w ^all systemctl reload ssh
+```
+
+### 设置防火墙
+
+不同角色节点防火墙设置不同，需要根据实际情况进行设置
+
+#### 存储节点
+
+考虑到存储节点需要对外提供服务，需要禁止计算节点访问存储节点 22 端口.
+
+所有存储节点需要执行下面步骤, 假如：
+* 存储节点在网段：`10.128.2.0/24`
+* 外部 VPN 所在 IP：`10.128.200.1`
+
+```bash
+# 缺省允许进入和出去
+ufw reset
+ufw default allow incoming
+ufw default allow outgoing
+ufw enable
+
+# 查看
+ufw status verbose
+
+# 允许特定网络和 IP 访问 22 端口
+ufw allow from 10.128.2.0/24 to any port 22
+ufw allow from 10.128.200.1 to any port 22
+# 禁止所有其他来源访问 22 端口
+ufw deny 22
+
+# 查看
+ufw status verbose
 ```
 
 ## 基础测试
