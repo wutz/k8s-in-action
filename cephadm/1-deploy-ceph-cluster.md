@@ -8,35 +8,33 @@
 
     | 节点 | Public Network IP | Cluster Network IP |
     | --- | --- | --- |
-    | bj1osd001 | 10.128.2.1/24 | 10.129.2.1/24 |
-    | bj1osd002 | 10.128.2.2/24 | 10.129.2.2/24 |
-    | bj1osd003 | 10.128.2.3/24 | 10.129.2.3/24 |
-    | bj1osd004 | 10.128.2.4/24 | 10.129.2.4/24 |
-    | bj1osd005 | 10.128.2.5/24 | 10.129.2.5/24 |
-    | bj1mds01 | 10.128.2.201/24 | N/A |
-    | bj1mds02 | 10.128.2.202/24 | N/A |
-    | bj1mds03 | 10.128.2.203/24 | N/A |
+    | bj1dn01 | 100.68.16.1/20 | N/A |
+    | bj1dn02 | 100.68.16.2/20 | N/A |
+    | bj1dn03 | 100.68.16.3/20 | N/A |
+    | bj1sn001 | 100.68.20.1/20 | 10.68.20.1/20 |
+    | bj1sn002 | 100.68.20.2/20 | 10.68.20.2/20 |
+    | bj1sn003 | 100.68.20.3/20 | 10.68.20.3/20 |
+    | bj1sn004 | 100.68.20.4/20 | 10.68.20.4/20 |
 
 * 配置 hosts 文件
 
     ```bash
     # 使用前 3 个节点作为管理角色
     cat > admin <<EOF
-    root@10.128.2.[1-3]
+    root@100.68.20.[1-3]
     EOF
 
     cat > hosts <<EOF
-    # osd
-    10.128.2.1    bj1osd001
-    10.128.2.2    bj1osd002
-    10.128.2.3    bj1osd003
-    10.128.2.4    bj1osd004
-    10.128.2.5    bj1osd005
+    # dn
+    100.68.16.1    bj1dn01
+    100.68.16.2    bj1dn02
+    100.68.16.3    bj1dn03
 
-    # mds
-    10.128.2.201    bj1mds01
-    10.128.2.202    bj1mds02
-    10.128.2.203    bj1mds03
+    # sn
+    100.68.20.1    bj1sn001
+    100.68.20.2    bj1sn002
+    100.68.20.3    bj1sn003
+    100.68.20.4    bj1sn004
     EOF
 
     pdcp -w ^admin hosts /tmp/hosts
@@ -56,8 +54,8 @@
             "max-file": "3"
         },
         "proxies": {
-            "http-proxy": "http://10.128.0.90:3128",
-            "https-proxy": "http://10.128.0.90:3128",
+            "http-proxy": "http://100.68.3.1:3128",
+            "https-proxy": "http://100.68.3.1:3128",
             "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,*.example.com"
         }
     }
@@ -72,7 +70,7 @@
     ```bash
     pdsh -w ^all apt install -y cephadm
     # 如果机器无法访问外网，则需要临时设置代理
-    # export https_proxy=http://10.128.0.90:3128
+    # export https_proxy=http://100.68.3.1:3128
     pdsh -w ^all cephadm add-repo --release squid --repo-url http://mirrors.ustc.edu.cn/ceph --gpg-url http://mirrors.ustc.edu.cn/ceph/keys/release.gpg
     # 如果临时设置代理，则需要取消
     # unset https_proxy
@@ -92,7 +90,7 @@
     在 bootstrap 节点(sn01)执行
 
     ```bash
-    cephadm bootstrap --mon-ip 10.128.2.1 --cluster-network 10.129.2.0/24 
+    cephadm bootstrap --mon-ip 100.68.20.1 --cluster-network 10.68.20.0/20 
     ceph -s
     ```
 
@@ -118,20 +116,19 @@
     * 访问 ceph dashboard 并修改配置
 
         ```bash
-        ceph dashboard set-grafana-api-url https://10.128.2.1:3000/
+        ceph dashboard set-grafana-api-url https://100.68.20.1:3000/
         ```
 
     * 添加新节点到集群中 (在 bootstrap 节点执行)
         
         ```bash
-        ceph orch host add bj1osd001 --labels _admin
-        ceph orch host add bj1osd002 --labels _admin
-        ceph orch host add bj1osd003 --labels _admin
-        ceph orch host add bj1osd004 
-        ceph orch host add bj1osd005 
-        ceph orch host add bj1mds01 --labels mds
-        ceph orch host add bj1mds02 --labels mds
-        ceph orch host add bj1mds03 --labels mds
+        ceph orch host add bj1sn001 --labels _admin
+        ceph orch host add bj1sn002 --labels _admin
+        ceph orch host add bj1sn003 --labels _admin
+        ceph orch host add bj1sn004 
+        ceph orch host add bj1dn01 --labels mds
+        ceph orch host add bj1dn02 --labels mds
+        ceph orch host add bj1dn03 --labels mds
         ceph orch host ls
         ```
         
@@ -140,8 +137,8 @@
         - 如果添加节点属于不同的网络，需要指定 `public_network` 和 `cluster_network` 参数
 
             ```bash
-            ceph config set mon public_network "10.128.2.0/24,10.130.2.0/24"
-            ceph config set global cluster_network "10.129.2.0/24,10.131.2.0/24"
+            ceph config set mon public_network "100.68.20.0/20,100.68.32.0/20"
+            ceph config set global cluster_network "100.68.20.0/20,100.68.32.0/20"
             ```
 
 * [添加存储](https://docs.ceph.com/en/reef/cephadm/services/osd/#cephadm-deploy-osds)
