@@ -342,3 +342,6 @@ done
 $ELBENCHO --hosts $USER@$HOSTS --quit
 ```
 
+## 监控
+
+如果没有 `ceph_mds_xxx` metrics 需要执行 `ceph config set mgr mgr/prometheus/exclude_perf_counters false` 切回从 mgr 获取 metrics
