@@ -8,27 +8,33 @@
 
     | 节点 | Public Network IP | Cluster Network IP |
     | --- | --- | --- |
-    | bj1sn01 | 10.128.0.101/16 | 10.129.0.101/16 |
-    | bj1sn02 | 10.128.0.102/16 | 10.129.0.101/16 |
-    | bj1sn03 | 10.128.0.103/16 | 10.129.0.102/16 |
-    | bj1sn04 | 10.128.0.104/16 | 10.129.0.103/16 |
+    | bj1dn01 | 100.68.16.1/20 | N/A |
+    | bj1dn02 | 100.68.16.2/20 | N/A |
+    | bj1dn03 | 100.68.16.3/20 | N/A |
+    | bj1sn001 | 100.68.20.1/20 | 10.68.20.1/20 |
+    | bj1sn002 | 100.68.20.2/20 | 10.68.20.2/20 |
+    | bj1sn003 | 100.68.20.3/20 | 10.68.20.3/20 |
+    | bj1sn004 | 100.68.20.4/20 | 10.68.20.4/20 |
 
 * 配置 hosts 文件
 
-    使用 3 个管理节点
-
     ```bash
+    # 使用前 3 个节点作为管理角色
     cat > admin <<EOF
-    root@10.128.0.[101-103]
+    root@100.68.20.[1-3]
     EOF
 
     cat > hosts <<EOF
+    # dn
+    100.68.16.1    bj1dn01
+    100.68.16.2    bj1dn02
+    100.68.16.3    bj1dn03
 
     # sn
-    10.128.0.101    bj1sn01
-    10.128.0.102    bj1sn02
-    10.128.0.103    bj1sn03
-    10.128.0.104    bj1sn04
+    100.68.20.1    bj1sn001
+    100.68.20.2    bj1sn002
+    100.68.20.3    bj1sn003
+    100.68.20.4    bj1sn004
     EOF
 
     pdcp -w ^admin hosts /tmp/hosts
@@ -42,10 +48,15 @@
 
     cat > daemon.json <<EOF
     {
+        "log-driver": "json-file",
+        "log-opts": {
+            "max-size": "250m",
+            "max-file": "3"
+        },
         "proxies": {
-            "http-proxy": "http://10.128.0.90:3128",
-            "https-proxy": "http://10.128.0.90:3128",
-            "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,.example.com"
+            "http-proxy": "http://100.68.3.1:3128",
+            "https-proxy": "http://100.68.3.1:3128",
+            "no-proxy": "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,*.example.com"
         }
     }
     EOF
@@ -58,7 +69,11 @@
 
     ```bash
     pdsh -w ^all apt install -y cephadm
-    pdsh -w ^all cephadm add-repo --release reef --repo-url http://mirrors.ustc.edu.cn/ceph --gpg-url http://mirrors.ustc.edu.cn/ceph/keys/release.gpg
+    # 如果机器无法访问外网，则需要临时设置代理
+    # export https_proxy=http://100.68.3.1:3128
+    pdsh -w ^all cephadm add-repo --release squid --repo-url http://mirrors.ustc.edu.cn/ceph --gpg-url http://mirrors.ustc.edu.cn/ceph/keys/release.gpg
+    # 如果临时设置代理，则需要取消
+    # unset https_proxy
     pdsh -w ^all cephadm install
     pdsh -w ^all cephadm version
     ```
@@ -75,7 +90,7 @@
     在 bootstrap 节点(sn01)执行
 
     ```bash
-    cephadm bootstrap --allow-fqdn-hostname --mon-ip 10.128.0.101 --cluster-network 10.129.0.0/16 
+    cephadm bootstrap --mon-ip 100.68.20.1 --cluster-network 10.68.20.0/20 
     ceph -s
     ```
 
@@ -101,14 +116,19 @@
     * 访问 ceph dashboard 并修改配置
 
         ```bash
-        ceph dashboard set-grafana-api-url https://10.128.0.101:3000/
+        ceph dashboard set-grafana-api-url https://100.68.20.1:3000/
         ```
 
     * 添加新节点到集群中 (在 bootstrap 节点执行)
         
         ```bash
-        ceph orch host add sn002.example.local --labels _admin
-        ceph orch host add sn003.example.local --labels _admin
+        ceph orch host add bj1sn001 --labels _admin
+        ceph orch host add bj1sn002 --labels _admin
+        ceph orch host add bj1sn003 --labels _admin
+        ceph orch host add bj1sn004 
+        ceph orch host add bj1dn01 --labels mds
+        ceph orch host add bj1dn02 --labels mds
+        ceph orch host add bj1dn03 --labels mds
         ceph orch host ls
         ```
         
@@ -117,20 +137,30 @@
         - 如果添加节点属于不同的网络，需要指定 `public_network` 和 `cluster_network` 参数
 
             ```bash
-            ceph config set mon public_network "10.128.0.0/16,10.130.0.0/16"
-            ceph config set global cluster_network "10.129.0.0/16,10.131.0.0/16"
+            ceph config set mon public_network "100.68.20.0/20,100.68.32.0/20"
+            ceph config set global cluster_network "100.68.20.0/20,100.68.32.0/20"
             ```
 
 * [添加存储](https://docs.ceph.com/en/reef/cephadm/services/osd/#cephadm-deploy-osds)
 
-    - 注意检查磁盘上存在分区
+    - 注意检查磁盘上存在分区。
+      如果存在分区，需要尝试执行如下命令清除分区表
+
+      ```bash
+      以下三个命令根据自己的环境可以任选其一进行尝试，dd和sgdisk抹除的最彻底
+      # dd if=/dev/zero of=/dev/xxx bs=1M count=1
+      # wipefs -fa /dev/sda
+      # sgdisk --zap-all /dev/sda
+      ```
+      上述抹除分区表命令执行完成后一定要执行一遍下面的 ceph orch device ls --refresh命令。
 
     - 查看可用磁盘
         
         ```bash
-        ceph orch device ls [--wide]
+        ceph orch device ls --refresh 
         ```
         
+        - 通过加上参数 `--refresh` 可以刷新识别磁盘列表。
         - 检查磁盘是否支持 libstoragemgmt `cephadm shell lsmcli ldl`
         - 如果支持则执行开启 `ceph config set mgr mgr/cephadm/device_enhanced_scan true`
         - 不支持 NVMe 设备
@@ -145,15 +175,35 @@
         
         ```bash
         # 查看磁盘属性
+        $ cephadm shell
         > ceph-volume inventory </path/to/disk>
+            ====== Device report /dev/xxxxxx ======
+    
+         path                      /dev/xxxxxx
+         ceph device               False
+         being replaced            False
+         lsm data                  {}
+         available                 True      #该值为True表示可被Ceph使用
+         rejected reasons                    #该值为一个字符数组，表示不能被Ceph使用的原因，可根据原因做出相应处理。
+         device id
+         removable                 0
+         ro                        0
+         vendor
+         model                     xxxxxx
+         sas address
+         rotational                0
+         actuators                 None
+         scheduler mode            none
+         human readable size       7.28 TB   #这个大小作为下面osd-ssd.yaml中指定的size大小
         ```
+        
         
         ```yaml
         # osd-hdd.yaml
         service_type: osd
         service_id: hdd
         placement:
-            host_pattern: sn*
+            host_pattern: bj1osd*
         spec:
             data_devices:
                 rotational: 1
@@ -165,7 +215,7 @@
         service_type: osd
         service_id: ssd
         placement:
-            host_pattern: sn*
+            host_pattern: bj1osd*
         spec:
             data_devices:
                 rotational: 0
@@ -199,11 +249,13 @@
     ceph osd crush rule create-replicated rep_ssd default host ssd
 
     # ceph osd crush rule create-replicated <name> <root> <failure-domain> <class>
-    # 创建 EC 4+2 纠删码，存储集群至少有 7 个节点
-    ceph osd erasure-code-profile set ec42_hdd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=hdd
-    # 创建 EC 8+3 纠删码，存储集群至少有 12 个节点
-    ceph osd erasure-code-profile set ec83_hdd k=8 m=3 crush-root=default crush-failure-domain=host crush-device-class=hdd
-    # 如果需要创建 SSD EC 纠删码，修改 `crush-device-class=ssd` 即可
+    # 创建 EC 2+2 纠删码，存储集群推荐 5 个节点
+    ceph osd erasure-code-profile set ec22_ssd k=2 m=2 crush-root=default crush-failure-domain=host crush-device-class=ssd
+    # 创建 EC 4+2 纠删码，存储集群推荐 7 个节点
+    ceph osd erasure-code-profile set ec42_ssd k=4 m=2 crush-root=default crush-failure-domain=host crush-device-class=ssd
+    # 创建 EC 8+3 纠删码，存储集群推荐 12 个节点
+    ceph osd erasure-code-profile set ec83_ssd k=8 m=3 crush-root=default crush-failure-domain=host crush-device-class=ssd
+    # 如果需要创建 HDD EC 纠删码，修改 `crush-device-class=hdd` 即可
     ```
 
     > * 缺省自带副本类 crush rule `replicated_rule`，如果系统中存在 HDD 和 SSD 两类设备这将混用在一起，这会带来不稳定性能。

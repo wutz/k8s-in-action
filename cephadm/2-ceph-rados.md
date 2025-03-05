@@ -33,7 +33,7 @@
         纠删码池适合吞吐型及高得盘率场景
 
         ```bash
-        ceph osd pool create mypool 32 32 erasure ec42_hdd --bulk
+        ceph osd pool create mypool 32 32 erasure ec42_ssd --bulk
         ceph osd pool application enable mypool myapp
         ceph osd pool set mypool target_size_ratio 0.3
         ceph osd pool autoscale-status

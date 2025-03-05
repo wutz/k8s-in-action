@@ -24,15 +24,15 @@
 * 控制节点 mn
   * 生产集群至少 3 节点满足 HA 需要，最大 7 节点
   * 示例：`bj1mn01`, `bj1mn02`, `bj1mn03`
-* 网络负载均衡节点 ln
+* 网络负载均衡节点 lb
   * 生产集群至少 2 节点满足 HA 需要, 可复用管理节点
-  * 示例：`bj1ln01`, `bj1ln02`
-* 存储节点 sn
+  * 示例：`bj1lb01`, `bj1lb02`
+* 存储节点 mds/osd
   * 生产集群至少 3 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
-  * 示例：`bj1sn01`, `bj1sn02`, `bj1sn03`
-* 数据库节点 dn
-  * 生产集群至少 2 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
-  * 示例：`bj1dn01`, `bj1dn02`
+  * 示例：`bj1mds01`, `bj1mds02`, `bj1mds03`, `bj1osd001`, `bj1osd002`, `bj1osd003` 
+* 数据库节点 rds
+  * 生产集群至少 3 节点满足 HA 需要, 推荐配置独立节点 (酌情复用管理节点)
+  * 示例：`bj1rds01`, `bj1rds02`, `bj1rds03`
 * CPU 计算节点 cn
   * 示例：`bj1cn001`, `bj1cn002`, `bj1cn003`
 * GPU 计算节点 gn
@@ -58,7 +58,7 @@
 
 - OS: ubuntu 22.04
 - K8S: [k3s](https://k3s.io/) v1.31
-- Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v18.2
+- Ceph: [ceph](https://docs.ceph.com/en/latest/releases/) v19.2
 
 > 更多需求可以参考 [k3s requirements](https://docs.k3s.io/zh/installation/requirements)
 
@@ -66,19 +66,19 @@
 
 | 节点 | IP |
 | --- | --- |
-| bj1mn01 | 10.128.0.1/24 |
-| bj1mn02 | 10.128.0.2/24 |
-| bj1mn03 | 10.128.0.3/24 |
-| bj1sn01 | 10.128.0.101/24 |
-| bj1sn02 | 10.128.0.102/24 |
-| bj1sn03 | 10.128.0.103/24 |
-| bj1sn04 | 10.128.0.104/24 |
-| bj1dn01 | 10.128.0.201/24 |
-| bj1dn02 | 10.128.0.202/24 |
-| bj1dn03 | 10.128.0.203/24 |
-| bj1gn001 | 10.128.1.1/24 |
-| bj1gn002 | 10.128.1.2/24 |
-| bj1gn003 | 10.128.1.3/24 |
+| bj1mn01 | 10.128.0.1/16 |
+| bj1mn02 | 10.128.0.2/16 |
+| bj1mn03 | 10.128.0.3/16 |
+| bj1gn001 | 10.128.1.1/16 |
+| bj1gn002 | 10.128.1.2/16 |
+| bj1gn003 | 10.128.1.3/16 |
+| bj1dn01 | 100.68.16.1/20 |
+| bj1dn02 | 100.68.16.2/20 |
+| bj1dn03 | 100.68.16.3/20 |
+| bj1sn001 | 100.68.20.1/20 |
+| bj1sn002 | 100.68.20.2/20 |
+| bj1sn003 | 100.68.20.3/20 |
+| bj1sn004 | 100.68.20.4/20 |
 
 ### 管理工具 pdsh
 
@@ -92,13 +92,21 @@ brew install pdsh
 
 # 生成 hosts 用于后续执行 pdsh / pdcp
 cat << 'EOF' > all
-root@10.128.0.[1-3,100-104,201-203]
+root@10.128.0.[1-3]
 root@10.128.1.[1-3]
+root@100.68.16.[1-3]
+root@100.68.20.[1-4]
 EOF
 
-# 设置 pdsh 远程 pdcp 路径
-pdsh -w ^all apt install -y pdsh
+# 设置 pdsh 使用 ssh 而非缺省的 rsh
+cat << 'EOF' > /etc/profile.d/pdsh.sh
+export PDSH_RCMD_TYPE=ssh
 export PDSH_REMOTE_PDCP_PATH=pdcp
+EOF
+source /etc/profile.d/pdsh.sh
+
+# 所有节点安装 pdsh
+pdsh -w ^all apt install -y pdsh
 ```
 
 ### 设置 ssh 无密码登录
@@ -184,8 +192,8 @@ pdsh -w ^all apt update
 
 ```bash
 cat << 'EOF' > 80proxy
-Acquire::http::Proxy "http://10.128.0.90:3128";
-Acquire::https::Proxy "http://10.128.0.90:3128";
+Acquire::http::Proxy "http://100.68.3.1:3128";
+Acquire::https::Proxy "http://10.68.3.1:3128";
 EOF
 
 pdcp -w ^all 80proxy /etc/apt/apt.conf.d/80proxy
@@ -212,8 +220,6 @@ pdsh -w ^all "sed -i 's/^\/swap/#&/' /etc/fstab"
 
 ### 开启 CPU Performance Mode
 
-> 如果在 BIOS 中已经开启，可以跳过。开启此选项极大提升性能
-
 ```sh
 cat << 'EOF' > cpufrequtils
 GOVERNOR="performance"
@@ -223,10 +229,11 @@ pdcp -w ^all cpufrequtils /etc/default
 pdsh -w ^all systemctl restart cpufrequtils
 
 # 查看当前 CPU 频率 (执行任意命令即可)
-pdsh -w ^all cpufreq-info
-pdsh -w ^all grep MHz /proc/cpuinfo
-pdsh -w ^all 'cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors'
+pdsh -w ^all 'apt install linux-tools-common linux-tools-`uname -r` -y'
+turbostat --interval 1
 ```
+
+如果节点间 `ping` 延迟大于 `0.1ms`， 则需要在 BIOS 中禁用 `SpeedStep` 和 `C1E` 模式
 
 ### 锁定内核版本，避免驱动失效
 
@@ -248,16 +255,52 @@ EOF
 pdcp -w ^all nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
 ```
 
-### [必须]关闭密码登录增强安全性
+## 安全
+
+### 关闭密码登录增强安全性
 
 ```sh
 pdsh -w ^all "sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config.d/50-cloud-init.conf"
 pdsh -w ^all systemctl reload ssh
 ```
 
+### 设置防火墙
+
+不同角色节点防火墙设置不同，需要根据实际情况进行设置
+
+#### 存储节点
+
+考虑到存储节点需要对外提供服务，需要禁止计算节点访问存储节点 22 端口.
+
+所有存储节点需要执行下面步骤, 假如：
+* 存储节点在网段：`100.68.16.0/20`
+* 外部 VPN 所在 IP：`100.68.3.100`
+
+```bash
+# 缺省允许进入和出去
+ufw reset
+ufw default allow incoming
+ufw default allow outgoing
+ufw enable
+
+# 查看
+ufw status verbose
+
+# 允许特定网络和 IP 访问 22 端口
+ufw allow from 100.68.16.0/20 to any port 22
+ufw allow from 100.68.3.100 to any port 22
+# 禁止所有其他来源访问 22 端口
+ufw deny 22
+
+# 查看
+ufw status verbose
+```
+
 ## 基础测试
 
 ### 网络性能测试
+
+首先使用 ping 测试节点间延迟，值必须小于 `0.1ms`
 
 ```sh
 pdsh -w ^all apt install -y iperf
@@ -274,3 +317,25 @@ pdsh -w 10.128.0.1 iperf -i1 -c 10.128.0.2 -P8 -R
 # 依次测试两两节点间网络性能
 ```
 
+### 磁盘性能测试
+
+访问 [elbencho](https://github.com/breuner/elbencho/releases) 下载 elbencho 二进制文件
+
+```sh
+tar zxvf elbencho-static-x86_64.tar.gz
+# 解压后将 elbencho 文件拷贝到 /usr/local/bin
+pdcp -w ^all elbencho /usr/local/bin
+pdsh -w ^all apt install -y nvme-cli sysstat
+
+# 依次测试每个节点裸盘性能
+# 获取所有 nvme 设备
+nvme list
+# 假如查询到 12 个设备, 则指定设备列表 /dev/nvme{0..11}n1
+# 测试写, -t 48 指定线程数, 取值为设备数乘以 4
+elbencho -w -b 4M -t 48 --direct -s 100g /dev/nvme{0..11}n1
+# 测试读, 修改 -w 为 -r
+elbencho -r -b 4M -t 48 --direct -s 100g /dev/nvme{0..11}n1
+
+# 同时监控 io 性能是否满足设备官方性能标称（通常写比官方高，读略低于官方）
+iostat -xm 1
+```
