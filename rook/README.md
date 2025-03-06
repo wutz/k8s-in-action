@@ -35,10 +35,20 @@
   # sgdisk --zap-all /dev/sda
   ```
 
-- 如果依然还存在分区，使用 `dmsetup remove /dev/mapper/ceph--xxx` 清除分区（在宿主机上执行）
+  - 如果依然还存在分区，使用 `dmsetup remove /dev/mapper/ceph--xxx` 清除分区（在宿主机上执行）
 
 - 主动触发重新扫描OSD
 
-  ```
+  ```shell
   kubectl -n rook-ceph rollout restart deployment rook-ceph-operator
   ```
+
+- 查看ceph cluster状态
+
+  ```
+  kubectl -n rook-ceph get cephclusters.ceph.rook.io
+  NAME        DATADIRHOSTPATH   MONCOUNT   AGE   PHASE   MESSAGE                        HEALTH      EXTERNAL   FSID
+  rook-ceph   /var/lib/rook     3          52m   Ready   Cluster created successfully   HEALTH_OK              f6e0c207-33d4-4329-b1fb-29e502b79277
+  ```
+
+  - 如果卸载rook后有残留未清理，可以尝试清理宿主机 `DATADIRHOSTPATH` 目录
