@@ -82,7 +82,9 @@ CephFS 提供一些功能:
 5. 生成 Client 访问 Key
     
     ```bash
-    ceph fs authorize bj1cfs01 client.bj1cfs01 / rw |sudo tee /etc/ceph/ceph.client.bj1cfs01.keyring
+    #ceph fs authorize bj1cfs01 client.bj1cfs01 / rw |sudo tee /etc/ceph/ceph.client.bj1cfs01.keyring
+    # 生成的 client key 同时允许 k8s ceph csi 使用
+    ceph auth get-or-create client.bj1cfs01 osd 'allow rw tag cephfs *=bj1cfs01' mon 'allow r fsname=bj1cfs01' mds 'allow rw fsname=bj1cfs01' mgr 'allow rw' |sudo tee /etc/ceph/ceph.client.bj1cfs01.keyring
     chmod 600 /etc/ceph/ceph.client.bj1cfs01.keyring
     ```
     
@@ -169,10 +171,9 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 
 > https://github.com/ceph/ceph-csi
 
-1. 在 ceph cluster 中准备 key
+1. 创建 subvolumegroup
     
     ```bash
-    ceph auth get-or-create client.bj1cfs01k osd 'allow rw tag cephfs *=bj1cfs01' mon 'allow r fsname=bj1cfs01' mds 'allow rw fsname=bj1cfs01' mgr 'allow rw' |sudo tee /etc/ceph/ceph.client.bj1cfs01k.keyring
     ceph fs subvolumegroup create bj1cfs01 csi
     ```
     
@@ -186,7 +187,7 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
       fsName: bj1cfs01
     secret:
       create: true
-      adminID: bj1cfs01k
+      adminID: bj1cfs01
       adminKey: <---key--->
     csiConfig:
       - clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
@@ -199,7 +200,7 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
     ```
     
     - clusterID, monitors 来自配置 ceph.conf
-    - adminID, adminKey 来自配置 ceph.client.bj1cfs01k.keyring
+    - adminID, adminKey 来自配置 ceph.client.bj1cfs01.keyring
 
 3. 安装 ceph-csi
     
