@@ -20,6 +20,19 @@
 
   > 只需要修改 GPU 节点的配置
 
+- 设置 host 上 `nvidia-smi` 命令可执行
+
+  ```sh
+  cat << 'EOF' > nvidia-smi.sh
+  alias nvidia-smi="chroot /run/nvidia/driver nvidia-smi"
+  EOF
+
+  pdcp -w ^all nvidia-smi.sh /etc/profile.d/
+  source /etc/profile.d/nvidia-smi.sh
+  ```
+
+  > 只需要设置 GPU 节点即可
+
 - 修改调度策略为优先填充满节点：缺省平分到节点会造成无法申请满 8 卡的节点资源
 
   > 修改所有 mn 节点
