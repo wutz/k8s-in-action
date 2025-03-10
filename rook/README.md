@@ -52,3 +52,13 @@
   ```
 
   - 如果卸载rook后有残留未清理，可以尝试清理宿主机 `DATADIRHOSTPATH` 目录
+ 
+- 修复 `ceph orch` 命令无法使用
+  ```shell
+  kubectl exec -it deployments/rook-ceph-tools -- bash
+  ceph mgr module enable rook
+  ceph orch set backend rook
+  ceph orch status
+  ```
+  
+  
