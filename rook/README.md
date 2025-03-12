@@ -6,9 +6,10 @@
   - 如果有 2 条网络，根据实际的宿主机网络设置 `public` 和 `cluster` 网段
 - 为存储节点打上额外 label, 下面使用 3 台 mn 节点复用作为存储节点
   ```sh
-  kubectl label node mn01.play.local role=storage-node
-  kubectl label node mn02.play.local role=storage-node
-  kubectl label node mn03.play.local role=storage-node
+  kubectl label node bj1sn001 node-role.kubernetes.io/storage=true
+  kubectl label node bj1sn002 node-role.kubernetes.io/storage=true
+  kubectl label node bj1sn003 node-role.kubernetes.io/storage=true
+  kubectl label node bj1sn004 node-role.kubernetes.io/storage=true
   ```
 - 部署 Rook
 
@@ -29,10 +30,8 @@
 - 注意检查磁盘上存在分区。 如果存在分区，需要尝试执行如下命令清除分区表（在宿主机上执行）
 
   ```
-  以下三个命令根据自己的环境可以任选其一进行尝试，dd和sgdisk抹除的最彻底
   # dd if=/dev/zero of=/dev/xxx bs=1M count=1
-  # wipefs -fa /dev/sda
-  # sgdisk --zap-all /dev/sda
+  sgdisk --zap-all /dev/xxx
   ```
 
   - 如果依然还存在分区，使用 `dmsetup remove /dev/mapper/ceph--xxx` 清除分区（在宿主机上执行）
@@ -51,7 +50,7 @@
   rook-ceph   /var/lib/rook     3          52m   Ready   Cluster created successfully   HEALTH_OK              f6e0c207-33d4-4329-b1fb-29e502b79277
   ```
 
-  - 如果卸载rook后有残留未清理，可以尝试清理宿主机 `DATADIRHOSTPATH` 目录
+  - 如果卸载rook后有残留未清理，可以尝试清理宿主机 `DATADIRHOSTPATH: /var/lib/rook` 目录
  
 - 修复 `ceph orch` 命令无法使用
   ```shell
@@ -62,3 +61,44 @@
   ```
   
   
+
+- 部署 Operator
+  ```sh
+  kubectl apply -k operator/
+  ```
+
+- 部署 CephCluster
+  根据实际情况修改 [cluster/patch.yaml](./cluster/patch.yaml) 中的 public 和 cluster 网段
+  ```sh
+  # 部署 CephCluster
+  kubectl apply -k cluster/
+
+  # 查看 CephCluster 状态
+  kubectl get cephclusters
+  # 查看 CephCluster 详细信息
+  kubectl describe cephcluster rook-ceph
+  ```
+
+# [安装 kubectl-rook-ceph 用于运维](https://github.com/rook/kubectl-rook-ceph)
+
+1. 安装 [krew](https://krew.sigs.k8s.io/docs/user-guide/setup/install/)
+2. 安装 kubectl-rook-ceph 执行 `kubectl krew install rook-ceph`
+3. 使用 `kubectl rook-ceph ceph -s` 命令查看集群状态
+
+# 排错
+
+* [查看 osd 数量是否符合预期](https://rook.io/docs/rook/latest-release/Troubleshooting/ceph-common-issues/?h=osd+prepare#solution_4)
+
+  ```sh
+  kubectl rook-ceph ceph osd tree
+  kubectl get po -n rook-ceph
+  ```
+
+# 销毁集群
+
+```bash
+kubectl rook-ceph destroy-cluster
+# 输入 yes-really-destroy-cluster 后开始执行
+
+pdsh -w bj1sn[001-004] 'rm -rf /var/lib/rook'
+```
