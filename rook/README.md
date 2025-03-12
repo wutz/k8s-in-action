@@ -70,7 +70,7 @@
 
   通常 osd 未加入是磁盘或者之前集群残留，参见 [销毁集群](#销毁集群) 章节
 
-## 创建 RBD 块存储
+## [创建 RBD 块存储](https://rook.io/docs/rook/latest-release/CRDs/Block-Storage/ceph-block-pool-crd/)
 
 * 创建 rbd 存储池和 storageclass
 
