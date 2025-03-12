@@ -74,11 +74,16 @@
 
 * 创建 rbd 存储池和 storageclass
 
+  * 每个租户需要使用独立的 rbd 部署
+  * 二选一  
+    * 使用副本复制 [rbd/bj1rbd01.yaml](./rbd/bj1rbd01.yaml), 注意 `StorageClass.parameters.pool` 必须和 `CephBlockPool.metadata.name` 一致
+    * 使用纠删码则复制 [rbd/bj1rbd01ec.yaml](./rbd/bj1rbd01ec.yaml), 其中 `erasureCoded` 配置生产中需要配置 `2+2` (需要4节点), `4+2` (需要6节点) 或 `8+3` (需要11节点), 注意 `pool` 和 `dataPool` 与 2 个对应 `CephBlockPool.metadata.name` 一致
+  * 注意根据实际情况修改 `CephBlockPool.spec.deviceClass` 为 `hdd` 或 `ssd` 等
+  * `StorageClass.metadata.name` 根据需要自定义，例如 `block-ssd` 或 `block-hdd` 等
+
   ```bash
   kubectl apply -f rbd/bj1rbd01.yaml
   ```
-
-  * 每个租户需要使用独立的 rbd 部署，可以复制 [rbd/bj1rbd01.yaml](./rbd/bj1rbd01.yaml) 一份并修改 `name`, 注意 `StorageClass.parameters.pool` 必须和 `CephBlockPool.metadata.name` 一致
 
 * 测试验证 RBD 工作正常
 
