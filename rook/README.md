@@ -70,6 +70,27 @@
 
   通常 osd 未加入是磁盘或者之前集群残留，参见 [销毁集群](#销毁集群) 章节
 
+## 创建 RBD 块存储
+
+* 创建 rbd 存储池和 storageclass
+
+  ```bash
+  kubectl apply -f rbd/bj1rbd01.yaml
+  ```
+
+  * 每个租户需要使用独立的 rbd 部署，可以复制 [rbd/bj1rbd01.yaml](./rbd/bj1rbd01.yaml) 一份并修改 `name`, 注意 `StorageClass.parameters.pool` 必须和 `CephBlockPool.metadata.name` 一致
+
+* 测试验证 RBD 工作正常
+
+  测试验证 RBD 工作正常, 首先修改 [rbd/tests/pvc.yaml](./rbd/tests/pvc.yaml) 中的 `storageClassName` 为实际的名称
+
+  ```bash
+  kubectl apply -k rbd/tests/
+
+  kubectl exec -it csirbd-demo-pod -- bash
+  ```
+
+
 ## [使用 Ceph Dashboard](https://rook.io/docs/rook/latest-release/Storage-Configuration/Monitoring/ceph-dashboard/)
 
 通常不直接使用 Ceph Dashboard 管理集群而是使用 rook, Ceph Dashboard 作为一个 GUI 查看工具
