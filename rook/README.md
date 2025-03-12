@@ -62,12 +62,13 @@
   
   
 
-- 部署 Operator
+## 部署 Operator
+
   ```sh
   kubectl apply -k operator/
   ```
 
-- 部署 CephCluster
+## 部署 CephCluster
   根据实际情况修改 [cluster/patch.yaml](./cluster/patch.yaml) 中的 public 和 cluster 网段
   ```sh
   # 部署 CephCluster
@@ -79,13 +80,13 @@
   kubectl describe cephcluster rook-ceph
   ```
 
-# [安装 kubectl-rook-ceph 用于运维](https://github.com/rook/kubectl-rook-ceph)
+## [安装 kubectl-rook-ceph 用于运维](https://github.com/rook/kubectl-rook-ceph)
 
 1. 安装 [krew](https://krew.sigs.k8s.io/docs/user-guide/setup/install/)
 2. 安装 kubectl-rook-ceph 执行 `kubectl krew install rook-ceph`
 3. 使用 `kubectl rook-ceph ceph -s` 命令查看集群状态
 
-# 排错
+## 排错
 
 * [查看 osd 数量是否符合预期](https://rook.io/docs/rook/latest-release/Troubleshooting/ceph-common-issues/?h=osd+prepare#solution_4)
 
@@ -94,7 +95,7 @@
   kubectl get po -n rook-ceph
   ```
 
-# 销毁集群
+## 销毁集群
 
 ```bash
 kubectl rook-ceph destroy-cluster
