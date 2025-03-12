@@ -70,6 +70,20 @@
 
   通常 osd 未加入是磁盘或者之前集群残留，参见 [销毁集群](#销毁集群) 章节
 
+## [使用 Ceph Dashboard](https://rook.io/docs/rook/latest-release/Storage-Configuration/Monitoring/ceph-dashboard/)
+
+通常不直接使用 Ceph Dashboard 管理集群而是使用 rook, Ceph Dashboard 作为一个 GUI 查看工具
+
+```bash
+kubectl port-forward svc/rook-ceph-mgr-dashboard 8443
+```
+
+访问 https://localhost:8443 即可, 用户名为 `admin`, 密码使用下面命令获取
+
+```bash
+kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath="{['data']['password']}" | base64 --decode && echo
+```
+
 ## [销毁集群](https://rook.io/docs/rook/latest-release/Getting-Started/ceph-teardown/)
 
 ```bash
