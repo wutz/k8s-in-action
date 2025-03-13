@@ -95,6 +95,24 @@
   kubectl exec -it csirbd-demo-pod -- bash
   ```
 
+## [创建 CephFS 文件系统](https://rook.io/docs/rook/latest-release/CRDs/Shared-Filesystem/ceph-filesystem-crd/)
+
+* 创建 cephfs 文件系统和 storageclass
+
+  ```bash
+  kubectl apply -f cephfs/bj1cfs01.yaml
+  kubectl apply -f cephfs/bj1cfs01-sc.yaml
+  ```
+
+* 测试验证 CephFS 工作正常
+
+  测试验证 CephFS 工作正常, 首先修改 [cephfs/tests/pvc.yaml](./cephfs/tests/pvc.yaml) 中的 `storageClassName` 为实际的名称
+
+  ```bash
+  kubectl apply -k cephfs/tests/
+
+  kubectl exec -it csicephfs-demo-pod -- bash
+  ```
 
 ## [使用 Ceph Dashboard](https://rook.io/docs/rook/latest-release/Storage-Configuration/Monitoring/ceph-dashboard/)
 
