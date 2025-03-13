@@ -99,9 +99,15 @@
 
 * 创建 cephfs 文件系统和 storageclass
 
+  * 每个租户需要使用独立的 cephfs 部署
+  * 复制示例 [cephfs/bj1cfs01.yaml](./cephfs/bj1cfs01.yaml), 修改所有 `bj1cfs01` 为实际的名称
+  * 生产环境 `metadataPool.deviceClass` 需要配置为 `ssd`, `dataPools.deviceClass` 根据实际情况选择 `hdd` 或 `ssd`
+  * 生产环境 `dataPools.erasurecoded` 配置中的 `codingChunks` 即冗余至少为 `2`, 一般配置 `2+2` (需要4节点), `4+2` (需要6节点) 或 `8+3` (需要11节点)
+  * 生产环境 `metadataServer.resources.memory` 至少 `32Gi`, 其与热元数据数量相关, 每个元数据大约占用内存 `3k` 大小，如果元数据缓存大小不足则会频繁回收内存造成严重性能下降
+  * 缺省使用纠删码其得盘率更高，如果需要更高性能则可以使用副本，注释 `dataPools.erasurecoded` 整段配置, 并修改 `StorageClass.parameters.pool` 为 `bj1cfs01-replicated`
+
   ```bash
   kubectl apply -f cephfs/bj1cfs01.yaml
-  kubectl apply -f cephfs/bj1cfs01-sc.yaml
   ```
 
 * 测试验证 CephFS 工作正常
