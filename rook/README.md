@@ -1,5 +1,9 @@
 # [Rook Ceph](https://rook.io/)
 
+## 基本概念
+
+[Ceph 基本概念与架构](https://www.redbooks.ibm.com/abstracts/redp5721.html)
+
 ## 准备
 
 - 至少 3 台机器，每台至少插入 1 块本地盘
