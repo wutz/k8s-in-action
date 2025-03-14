@@ -24,10 +24,13 @@ releases:
     <<: *options
     chart:
       name: nvidia/gpu-operator
-      version: v24.3.0
+      version: v24.6.2
     values:
       - values.yml
     lifecycle:
+      pre_up:
+        - kubectl apply -f hooks/dcgm-exporter-config.yaml
+        - kubectl apply -f hooks/kernel-module-params.y
       post_up:
         - kubectl apply -k hooks
       pre_down:
