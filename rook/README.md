@@ -150,3 +150,7 @@ pdsh -w bj1sn[001-004] 'dd if=/dev/zero bs=1M count=100 oflag=direct,dsync of=/d
 # ssd 使用 blkdiscard 抹除而非 dd
 pdsh -w bj1sn[001-004] 'blkdiscard /dev/xxx'
 ```
+
+## 日常维护
+
+[Rook 日常维护](./day-2.md)
