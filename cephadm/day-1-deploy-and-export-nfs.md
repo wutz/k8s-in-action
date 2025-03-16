@@ -1,5 +1,7 @@
 # 部署与导出 NFS
 
+为了避免 nfs server 成为瓶颈，每个导出需要使用独立的 nfs server 集群。
+
 ```bash
 # 创建 nfs 集群，这将创建 2 个服务 `nfs.bj1nfs01` 和 `ingress.nfs.bj1nfs01`
 ceph nfs cluster create bj1nfs01 "1 label:nfs" --ingress --ingress-mode keepalive-only --virtual_ip 100.68.17.1/20 
