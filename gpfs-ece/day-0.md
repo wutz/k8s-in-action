@@ -1,4 +1,14 @@
-# GPFS 集群规划
+# GPFS 纠删码版集群规划
+
+## 简介
+
+IBM Storage Scale Erasure Code Edition 以软件形式提供 IBM Storage Scale RAID。
+
+IBM Storage Scale Erasure Code Edition 可以在一个集群中拥有一个或多个恢复组，并且每个存储服务器仅属于一个 RG。恢复组中的所有存储服务器必须具有匹配的配置，包括相同的 CPU、内存、网络和存储设备配置。存储设备 (pdisk) 直接连接到仅一个存储服务器。
+
+IBM Storage Scale Erasure Code Edition 支持以下纠删码和复制级别：16+2P、16+3P、8+2p、8+3p、4+2p、4+3p、3WayReplication 和 4WayReplication。
+
+一个 IBM Storage Scale 集群中最多可以有 256 个 IBM Storage Scale Erasure Code Edition 存储节点。
 
 ## 硬件需求
 
