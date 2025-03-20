@@ -46,6 +46,8 @@
 
 ## 部署到 K8S 集群
 
+> 安装 [helmwave](https://docs.helmwave.app/0.29.x/install/) 用于部署 helm 包
+
 * 安装依赖 etcd 用于服务发现
 
     ```bash
