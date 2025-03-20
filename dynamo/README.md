@@ -42,7 +42,7 @@
     dynamo build --containerize hello_world:Frontend
 
     # 获取示例程序运行配置, 用于后续部署到 K8S 集群
-    dynamo get frontend > values.yaml
+    dynamo get frontend > values.yml
 
     # 将示例程序镜像推送到镜像仓库, 其中 <image-id> 执行 docker images 获取最近构建的镜像
     docker tag <image-id> cr.bj1.example.com/ai-dynamo/dynamo-examples:hello-world
@@ -80,6 +80,9 @@
 ## 访问
 
 ```bash
+# 查看服务部署情况
+kubectl -n dynamo get po 
+
 # 转发服务的端口到本地 3000 端口
 kubectl -n dynamo port-forward svc/dynamo-hello-world-frontend 3000:80
 
