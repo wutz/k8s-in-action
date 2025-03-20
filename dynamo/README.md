@@ -5,16 +5,21 @@
 * 开发机：准备一个 x86_64 cpu 安装 docker 的 Linux 机器即可, 用于构建 Runtime 镜像和示例程序镜像
 * 镜像仓库: 本示例使用 `cr.bj1.example.com` 作为镜像仓库
 * K8S 集群: hello-world 示例不依赖 GPU
+* 已解决开发机和 K8S 的科学上网问题
 
 ## 开发与构建镜像
 
 * 准备 Runtime 镜像
 
     ```bash
+    # 克隆 dynamo 仓库
     git clone https://github.com/ai-dynamo/dynamo.git
 
+    # 构建 Runtime 镜像
+    cd dynamo
     ./container/build.sh
 
+    # 推送镜像到镜像仓库, 其中 <image-id> 执行 docker images 获取最近构建的镜像
     docker tag <image-id> cr.bj1.example.com/ai-dynamo/dynamo:v0.1.0-vllm
     docker push cr.bj1.example.com/ai-dynamo/dynamo:v0.1.0-vllm
     ```
