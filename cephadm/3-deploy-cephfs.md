@@ -286,6 +286,165 @@ ceph mds stat
 ceph fs status
 ```
 
+
+# 故障排除
+
+本章节主要描述日常遇到的一些CephFS问题及问题解决方法。
+
+CephFS常见的问题包括响应缓慢、客户端操作卡主等。
+
+## CephFS响应缓慢
+
+本章节主要描述由于CephFS组件（MDS）造成的响应缓慢问题，请先确认你的单盘和OSD Pool性能没有问题。
+
+### 获取CephFS MDS概要信息
+
+执行如下命令获取到指定CephFS的概要信息
+
+```bash
+root@mn01:~# ceph fs status bjcfs01
+bjcfs01 - 96 clients
+========
+RANK  STATE             MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0    active  bjcfs01.mn01.zxhhrq  Reqs:  2895 /s      30.6M  30.5M  1997k  21.5M
+       POOL          TYPE     USED  AVAIL
+bjcfs01_metadata  metadata   105G    114T
+bjcfs01_data      data       80.6T   114T
+```
+
+96 clients表示已建立链接的客户端的数量。
+
+bjcfs01.mn01.zxhhrq 表示CephFS bjcfs01的主MDS运行在mn01节点上。
+
+DNS (Directory Number of Entries) 30.6M 表示文件系统中共计有 3050万个目录条目 (目录以及文件)，这个数字反映了 CephFS 中文件和目录的总数。
+
+INOS 30.5M 表示inode的总数。
+
+DIRS 1997k 表示文件系统中有 1997000 个目录。
+
+**CAPS** 21.5M 表示已经授予给客户端的 capabilities 的数量。 高 CAPS 也意味着客户端对 CephFS 的活跃使用，**如果CAPS的值大于等于 DNS的值可能存在MDS内存不够用的风险**。
+
+
+### 获取CephFS MDS的主从信息
+
+通过如下命令获取CephFS MDS主从服务的信息。
+
+```bash
+root@mn01:~# ceph orch ps --service_name mds.bjcfs01
+NAME                          HOST      PORTS  STATUS             REFRESHED  AGE  MEM USE  MEM LIM  VERSION  IMAGE ID      CONTAINER ID
+mds.bjcfs01.mn01.vogufr        mn01             running (4w)     5m ago     4w    23.8M        -  19.2.1   f2efb0401a30  265fe7d39a75
+mds.bjcfs01.mn02.zxhhrq        mn02             running (4w)     4m ago     4w     115G        -  19.2.1   f2efb0401a30  4f1b3a7617a6
+mds.bjcfs01.mn03.vgjudl        mn03             running (4w)     4m ago     4w    25.6M        -  19.2.1   f2efb0401a30  462ac6e84fdf
+```
+
+通过如上信息大致的得到bjcfs01文件系统所有MDS服务的信息。重点关注 MEM USE 的大小，该值表示此MDS服务占用的内存大小。
+
+另外一个获取MDS服务的方法是直接登录到MDS服务对应的节点使用top观察其内存占用。
+
+### 获取CephFS客户端访问请求事件
+
+通过如下命令可以获取CephFS客户端的请求事件。
+
+```bash
+root@mn01:~# ceph tell mds.bjcfs01.mn01.zxhhrq dump_ops_in_flight
+```
+
+默认该命令会输出所有客户端操作内容，通常需要过滤出需要用到的操作和客户端信息
+
+过滤出readdir操作
+
+```bash
+root@mn01:~# ceph tell mds.bjcfs01.mn01.zxhhrq dump_ops_in_flight |grep readdir
+以下为部分输出信息
+"description": "client_request(client.165916:7196203 setfilelock rule 1, type 2, owner 16963308566499810484, pid 1461127, start 0, length 0, wait 1 #0x100120f7b34 2025-03-21T08:13:26.842573+0000 caller_uid=17448, caller_gid=17562{17562,})",
+```
+
+上面的输出信息中包含client.165916就是客户端的IP。
+
+排查客户端具体信息
+
+```bash
+root@mn01:~# ceph tell mds.bjcfs01.mn01.zxhhrq client ls |grep client.165916
+    {
+        "id": 205000,
+        "entity": {
+            "name": {
+                "type": "client",
+                "num": 205000
+            },
+            "addr": {
+                "type": "v1",
+                "addr": "10.251.10.17:0",
+                "nonce": 1156683885
+            }
+        }
+      ...
+    }
+```
+
+这里可以通过client.165916获取到客户端的id是205000，IP地址10.251.10.105。
+
+获取到客户端的IP地址后可以去对应节点观察客户端做了什么操作。
+
+### 响应慢处理方案
+
+####  增加MDS主服务内存容量
+
+当发现MDS的CAPS值大于等于 DNS的值可能存在MDS内存不够用的风险后，可以尝试增加MDS服务的内存大小缓解当前遇到的问题。
+
+```bash
+# ceph config set mds.bj1cfs01 mds_cache_memory_limit 68719476736
+```
+
+修改后时刻观察MDS服务的内存占用情况和响应情况。
+
+#### 驱逐客户端
+
+当文件系统客户端无响应或出现其他异常行为时，可能需要强制终止其对文件系统的访问。这个过程称为驱逐。
+
+客户端可以自动驱逐（如果它们未能及时与 MDS 通信），或者手动驱逐（由系统管理员）。
+
+客户端驱逐过程适用于所有类型的客户端，包括 FUSE 挂载、内核挂载、nfs-ganesha 网关以及任何使用 libcephfs 的进程。
+
+在三种情况下，客户端可能会被自动驱逐:
+
+1. 在一个活动的 MDS 守护进程上，如果一个客户端超过 session_autoclose 秒（一个文件系统变量，默认为 300 秒）没有与 MDS 通信，那么它将被自动驱逐。
+1. 在一个活动的 MDS 守护进程上，如果一个客户端超过 mds_cap_revoke_eviction_timeout 秒（配置选项）没有响应 cap 撤销消息。 默认情况下，此功能处于禁用状态。
+1. 在 MDS 启动期间（包括故障转移时），MDS 会经历一个名为 reconnect 的状态。在此状态下，它会等待所有客户端连接到新的 MDS 守护程序。如果任何客户端未能在时间窗口（ mds_reconnect_timeout ，默认为 45 秒）内执行此操作，则它们将被驱逐
+
+通过如下命令获取到客户端id
+```bash
+ceph tell mds.bjcfs01.mn01.zxhhrq client ls
+
+[
+    {
+        "id": 205000,
+        "entity": {
+            "name": {
+                "type": "client",
+                "num": 205000
+            },
+            "addr": {
+                "type": "v1",
+                "addr": "10.251.10.17:0",
+                "nonce": 1156683885
+            }
+        }
+      ...
+    }
+]
+```
+
+使用如下命令驱逐客户端
+
+```bash
+# ceph tell mds.bjcfs01.mn01.zxhhrq client evict id=205000
+# ceph tell mds.bjcfs01.mn01.zxhhrq client evict client_metadata.=205000
+```
+
+参考文档:  https://docs.ceph.com/en/latest/cephfs/eviction/
+
+
 ## 性能测试
 
 ### elbencho
