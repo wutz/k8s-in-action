@@ -1,0 +1,29 @@
+project: nats
+version: "0.41.0"
+
+.options:
+  &options # if set, upgrade process rolls back to the previous version if the upgrade fails.
+  atomic: true
+  # if set, upgrade process rolls back to the previous version if the upgrade fails.
+  pending_release_strategy: rollback
+  # the wait will be set automatically if atomic is true.
+  wait: true
+  # time to wait for any individual Kubernetes operation
+  timeout: 30m
+  # limit the history of revisions stored per release
+  max_history: 3
+  create_namespace: true
+  namespace: dynamo
+
+repositories:
+  - name: nats-io
+    url: https://nats-io.github.io/k8s/helm/charts
+
+releases:
+  - name: dynamo-platform-nats
+    <<: *options
+    chart:
+      name: nats-io/nats
+      version: 1.2.11
+    values:
+      - values.yml

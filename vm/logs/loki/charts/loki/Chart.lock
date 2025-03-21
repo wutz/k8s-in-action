@@ -1,0 +1,12 @@
+dependencies:
+- name: minio
+  repository: ""
+  version: 4.0.15
+- name: grafana-agent-operator
+  repository: ""
+  version: 0.3.15
+- name: rollout-operator
+  repository: ""
+  version: 0.13.0
+digest: sha256:657e0fef8d0c856c30e666af3394cbee30b4f7457107459f2197a13069dbb542
+generated: "2024-10-14T17:33:54.972843+08:00"

@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "name": "apprepo-kubeapps-sync-bitnami-28746010-t9qnk.17ef94a0e4137bc0",
+    "namespace": "kubeapps",
+    "uid": "ef4bb79d-197d-4b64-b3d9-8ba089af8f46",
+    "resourceVersion": "148287483",
+    "creationTimestamp": "2024-08-27T12:10:01Z"
+  },
+  "reason": "Failed",
+  "message": "Error: secret \"kubeapps-postgresql\" not found",
+  "source": { "component": "kubelet", "host": "cn001.dev.local" },
+  "firstTimestamp": "2024-08-27T12:10:01Z",
+  "lastTimestamp": "2024-08-27T12:10:01Z",
+  "count": 1,
+  "type": "Warning",
+  "eventTime": null,
+  "reportingComponent": "kubelet",
+  "reportingInstance": "cn001.dev.local",
+  "clusterName": "",
+  "involvedObject": {
+    "kind": "Pod",
+    "namespace": "kubeapps",
+    "name": "apprepo-kubeapps-sync-bitnami-28746010-t9qnk",
+    "uid": "76859768-535c-4bc8-b617-38250e7ece78",
+    "apiVersion": "v1",
+    "resourceVersion": "148287461",
+    "fieldPath": "spec.containers{sync}",
+    "labels": {
+      "apprepositories.kubeapps.com/repo-name": "bitnami",
+      "apprepositories.kubeapps.com/repo-namespace": "kubeapps",
+      "batch.kubernetes.io/controller-uid": "92a3d524-d016-4c1f-827e-365adf4ae09d",
+      "batch.kubernetes.io/job-name": "apprepo-kubeapps-sync-bitnami-28746010",
+      "controller-uid": "92a3d524-d016-4c1f-827e-365adf4ae09d",
+      "job-name": "apprepo-kubeapps-sync-bitnami-28746010"
+    },
+    "ownerReferences": [
+      {
+        "apiVersion": "batch/v1",
+        "kind": "Job",
+        "name": "apprepo-kubeapps-sync-bitnami-28746010",
+        "uid": "92a3d524-d016-4c1f-827e-365adf4ae09d",
+        "controller": true,
+        "blockOwnerDeletion": true
+      }
+    ],
+    "deleted": false
+  }
+}

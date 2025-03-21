@@ -1,0 +1,7 @@
+
+# 在所有节点上运行
+tolerations:
+- effect: NoSchedule
+  operator: Exists
+nodeSelector:
+  kubernetes.io/os: linux

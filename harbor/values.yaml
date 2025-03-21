@@ -28,7 +28,7 @@ expose:
       secretName: "harbor-tls-secret"
   ingress:
     hosts:
-      core: harbor.example.com
+      core: cr.hs1h-int.example.com
     # set to the type of ingress controller if it has specific requirements.
     # leave as `default` for most ingress controllers.
     # set to `gce` if using the GCE ingress controller
@@ -42,10 +42,11 @@ expose:
     annotations:
       # note different ingress controllers may require a different ssl-redirect annotation
       # for Envoy, use ingress.kubernetes.io/force-ssl-redirect: "true" and remove the nginx lines below
-      ingress.kubernetes.io/ssl-redirect: "true"
       ingress.kubernetes.io/proxy-body-size: "0"
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "86400"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "86400"
+      nginx.ingress.kubernetes.io/client-body-buffer-size: "1024k"      
     # ingress-specific labels
     labels: {}
   clusterIP:
@@ -84,7 +85,7 @@ expose:
     # The name of LoadBalancer service
     name: harbor
     # Set the IP if the LoadBalancer supports assigning IP
-    IP: "10.192.255.2"
+    IP: "10.193.255.2"
     ports:
       # The service port Harbor listens on when serving HTTP
       httpPort: 80
@@ -109,7 +110,7 @@ expose:
 # the IP address of k8s node
 #
 # If Harbor is deployed behind the proxy, set it as the URL of proxy
-externalURL: https://harbor.example.com
+externalURL: https://cr.hs1h-int.example.com
 
 # The persistence is enabled by default and a default StorageClass
 # is needed in the k8s cluster to provision volumes dynamically.
@@ -272,7 +273,7 @@ persistence:
 # key in secret is given via (default to HARBOR_ADMIN_PASSWORD)
 # existingSecretAdminPassword:
 existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
-harborAdminPassword: "xxxxxxxxxxxxxxx"
+harborAdminPassword: "change_it"
 
 # The internal TLS used for harbor components secure communicating. In order to enable https
 # in each component tls cert files need to provided in advance.
@@ -764,7 +765,7 @@ registry:
   serviceAccountName: ""
   # mount the service account token
   automountServiceAccountToken: false
-  replicas: 2
+  replicas: 3
   revisionHistoryLimit: 10
   nodeSelector: {}
   tolerations:
@@ -840,7 +841,7 @@ registry:
 
 trivy:
   # enabled the flag to enable Trivy scanner
-  enabled: true
+  enabled: false
   image:
     # repository the repository for Trivy adapter image
     repository: goharbor/trivy-adapter-photon
@@ -994,10 +995,10 @@ database:
       #    memory: 128Mi
       #    cpu: 100m
   external:
-    host: "pgm-z87um9hgrsktkiev6.pg.rds.example.com"
+    host: "pgm-z87um9hgrsktkiev6.pg.rds.hs1b-int.example.com"
     port: "5432"
-    username: "habor"
-    password: "xxxxxxxxxxxxxxx"
+    username: "harbor"
+    password: "change_it"
     coreDatabase: "registry"
     # if using existing secret, the key must be "password"
     existingSecret: ""
@@ -1064,7 +1065,7 @@ redis:
     # support redis, redis+sentinel
     # addr for redis: <host_redis>:<port_redis>
     # addr for redis+sentinel: <host_sentinel1>:<port_sentinel1>,<host_sentinel2>:<port_sentinel2>,<host_sentinel3>:<port_sentinel3>
-    addr: "r-uvnz4dxcdnmzwshc2.redis.rds.example.com:6379"
+    addr: "r-uvnz4dxcdnmzwshc2.redis.rds.hs1b-int.example.com:6379"
     # The name of the set of Redis instances to monitor, it must be set to support redis+sentinel
     sentinelMasterSet: ""
     # The "coreDatabaseIndex" must be "0" as the library Harbor
@@ -1078,8 +1079,8 @@ redis:
     # harborDatabaseIndex: "6"
     # cacheLayerDatabaseIndex: "7"
     # username field can be an empty string, and it will be authenticated against the default user
-    username: "harbor"
-    password: "xxxxxxxxxxxxxxx"
+    #username: "default"
+    password: "change_it"
     # If using existingSecret, the key must be REDIS_PASSWORD
     existingSecret: ""
   ## Additional deployment annotations

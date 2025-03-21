@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kernel-module-params
+  namespace: gpu-operator
+data:
+  nvidia.conf: |+
+    NVreg_EnableGpuFirmware=0

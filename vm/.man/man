@@ -1,0 +1,69 @@
+#!/bin/sh
+
+dir=$(cd $(dirname $0); pwd)
+dirname=${dir##*/}
+cd $dir
+
+pwd
+echo "--------------------------"
+
+help=`cat <<EOF
+./man < diff | show | upgrade >
+
+  diff        show difference between old and cur
+  show        show all manifests
+  upgrade|up  apply current settings to k8s
+-
+EOF`
+
+
+diff() {
+    kubectl kustomize . > .last_deployments.yaml
+
+    kubectl diff -f .last_deployments.yaml | colordiff
+}
+
+show() {
+    kubectl kustomize . | less
+}
+
+upgrade() {
+    out=`kubectl apply -k .`
+    
+    export GREP_COLOR='1;32'  # 设置为绿色高亮
+    echo "$out" | grep --color ' unchanged'
+    echo "--------------------------"
+    export GREP_COLOR='1;31'  # 设置为红色高亮
+    echo "$out" | grep --color -E ' configured| created'
+}
+
+if [[ $# -ne 1 ]]; then
+    echo "$help"
+    exit 0
+fi
+
+if [[ $1 == "diff" ]]; then
+    diff
+    exit 0
+fi
+
+if [[ $1 == "show" ]]; then
+    show
+    exit 0
+fi
+
+if [[ $1 == "upgrade" ]]; then
+    kubectl kustomize . > .last_deployments.yaml
+
+    upgrade
+    exit 0
+fi
+
+if [[ $1 == "up" ]]; then
+    kubectl kustomize . > .last_deployments.yaml
+
+    upgrade
+    exit 0
+fi
+
+echo "$help"
