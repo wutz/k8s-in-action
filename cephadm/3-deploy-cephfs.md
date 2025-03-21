@@ -274,7 +274,9 @@ ceph fs status
 
 # 故障排除
 
-本章节主要描述日常遇到的一些CephFS问题如何进行解决。CephFS常见的问题包括响应缓慢、卡主。
+本章节主要描述日常遇到的一些CephFS问题及问题解决方法。
+
+CephFS常见的问题包括响应缓慢、客户端操作卡主等。
 
 ## CephFS响应缓慢
 
@@ -283,6 +285,7 @@ ceph fs status
 ### 获取CephFS MDS概要信息
 
 执行如下命令获取到指定CephFS的概要信息
+
 ```bash
 root@mn01:~# ceph fs status bjcfs01
 bjcfs01 - 96 clients
@@ -372,7 +375,7 @@ root@mn01:~# ceph tell mds.bjcfs01.mn01.zxhhrq client ls |grep client.165916
 
 ####  增加MDS主服务内存容量
 
-当发现MDS的CAPS值大于等于 DNS的值可能存在MDS内存不够用的风险后可以尝试增加MDS服务的内存大小缓解当前遇到的问题.
+当发现MDS的CAPS值大于等于 DNS的值可能存在MDS内存不够用的风险后，可以尝试增加MDS服务的内存大小缓解当前遇到的问题。
 
 ```bash
 # ceph config set mds.bj1cfs01 mds_cache_memory_limit 68719476736
@@ -425,6 +428,3 @@ ceph tell mds.bjcfs01.mn01.zxhhrq client ls
 ```
 
 参考文档:  https://docs.ceph.com/en/latest/cephfs/eviction/
-
-
-
