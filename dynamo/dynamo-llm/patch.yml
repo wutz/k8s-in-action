@@ -1,0 +1,3 @@
+image: cr.bj1.example.com/ai-dynamo/dynamo-examples:llm-agg
+dynamoIdentifier: "graphs.agg:Frontend -f src/configs/agg.yaml"
+imagePullSecrets: {}
