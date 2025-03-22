@@ -55,7 +55,7 @@ spec:
       - name: {{ $.Release.Name }}-{{ .name | lower }}
         image: {{ $.Values.image }}
         args:
-        - uv run dynamo start --service-name {{ .name }} src.{{ $.Values.dynamoIdentifier }}
+        - PYTHONPATH=/home/bentoml/bento/src:$PYTHONPATH uv run dynamo start --service-name {{ .name }} src.{{ $.Values.dynamoIdentifier }}
         command:
         - sh
         - -c
@@ -81,8 +81,6 @@ spec:
         env:
         - name: HF_ENDPOINT
           value: "https://hf-mirror.com"
-        - name: PYTHONPATH
-          value: "/home/bentoml/bento/src:$PYTHONPATH"
       {{- if .config.traffic }}
         - name: TRAFFIC_TIMEOUT
           value: "{{ .config.traffic.timeout }}"
