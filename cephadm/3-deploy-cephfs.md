@@ -460,7 +460,7 @@ RESFILE=fs.log
 DIRS=1
 FILES=128
 THREADS_LIST="1 4 16 64"
-SIZE_LIST="4k 128k 4m 1g"
+SIZE_LIST="4k 128k 4m 4g"
 HOSTS_LIST="gn001 gn[001-004] gn[001-016]"
 USER=root
 
@@ -488,10 +488,10 @@ for host in $HOSTS_LIST; do
 
             # Write
             $ELBENCHO --hosts $host  \
-                    -w -d --direct -t $threads -n $DIRS -N $files -s $size -b $size --resfile $RESFILE $TESTDIR
+                    -w -d --direct -t $threads -n $DIRS -N $files -s $size -b 4m --resfile $RESFILE $TESTDIR
             # Read
             $ELBENCHO --hosts $host  \
-                    -r --direct -t $threads -n $DIRS -N $files -s $size -b $size --resfile $RESFILE $TESTDIR
+                    -r --direct -t $threads -n $DIRS -N $files -s $size -b 4m --resfile $RESFILE $TESTDIR
             # Delete
             $ELBENCHO --hosts $host  \
                     -D -F -t $threads -n $DIRS -N $files $TESTDIR

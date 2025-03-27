@@ -278,7 +278,7 @@ RESFILE=s3.log
 DIRS=1
 FILES=128
 THREADS_LIST="1 4 16 64"
-SIZE_LIST="4k 128k 4m 1g"
+SIZE_LIST="4k 128k 4m 4g"
 HOSTS_LIST="gn001 gn[001-004] gn[001-016]"
 USER=root
 
@@ -309,10 +309,10 @@ for host in $HOSTS_LIST; do
                     -d $S3BUCKET
             # Write
             $ELBENCHO --hosts $host --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                    -w -t $threads -n $DIRS -N $files -s $size -b $size --resfile $RESFILE $S3BUCKET
+                    -w -t $threads -n $DIRS -N $files -s $size -b 4m --resfile $RESFILE $S3BUCKET
             # Read
             $ELBENCHO --hosts $host --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                    -r -t $threads -n $DIRS -N $files -s $size -b $size --resfile $RESFILE $S3BUCKET
+                    -r -t $threads -n $DIRS -N $files -s $size -b 4m --resfile $RESFILE $S3BUCKET
             # Delete
             $ELBENCHO --hosts $host --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
                     -D -F -t $threads -n $DIRS -N $files $S3BUCKET
