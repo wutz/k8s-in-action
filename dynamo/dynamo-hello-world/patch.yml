@@ -1,0 +1,2 @@
+image: cr.bj1.example.com/ai-dynamo/dynamo-examples:hello-world
+dynamoIdentifier: "hello_world:Frontend"

@@ -1,0 +1,11 @@
+replicaCount: 1
+
+auth:
+  rbac:
+    create: false
+
+readinessProbe:
+  enabled: false
+
+livenessProbe:
+  enabled: false
