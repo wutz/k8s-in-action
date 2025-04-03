@@ -460,7 +460,7 @@ RESFILE=fs.log
 DIRS=1
 FILES=128
 THREADS_LIST="1 4 16 64"
-SIZE_LIST="4k 128k 4m 1g"
+SIZE_LIST="4k 128k 4m 1g 4g"
 HOSTS_LIST="gn001 gn[001-004] gn[001-016]"
 USER=root
 
@@ -480,18 +480,20 @@ for host in $HOSTS_LIST; do
 
     for threads in $thread_list; do
         for size in $SIZE_LIST; do
-            if [[ "$size" == "$LAST_SIZE" ]]; then
+            if [[ "$size" == "1g" ]] || [[ "$size" == "4g" ]]; then
                 files=1
-            else
-                files=$FILES
-            fi
+		            block_size="4m"
+	          else
+            	  files=$FILES
+		            block_size=$size
+	          fi
 
             # Write
             $ELBENCHO --hosts $host  \
-                    -w -d --direct -t $threads -n $DIRS -N $files -s $size -b $size --resfile $RESFILE $TESTDIR
+                    -w -d --direct -t $threads -n $DIRS -N $files -s $size -b $block_size --resfile $RESFILE $TESTDIR
             # Read
             $ELBENCHO --hosts $host  \
-                    -r --direct -t $threads -n $DIRS -N $files -s $size -b $size --resfile $RESFILE $TESTDIR
+                    -r --direct -t $threads -n $DIRS -N $files -s $size -b $block_size --resfile $RESFILE $TESTDIR
             # Delete
             $ELBENCHO --hosts $host  \
                     -D -F -t $threads -n $DIRS -N $files $TESTDIR
