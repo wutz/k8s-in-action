@@ -517,7 +517,7 @@ RESFILE=fs.log
 DIRS=1
 FILES=128
 THREADS_LIST="1 4 16 64"
-SIZE_LIST="4k 128k 4m 1g 4g"
+SIZE_LIST="4k 128k 4m 4g"
 HOSTS_LIST="gn001 gn[001-004] gn[001-016]"
 USER=root
 
@@ -537,13 +537,14 @@ for host in $HOSTS_LIST; do
 
     for threads in $thread_list; do
         for size in $SIZE_LIST; do
-            if [[ "$size" == "1g" ]] || [[ "$size" == "4g" ]]; then
+            #如果是以g结尾就设定4m块大小
+            if [[ $(rev <<< "$size" | head -c 1) == "g" ]]; then
                 files=1
-		            block_size="4m"
-	          else
-            	  files=$FILES
-		            block_size=$size
-	          fi
+                block_size="4m"
+            else
+                files=$FILES
+                block_size=$size
+            fi
 
             # Write
             $ELBENCHO --hosts $host  \
