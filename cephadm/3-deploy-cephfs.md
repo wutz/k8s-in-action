@@ -492,7 +492,6 @@ for host in $HOSTS_LIST; do
           $ELBENCHO --hosts $host -w -n 0 -t $threads -s $SIZE -b 4k --direct --iodepth $IODEPTH --rand --timelimit $TIMELIMIT --resfile $RESFILE $TESTDIR
           $ELBENCHO --hosts $host -r -n 0 -t $threads -s $SIZE -b 4k --direct --iodepth $IODEPTH --rand --timelimit $TIMELIMIT --resfile $RESFILE $TESTDIR
           $ELBENCHO --hosts $host -F -n 0 -t $threads $TESTDIR
-        done
     done
 done
 
