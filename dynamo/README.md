@@ -55,7 +55,7 @@
         docker push cr.bj1.example.com/ai-dynamo/dynamo-examples:hello-world
         ```
 
-    * 构建示例程序 llm-agg
+    * 构建示例程序 llm-disagg
 
         ```bash
         # 在容器中构建示例程序
@@ -65,14 +65,14 @@
         export DYNAMO_IMAGE=cr.bj1.example.com/ai-dynamo/dynamo:v0.1.0-vllm
 
         # 构建示例程序
-        dynamo build --containerize graphs.agg:Frontend
+        dynamo build --containerize graphs.disagg:Frontend
 
         # 获取示例程序运行配置, 用于后续部署到 K8S 集群
         dynamo get frontend > values.yml
 
         # 将示例程序镜像推送到镜像仓库, 其中 <image-id> 执行 docker images 获取最近构建的镜像
-        docker tag <image-id> cr.bj1.example.com/ai-dynamo/dynamo-examples:llm-agg
-        docker push cr.bj1.example.com/ai-dynamo/dynamo-examples:llm-agg
+        docker tag <image-id> cr.bj1.example.com/ai-dynamo/dynamo-examples:llm-disagg
+        docker push cr.bj1.example.com/ai-dynamo/dynamo-examples:llm-disagg
         ```
 
 ## 部署到 K8S 集群
@@ -122,7 +122,7 @@
             -d '{"text": "test"}'
         ```
 
-    * 安装 dynamo llm-agg 示例程序
+    * 安装 dynamo llm-disagg 示例程序
 
         * 替换 `dynamo/dynamo-llm/patch.yml` 中的 `image` 为示例程序镜像
         * 替换 `dynamo/dynamo-llm/values.yml` 来自开发机构建执行 `dynamo get frontend` 获取的配置
@@ -142,6 +142,18 @@
         ```bash
         # 查看服务部署情况
         kubectl -n dynamo get po 
+
+        # 启动另外一个终端查看 prefiller 
+        kubectl -n dynamo logs -f dynamo-llm-prefillworker-xxx
+        # 发起请求后应该观察到下面日志, Dequeued prefill request 表示 prefiller 已经收到请求
+        prefill queue handler started
+        Dequeued prefill request: ae666672-e0ec-448d-ad12-17ab16d856f5
+
+        # 启动另外一个终端查看 worker 日志
+        kubectl -n dynamo logs -f dynamo-llm-vllmworker-xxx
+        # 发起请求后应该观察到下面日志, Prefilling remotely for request 表示 worker 发送请求给 Prefiller
+        VllmWorker has been initialized
+        Prefilling remotely for request ae666672-e0ec-448d-ad12-17ab16d856f5 with length 193
 
         # 转发服务的端口到本地 3000 端口
         kubectl -n dynamo port-forward svc/dynamo-llm-frontend 3000:80
