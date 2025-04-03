@@ -470,6 +470,7 @@ USER=root
 FIRST_HOST=$(echo $HOSTS_LIST | awk '{print $1}')
 LAST_HOST=$(echo $HOSTS_LIST | awk '{print $NF}')
 LAST_THREAD=$(echo $THREADS_LIST | awk '{print $NF}')
+TOTAL=64
 
 pdsh -w $USER@$LAST_HOST $ELBENCHO --service
 
