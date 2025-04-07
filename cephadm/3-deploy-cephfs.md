@@ -286,6 +286,75 @@ ceph mds stat
 ceph fs status
 ```
 
+# 回收CephFS
+
+当不再使用某文件系统时需要及时回收相关资源，防止出现资源浪费和信息泄露的情况。
+
+回收文件系统资源分为如下几个步骤
+
+**注意：本章节所描述内容全部需要在Ceph的服务端完成。**
+
+如果没有特殊说明，本章节所描述文件系统使用bj1cfs01，挂载目录使用/share。
+
+## 确认是否被客户端使用
+
+
+通过如下命令确认bj1cfs01文件系统已经没有客户端在使用。
+
+```bash
+# ceph fs status
+bj1cfs01 - 0 clients
+========
+RANK  STATE             MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0    active  bj1cfs01.mds03.uhppzb  Reqs:    0 /s  23.6k    13     12      0
+```
+
+通过上面的ceph fs status命令可以得知该文件系统当前已经没有客户端在使用。该命令可能统计有些延时，也可以通过如下命令实时监控客户端使用情况。
+
+```bash
+# ceph tell mds.bj1cfs01.mds03.uhppzb client ls
+[]
+```
+
+如果得到一个空的数组就表示该文件系统已经没有客户端在使用，可以继续回收操作。
+
+如果文件系统还有被客户端使用，通知管理员进行客户端的卸载。卸载完成后才能进行文件系统的回收工作。
+
+## 清理文件系统上的文件
+
+在进行本章节操作之前请先将被操作的的文件系统挂载到当前服务器的某个目录下。比如将bj1cfs01文件系统挂载到了/share目录下。
+
+本章节的所有操作全部在/share目录下进行。
+
+```bash
+# cd /share
+进入到/share目录下
+# mkdir archive
+创建一个archive目录，将用户文件全部移到该目录下。
+# mkdir empty; rsync -avP --delete empty/ archive/
+一周后执行如下命令进行文件的清理。
+如果rsync命令执行后无法清理文件，还可以尝试使用find+rm的组合命令去清理文件。
+# find . -exec rm -fr {} \;
+如果存在海量的文件和目录结构，建议先清理文件。然后再清理目录。
+```
+
+## 清理客户端认证
+
+清理完文件以后需要更换文件系统客户端认证Key，按照如下步骤进行。
+
+```bash
+# ceph auth ls
+执行上面的命令找到bj1cfs01的客户端认证名称。通常为client.bj1cfs01
+
+# ceph auth rm client.bj1cfs01
+删除原来的认证
+
+# 生成的 client key 同时允许 k8s ceph csi 使用
+# ceph auth get-or-create client.bj1cfs01 osd 'allow rw tag cephfs *=bj1cfs01' mon 'allow r fsname=bj1cfs01' mds 'allow rw fsname=bj1cfs01' mgr 'allow rw' |sudo tee /etc/ceph/ceph.client.bj1cfs01.keyring
+# chmod 600 /etc/ceph/ceph.client.bj1cfs01.keyring
+```
+
+原则上MDS和存储池可以复用，为了防止误操作不建议执行删除操作。
 
 # 故障排除
 
