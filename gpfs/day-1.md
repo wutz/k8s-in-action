@@ -123,13 +123,18 @@ bj1sn004
 bj1gn001
 EOF
 
-mmcrcluster -N NodeList --ccr-enable -r /usr/bin/ssh -R /usr/bin/scp -C bj1
+mmcrcluster -N NodeList --ccr-enable -r /usr/bin/ssh -R /usr/bin/scp -C cluster1.bj1
 
 mmchlicense server --accept -N bj1sn001,bj1sn002,bj1sn003,bj1sn004
 mmchlicense client --accept -N bj1gn001,bj1gn002
 
+# 查看集群配置
 mmlscluster
+
+# 启动集群
 mmstartup -a
+
+# 查看集群状态
 mmgetstate -a
 ```
     
@@ -140,7 +145,7 @@ cat << 'EOF' > gen_nsd.sh
 for node in bj1sn00{1..4}; do
     for dev in nvme{0..7}n1; do
 
-cat << 'IN'
+cat << IN
 %nsd:
     device=/dev/$dev
     nsd=nsd_${node}_${dev}
@@ -154,7 +159,12 @@ IN
 done
 EOF
 sh gen_nsd.sh > NSD
+
+# 创建 NSD
 mmcrnsd -F NSD
+
+# 查看 NSD
+mmlsnsd
 ```
 
 - 在较小存储集群中通常按照节点设置 failureGroup
@@ -162,21 +172,46 @@ mmcrnsd -F NSD
 ## 创建 GPFS
     
 ```bash
+# 创建 GPFS
 mmcrfs bj1fs1 -F NSD -m 2 -r 2 -M 3 -R 3 -A yes -Q yes
+
+# 修改挂载点为 /share
+mmchfs bj1fs1 -T /share
+
+# 挂载 GPFS
 mmmount bj1fs1 -a
 
+# 查看磁盘
 mmlsdisk bj1fs1 -L
+
+# 查看 NSD
 mmlsnsd
+
+# 查看 GPFS
 mmlsfs bj1fs1
+
+# 设置 GPFS 元数据副本为 3, 并且均衡数据
 mmchfs bj1fs1 -m 3 && mmrestripefs bj1fs1 -R
 ```
     
 ## 启用 RoCE/IB 通信
     
 ```bash
-mmchconfig verbsRdma=enable,verbsRdmaSend=yes,verbsPorts="mlx5_bond_0",verbsRdmaCm=enable
+# 启用 IB 通信
+mmchconfig verbsRdma=enable,verbsRdmaSend=yes,verbsPorts="mlx5_0 mlx5_1"
+# 启用 RoCE 通信, 网络配置必须开启 IPv6 且必须设置 `verbsRdmaCm=enable`
+mmchconfig verbsRdma=enable,verbsRdmaSend=yes,verbsPorts="mlx5_0 mlx5_1",verbsRdmaCm=enable
+
+# 关闭集群
 mmshutdown -a
+
+# 启动集群
 mmstartup -a
+
+# 查看 RDMA 是否开启
+mmfsadm test verbs status
+# 测试 RDMA 连接状态
+mmfsadm test verbs conn
+# 查看网络状态
+mmdiag --network
 ```
-    
-- 如果使用 RoCE，网络配置必须开启 IPv6 且必须设置 `verbsRdmaCm=enable`
