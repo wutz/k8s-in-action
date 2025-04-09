@@ -26,30 +26,42 @@
 从 Fix Central 上的 IBM Storage Scale 页面下载补丁包
 
 ```bash
+# 安装 ansible
+apt install ansible 
+pdsh -w ^all apt install -y python3-dmidecode python3-ethtool
+
 # 提取安装包 
 ./Spectrum_Scale_Erasure_Code-5.x.y.z-x86_64-Linux-install --textonly
 
 cd /usr/lpp/mmfs/5.x.y.z/ansible-toolkit/
 
+# 清除节点和配置
+./spectrumscale node clear
+./spectrumscale config clear gpfs --all
+./spectrumscale callhome disable
+
 # 设置类型必须为 ece
 ./spectrumscale setup -s InstallerNodeIP -st ece
 
+# 设置集群名称
+./spectrumscale config gpfs -c bj1cluster1
+
 # 在集群定义文件中添加节点
-./spectrumscale node add NodeName -so
+./spectrumscale node add bj1sn001 -so -q -m -a
+./spectrumscale node add bj1sn002 -so -q -m 
+./spectrumscale node add bj1sn003 -so -q -m 
+./spectrumscale node add bj1sn004 -so
 
 # 显示集群定义文件中指定的节点列表
 ./spectrumscale node list
+
+# 集群定义文件中定义恢复组
+./spectrumscale recoverygroup define -N Node1,Node2,...,NodeN
 
 # 执行环境预检查
 ./spectrumscale install -pr
 
 # 执行安装工具包安装
-./spectrumscale install
-
-# 集群定义文件中定义恢复组
-./spectrumscale recoverygroup define -N Node1,Node2,...,NodeN
-
-# 再次执行安装工具箱安装过程以创建恢复组
 ./spectrumscale install
 ```
 
