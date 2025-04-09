@@ -215,3 +215,27 @@ mmfsadm test verbs conn
 # 查看网络状态
 mmdiag --network
 ```
+
+## 删除 GPFS 集群
+
+```bash
+# 卸载 GPFS
+mmumount all a
+
+# 删除 GPFS
+mmdelfs bj1fs1
+
+# 删除 NSD
+mmdelsnsd -F NSD
+
+# 关闭集群
+mmshutdown -a
+
+# 卸载软件包
+# RHEL/RockyLinux
+pdsh -w ^all 'rpm -e `rpm -qa | grep gpfs`'
+# Ubuntu
+pdsh -w ^all 'dpkg -P `dpkg-query -W -f='\''${Package}\n'\'' | grep gpfs`'
+
+pdsh -w ^all rm -rf /var/mmfs /usr/lpp/mmfs
+```
