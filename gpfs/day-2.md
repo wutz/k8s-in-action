@@ -23,4 +23,9 @@ mmchconfig enforceFilesetQuotaOnRoot=yes -i
 mmsetquota bj1fs1:fset1 --block 95G:100G --files 95K:100K
 # 查看 quota 信息
 mmlsquota -j fset1 bj1fs1
+
+mmqos class create bj1fs1 --class c1 --fileset fset1
+mmqos throttle create bj1fs1 --pool system  --class c1 --maxiops 1000 --maxmbs 100
+mmqos throttle list bj1fs1
+mmqos filesystem enable bj1fs1
 ```
