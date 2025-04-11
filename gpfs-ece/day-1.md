@@ -2,7 +2,7 @@
 
 ## 安装先决条件
 
-* 必须使用 EL8 或 EL9 系统
+* OS 使用 EL8
 * 安装了最新版本的 Mellanox OFED
 * 在 `/etc/hosts` 添加 `<IP address> <Fully qualified domain name> <Short name>` 格式名称解析
 
@@ -61,7 +61,7 @@ source /etc/profile.d/gpfs.sh
 pdsh -w ^all dnf update -y
 pdsh -w ^all reboot
 dnf -y install ansible 
-pdsh -w ^all dnf install -y python3 python3-dmidecode python3-distro python3-ethtool numactl cpp gcc gcc-c++ elfutils elfutils-devel make kernel-devel kernel-headers
+pdsh -w ^all dnf install -y python3 python3-dmidecode python3-distro python3-ethtool numactl cpp gcc gcc-c++ elfutils elfutils-devel make kernel-devel kernel-headers rpm-build
 
 # 提取安装包 
 ./Spectrum_Scale_Erasure_Code-5.x.y.z-x86_64-Linux-install --textonly
