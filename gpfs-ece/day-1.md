@@ -58,8 +58,10 @@ EOF
 source /etc/profile.d/gpfs.sh
 
 # 安装依赖 
+pdsh -w ^all dnf update -y
+pdsh -w ^all reboot
 dnf -y install ansible 
-pdsh -w ^all dnf install -y python3 python3-dmidecode python3-distro python3-ethtool numactl cpp gcc gcc-c++ elfutils elfutils-devel make 
+pdsh -w ^all dnf install -y python3 python3-dmidecode python3-distro python3-ethtool numactl cpp gcc gcc-c++ elfutils elfutils-devel make kernel-devel kernel-headers
 
 # 提取安装包 
 ./Spectrum_Scale_Erasure_Code-5.x.y.z-x86_64-Linux-install --textonly
@@ -88,7 +90,6 @@ cd /usr/lpp/mmfs/5.x.y.z/ansible-toolkit/
 # 执行环境预检查
 ./spectrumscale callhome disable
 ./spectrumscale install -pr
-# pdsh -w ^all dnf install -y kernel-devel-4.18.0-553.el8_10.x86_64 kernel-headers-4.18.0-553.el8_10.x86_64
 
 # 执行安装工具包安装
 ./spectrumscale install --skip no-ece-check
