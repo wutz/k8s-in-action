@@ -279,7 +279,7 @@ mmumount all a
 mmdelfs bj1fs1
 
 # 删除 NSD
-mmdelsnsd -F NSD
+mmdelnsd -F NSD
 
 # 关闭集群
 mmshutdown -a
