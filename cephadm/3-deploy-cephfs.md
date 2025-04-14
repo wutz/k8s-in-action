@@ -167,6 +167,21 @@ ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec
 setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 ```
 
+## 修改纠删码配置（可选）
+
+**注意： 本部分内容只是说明如何修改纠删码池的纠删码配置，默认不用执行**
+
+存储在创建初期可能由于节点个数的问题使用了纠删码配置ec22_ssd，后期随着节点的加入考虑到数据的安全性希望将纠删码配置修改为ec42_ssd。
+
+需要执行如下命令进行调整。
+
+```bash
+ceph osd pool set bj1cfs01_data_ec erasure_code_profile ec42_ssd
+```
+
+**注意：调整纠删码可能会导致该存储池进行数据的重新分配和平衡，执行期间可能会严重影响用户的使用体验。请谨慎执行该操作**
+
+
 # 使用 K8S PVC
 
 > https://github.com/ceph/ceph-csi
@@ -262,6 +277,34 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 ```bash
 ceph config set mds.bj1cfs01 mds_cache_memory_limit 68719476736
 ```
+
+## 开启 MDS standby-replay 功能 （可选）
+
+**注意： 该部分内容需要根据实际需要进行开启。**
+
+standby-replay功能使 standby 实例内存一直维护主的缓存，用于主 mds 故障快速恢复。
+
+执行如下命令开启standby-replay功能
+
+```bash
+开启
+ceph fs set bj1cfs01 allow_standby_replay 1
+关闭
+ceph fs set bj1cfs01 allow_standby_replay 0
+```
+
+开启后如果使用ceph fs status命令，输出与不开启有些差别
+
+```bash
+bj1cfs01 - 3 clients
+========
+RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DIRS   CAPS  
+ 0        active      bj1cfs01.node01.bkyjmn  Reqs:  669 /s  6554k  5029k  3177    787k  
+0-s   standby-replay  bj1cfs01.node02.qwyzzn  Evts: 1196 /s  8113k  5028k  3177      0  
+```
+
+开启后会多出0-s一行，改行用于展示standby的信息。不开启的情况下没有这样内容。
+
 
 ## 多 MDS (可选)
 
