@@ -11,6 +11,8 @@
     192.168.1.102 bj1sn002.example.local bj1sn002
     192.168.1.103 bj1sn003.example.local bj1sn003
     192.168.1.104 bj1sn004.example.local bj1sn004
+    192.168.2.1 bj1cn001.example.local bj1cn001
+    192.168.2.2 bj1cn002.example.local bj1cn002
     EOF
     ```
 
@@ -22,6 +24,8 @@
     ssh-copy-id bj1sn002
     ssh-copy-id bj1sn003
     ssh-copy-id bj1sn004
+    ssh-copy-id bj1cn001
+    ssh-copy-id bj1cn002
     ```
 
 4. 安装 pdsh
@@ -35,6 +39,7 @@
 
     cat << 'EOF' > all
     bj1sn[001-004]
+    bj1cn[001-002]
     EOF
     ```
 
@@ -165,15 +170,16 @@
 cat << 'EOF' > NodeList
 bj1sn001:quorum-manager
 bj1sn002:quorum-manager
-bj1sn003:quorum
-bj1sn004
-bj1gn001
+bj1sn003:quorum-manager
+bj1sn004:manager
+bj1cn001
+bj1cn002
 EOF
 
-mmcrcluster -N NodeList --ccr-enable -r /usr/bin/ssh -R /usr/bin/scp -C cluster1.bj1
+mmcrcluster -N NodeList --ccr-enable -r /usr/bin/ssh -R /usr/bin/scp -C bj1fs1.example.local
 
 mmchlicense server --accept -N bj1sn001,bj1sn002,bj1sn003,bj1sn004
-mmchlicense client --accept -N bj1gn001,bj1gn002
+mmchlicense client --accept -N bj1cn001,bj1cn002
 
 # 查看集群配置
 mmlscluster
