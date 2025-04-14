@@ -303,7 +303,7 @@ RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DI
 0-s   standby-replay  bj1cfs01.node02.qwyzzn  Evts: 1196 /s  8113k  5028k  3177      0  
 ```
 
-开启后会多出0-s一行，改行用于展示standby的信息。不开启的情况下没有这样内容。
+开启后会多出0-s一行，该行用于展示standby的信息。不开启的情况下没有这行内容。
 
 
 ## 多 MDS (可选)
