@@ -23,6 +23,19 @@
 5. 关闭 selinux & firewalld
 6. 配置 ntp 和时区
 7. 配置 `/etc/hosts` 其中每个节点使用格式 `<ip> <fqdn> <alias>`
+8. 更新 kernel 到最新版本
+
+    ```bash
+    # RHEL/RockyLinux
+    pdsh -w ^all 'yum update -y'
+
+    # Ubuntu
+    pdsh -w ^all 'apt update && apt upgrade -y'
+
+    # 重启使用新 kernel
+    pdsh -w ^all reboot
+    ```
+
 
 ## [安装软件包](https://www.ibm.com/docs/en/storage-scale/5.2.2?topic=isslndp-manually-installing-storage-scale-software-packages-linux-nodes)
 
