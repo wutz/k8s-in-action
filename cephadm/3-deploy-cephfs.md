@@ -167,7 +167,7 @@ ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec
 setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 ```
 
-## 【可选】修改纠删码配置
+## 修改纠删码配置（可选）
 
 **注意： 本部分内容只是说明如何修改纠删码池的纠删码配置，默认不用执行**
 
