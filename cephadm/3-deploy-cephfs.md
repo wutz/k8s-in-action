@@ -176,7 +176,18 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 需要执行如下命令进行调整。
 
 ```bash
-ceph osd pool set bj1cfs01_data_ec erasure_code_profile ec42_ssd
+# 创建一个使用ec42_ssd纠删码的存储池
+ceph osd pool create bj1cfs01_data_ec42 erasure ec42_ssd --bulk
+# (可选) 设置此 pool 预计大小，有助于 PG 数量分配到合理值
+ceph osd pool set bj1cfs01_data_ec42 target_size_bytes 200T
+# (必须) 设置此 pool 允许 EC 覆盖写
+ceph osd pool set bj1cfs01_data_ec42 allow_ec_overwrites true
+
+# 添加 ec pool 到 cephfs 中
+ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec42
+
+# 设置 layout 需要 p 权限见 quota 配置 (任意挂载节点执行一次)
+setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec42 /share
 ```
 
 **注意：调整纠删码可能会导致该存储池进行数据的重新分配和平衡，执行期间可能会严重影响用户的使用体验。请谨慎执行该操作**
