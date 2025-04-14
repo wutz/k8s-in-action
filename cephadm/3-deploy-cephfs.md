@@ -278,7 +278,9 @@ ceph osd pool set bj1cfs01_data_ec erasure_code_profile ec42_ssd
 ceph config set mds.bj1cfs01 mds_cache_memory_limit 68719476736
 ```
 
-## 开启 MDS standby-replay 功能
+## 开启 MDS standby-replay 功能 （可选）
+
+**注意： 该部分内容需要根据实际需要进行开启。**
 
 standby-replay功能使 standby 实例内存一直维护主的缓存，用于主 mds 故障快速恢复。
 
@@ -300,6 +302,7 @@ RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DI
  0        active      bj1cfs01.node01.bkyjmn  Reqs:  669 /s  6554k  5029k  3177    787k  
 0-s   standby-replay  bj1cfs01.node02.qwyzzn  Evts: 1196 /s  8113k  5028k  3177      0  
 ```
+
 开启后会多出0-s一行，改行用于展示standby的信息。不开启的情况下没有这样内容。
 
 
