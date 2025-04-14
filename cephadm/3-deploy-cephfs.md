@@ -169,7 +169,7 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 
 ## 【可选】修改纠删码配置
 
-注意： 本部分内容只是说明如何修改纠删码池的纠删码配置，默认不用执行。
+**注意： 本部分内容只是说明如何修改纠删码池的纠删码配置，默认不用执行**
 
 存储在创建初期可能由于节点个数的问题使用了纠删码配置ec22_ssd，后期随着节点的加入考虑到数据的安全性希望将纠删码配置修改为ec42_ssd。
 
@@ -179,7 +179,7 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 ceph osd pool set bj1cfs01_data_ec erasure_code_profile ec42_ssd
 ```
 
-调整纠删码可能会导致该存储池进行数据的重新分配和平衡，执行期间可能会严重影响用户的使用体验。请谨慎执行该操作。
+**注意：调整纠删码可能会导致该存储池进行数据的重新分配和平衡，执行期间可能会严重影响用户的使用体验。请谨慎执行该操作**
 
 
 # 使用 K8S PVC
