@@ -3,8 +3,27 @@
 ## 准备
 
 1. 访问 [https://www.ibm.com/docs/en/storage-scale?topic=STXKQY/gpfsclustersfaq.html](https://www.ibm.com/docs/en/storage-scale?topic=STXKQY/gpfsclustersfaq.html) 检查使用的 GPFS 版本支持 OS 和 MOFED (如果环境配置 IB/RoCE) 版本
-2. 安装 MOFED 驱动并重启
+2. 配置 `/etc/hosts` 其中每个节点使用格式 `<ip> <fqdn> <alias>`
+
+    ```bash
+    cat << 'EOF' >> /etc/hosts
+    192.168.1.101 bj1sn001.example.local bj1sn001
+    192.168.1.102 bj1sn002.example.local bj1sn002
+    192.168.1.103 bj1sn003.example.local bj1sn003
+    192.168.1.104 bj1sn004.example.local bj1sn004
+    EOF
+    ```
+
 3. 配置节点间 SSH 免密
+
+    ```bash
+    ssh-keygen
+    ssh-copy-id bj1sn001
+    ssh-copy-id bj1sn002
+    ssh-copy-id bj1sn003
+    ssh-copy-id bj1sn004
+    ```
+
 4. 安装 pdsh
 
     ```bash
@@ -16,19 +35,33 @@
 
     cat << 'EOF' > all
     bj1sn[001-004]
-    bj1gn[001-002]
     EOF
     ```
 
 5. 关闭 selinux & firewalld
+
+    ```bash
+    # RHEL/RockyLinux
+    pdsh -w ^all 'systemctl disable firewalld --now'
+    pdsh -w ^all 'sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config'
+    ```
+
 6. 配置 ntp 和时区
-7. 配置 `/etc/hosts` 其中每个节点使用格式 `<ip> <fqdn> <alias>`
-8. 更新 kernel 到最新版本
+
+    ```bash
+    # RHEL/RockyLinux
+    pdsh -w ^all 'timedatectl set-timezone Asia/Shanghai'
+    pdsh -w ^all 'yum install -y chrony'
+    pdsh -w ^all 'sed -i 's/^pool.*/pool ntp.aliyun.com iburst/' /etc/chrony.conf'
+    pdsh -w ^all 'systemctl enable --now chronyd'
+    pdsh -w ^all 'chronyc sources'
+    ```
+
+7. 更新 kernel 到最新版本
 
     ```bash
     # RHEL/RockyLinux
     pdsh -w ^all 'yum update -y'
-
     # Ubuntu
     pdsh -w ^all 'apt update && apt upgrade -y'
 
@@ -36,6 +69,7 @@
     pdsh -w ^all reboot
     ```
 
+8. 安装 MOFED 驱动并重启
 
 ## [安装软件包](https://www.ibm.com/docs/en/storage-scale/5.2.2?topic=isslndp-manually-installing-storage-scale-software-packages-linux-nodes)
 
