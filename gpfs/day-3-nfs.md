@@ -145,7 +145,7 @@ mount -t nfs4 sh90gn001:/share/nfs01 /mnt
 移除导出
 
 ```bash
-mmnfs export remove /share/nfsroot/nfs01
+mmnfs export remove /share/nfs01
 ```
 
 关闭NFS服务和节点
@@ -166,6 +166,7 @@ mmunlinkfileset bj1fs1 nfsroot
 删除file
 mmdelfileset bj1fs1 nfs01
 mmdelfileset bj1fs1 nfsroot
+可加-f选项强制删除
 ```
 
 关闭节点的CES功能
