@@ -340,16 +340,15 @@ elbencho -r -b 4M -t 48 --direct -s 100g /dev/nvme{0..11}n1
 iostat -xm 1
 ```
 
-通常情况下NVME盘写入速率为5G/s，如果测得的数据与该值相差很大需要确认是否存在PCIE3掉速的情况。
+通常情况下NVME盘写入速率为5G/s，如果测得的数据与该值相差很大需要确认是否存在PCIE掉速的情况。
 
 ```bash
 
 # lspci -vvv |grep 'Non-Volatile'
 5a:00.0 Non-Volatile memory controller: xxx Microelectronics Co., Ltd NVMe SSD Controller xxx (prog-if 02 [NVM Express])
 ...
-其中第一列5a:00.0是该设备的PCI地址。
+其中第一列5a:00.0是该设备的PCIE地址。
 
-# lspci -s 5a:00.0 -vvvxxx |grep 'Speed'
 # lspci -s 5a:00.0 -vvvxxx |grep 'Speed'
 		LnkCap:	Port #0, Speed 16GT/s, Width x4, ASPM not supported
 		LnkSta:	Speed 16GT/s (ok), Width x1 (downgraded)
