@@ -1,5 +1,7 @@
 # [使用 ansible 自动化部署 k3s](https://github.com/techno-tim/k3s-ansible)
 
+> 只适合部署测试集群
+
 ## 依赖
 
 ```bash
