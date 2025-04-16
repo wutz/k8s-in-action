@@ -22,6 +22,9 @@
     - role: k3s_custom_registries
       become: true
       when: custom_registries
+    - role: k3s_custom_scheduler
+      become: true
+      when: custom_scheduler
 
 - name: Setup k3s servers
   hosts: master
