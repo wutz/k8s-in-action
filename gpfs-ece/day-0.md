@@ -16,7 +16,7 @@ IBM Storage Scale Erasure Code Edition 支持以下纠删码和复制级别：16
     * 单路或双路 Intel 或 AMD x86_64 位处理器，总共有 16 个或更多处理器内核
     * 对于每个节点最多 64 个驱动器的配置，需要 64 GB 或更多内存
     * 每个机柜放置一个服务器
-    * [支持的操作系统和软件版本](https://www.ibm.com/docs/en/storage-scale?topic=STXKQY/gpfsclustersfaq.html#fsi)
+    * [支持的操作系统和软件版本](https://www.ibm.com/docs/en/storage-scale?topic=STXKQY/gpfsclustersfaq.html)
     * 每个存储节点最多支持 64 个驱动器
     * 每个恢复组支持最少 3 个，最多 32 个节点
     * 每个集群最多支持 256 个 IBM Storage Scale Erasure Code Edition 存储节点

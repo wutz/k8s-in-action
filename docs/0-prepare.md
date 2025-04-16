@@ -339,3 +339,26 @@ elbencho -r -b 4M -t 48 --direct -s 100g /dev/nvme{0..11}n1
 # 同时监控 io 性能是否满足设备官方性能标称（通常写比官方高，读略低于官方）
 iostat -xm 1
 ```
+
+通常情况下NVME盘写入速率为5G/s，如果测得的数据与该值相差很大需要确认是否存在PCIE掉速的情况。
+
+```bash
+
+# lspci -vvv |grep 'Non-Volatile'
+5a:00.0 Non-Volatile memory controller: xxx Microelectronics Co., Ltd NVMe SSD Controller xxx (prog-if 02 [NVM Express])
+...
+其中第一列5a:00.0是该设备的PCIE地址。
+
+# lspci -s 5a:00.0 -vvvxxx |grep 'Speed'
+		LnkCap:	Port #0, Speed 16GT/s, Width x4, ASPM not supported
+		LnkSta:	Speed 16GT/s (ok), Width x1 (downgraded)
+		LnkCap2: Supported Link Speeds: 2.5-16GT/s, Crosslink+ Retimer+ 2Retimers+ DRS+
+		LnkCtl2: Target Link Speed: 16GT/s, EnterCompliance- SpeedDis-
+如果输出中出现了downgraded字样表示存在PCIE掉速的情况，执行下面步骤
+# lspci -s 5a:00.0 -vvvxxx |grep 'Physical'
+	Physical Slot: 114
+	Capabilities: [198 v1] Physical Layer 16.0 GT/s <?>
+记住Physical Slot:后面的数字，这里是114，这是该设备的物理槽位号。执行如下命令通知操作系统对此设备下电
+# echo 0 >/sys/bus/pci/slots/114/power
+把设备拔掉30秒后再重新插回原来的槽位确认是否正常，一次不行重复执行几次。
+```

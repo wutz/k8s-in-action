@@ -65,9 +65,9 @@ channels:
   - defaults
 show_channel_urls: true
 default_channels:
-  - https://conda.hs1.paratera.com/get/main
-  - https://conda.hs1.paratera.com/get/r
-  - https://conda.hs1.paratera.com/get/msys2
+  - https://conda.example.com/get/main
+  - https://conda.example.com/get/r
+  - https://conda.example.com/get/msys2
 EOF
 conda clean -i
 ```

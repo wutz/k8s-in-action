@@ -167,6 +167,34 @@ ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec
 setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 ```
 
+## 修改纠删码配置（可选）
+
+**注意： 本部分内容只是说明如何修改纠删码池的纠删码配置，默认不用执行**
+
+存储在创建初期可能由于节点个数的问题使用了纠删码配置ec22_ssd，后期随着节点的加入考虑到数据的安全性希望将纠删码配置修改为ec42_ssd。
+
+注意： Ceph不支持对已存在的存储池修改纠删码配置，需要新建ec42_ssd纠删码存储池并加入到当前文件系统中，然后设定为默认存储池。
+
+需要执行如下命令进行调整。
+
+```bash
+# 创建一个使用ec42_ssd纠删码的存储池
+ceph osd pool create bj1cfs01_data_ec42 erasure ec42_ssd --bulk
+# (可选) 设置此 pool 预计大小，有助于 PG 数量分配到合理值
+ceph osd pool set bj1cfs01_data_ec42 target_size_bytes 200T
+# (必须) 设置此 pool 允许 EC 覆盖写
+ceph osd pool set bj1cfs01_data_ec42 allow_ec_overwrites true
+
+# 添加 ec pool 到 cephfs 中
+ceph fs add_data_pool bj1cfs01 bj1cfs01_data_ec42
+
+# 设置 layout 需要 p 权限见 quota 配置 (任意挂载节点执行一次)
+setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec42 /share
+```
+
+**注意：调整纠删码可能会导致该存储池进行数据的重新分配和平衡，执行期间可能会严重影响用户的使用体验。请谨慎执行该操作**
+
+
 # 使用 K8S PVC
 
 > https://github.com/ceph/ceph-csi
@@ -263,6 +291,34 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec /share
 ceph config set mds.bj1cfs01 mds_cache_memory_limit 68719476736
 ```
 
+## 开启 MDS standby-replay 功能 （可选）
+
+**注意： 该部分内容需要根据实际需要进行开启。**
+
+standby-replay功能使 standby 实例内存一直维护主的缓存，用于主 mds 故障快速恢复。
+
+执行如下命令开启standby-replay功能
+
+```bash
+开启
+ceph fs set bj1cfs01 allow_standby_replay 1
+关闭
+ceph fs set bj1cfs01 allow_standby_replay 0
+```
+
+开启后如果使用ceph fs status命令，输出与不开启有些差别
+
+```bash
+bj1cfs01 - 3 clients
+========
+RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DIRS   CAPS  
+ 0        active      bj1cfs01.node01.bkyjmn  Reqs:  669 /s  6554k  5029k  3177    787k  
+0-s   standby-replay  bj1cfs01.node02.qwyzzn  Evts: 1196 /s  8113k  5028k  3177      0  
+```
+
+开启后会多出0-s一行，该行用于展示standby的信息。不开启的情况下没有这行内容。
+
+
 ## 多 MDS (可选)
 
 - 使用多个 mds 服务 一个 cephfs 可以分担请求压力，以及分散元数据缓存到不同的 mds 上
@@ -286,6 +342,75 @@ ceph mds stat
 ceph fs status
 ```
 
+# 回收CephFS
+
+当不再使用某文件系统时需要及时回收相关资源，防止出现资源浪费和信息泄露的情况。
+
+回收文件系统资源分为如下几个步骤
+
+**注意：本章节所描述内容全部需要在Ceph的服务端完成。**
+
+如果没有特殊说明，本章节所描述文件系统使用bj1cfs01，挂载目录使用/share。
+
+## 确认是否被客户端使用
+
+
+通过如下命令确认bj1cfs01文件系统已经没有客户端在使用。
+
+```bash
+# ceph fs status
+bj1cfs01 - 0 clients
+========
+RANK  STATE             MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0    active  bj1cfs01.mds03.uhppzb  Reqs:    0 /s  23.6k    13     12      0
+```
+
+通过上面的ceph fs status命令可以得知该文件系统当前已经没有客户端在使用。该命令可能统计有些延时，也可以通过如下命令实时监控客户端使用情况。
+
+```bash
+# ceph tell mds.bj1cfs01.mds03.uhppzb client ls
+[]
+```
+
+如果得到一个空的数组就表示该文件系统已经没有客户端在使用，可以继续回收操作。
+
+如果文件系统还有被客户端使用，通知管理员进行客户端的卸载。卸载完成后才能进行文件系统的回收工作。
+
+## 清理文件系统上的文件
+
+在进行本章节操作之前请先将被操作的的文件系统挂载到当前服务器的某个目录下。比如将bj1cfs01文件系统挂载到了/share目录下。
+
+本章节的所有操作全部在/share目录下进行。
+
+```bash
+# cd /share
+进入到/share目录下
+# mkdir archive
+创建一个archive目录，将用户文件全部移到该目录下。
+# mkdir empty; rsync -avP --delete empty/ archive/
+一周后执行如下命令进行文件的清理。
+如果rsync命令执行后无法清理文件，还可以尝试使用find+rm的组合命令去清理文件。
+# find . -exec rm -fr {} \;
+如果存在海量的文件和目录结构，建议先清理文件。然后再清理目录。
+```
+
+## 清理客户端认证
+
+清理完文件以后需要更换文件系统客户端认证Key，按照如下步骤进行。
+
+```bash
+# ceph auth ls
+执行上面的命令找到bj1cfs01的客户端认证名称。通常为client.bj1cfs01
+
+# ceph auth rm client.bj1cfs01
+删除原来的认证
+
+# 生成的 client key 同时允许 k8s ceph csi 使用
+# ceph auth get-or-create client.bj1cfs01 osd 'allow rw tag cephfs *=bj1cfs01' mon 'allow r fsname=bj1cfs01' mds 'allow rw fsname=bj1cfs01' mgr 'allow rw' |sudo tee /etc/ceph/ceph.client.bj1cfs01.keyring
+# chmod 600 /etc/ceph/ceph.client.bj1cfs01.keyring
+```
+
+原则上MDS和存储池可以复用，为了防止误操作不建议执行删除操作。
 
 # 故障排除
 
@@ -451,6 +576,63 @@ ceph tell mds.bjcfs01.mn01.zxhhrq client ls
 
 访问 [elbencho](https://github.com/breuner/elbencho/releases) 下载工具
 
+经过测试，新版本的elbencho貌似有内存泄漏问题。建议使用v3.0.19版本。
+
+#### 大文件读写测试
+
+本章节所示脚本主要进行大文件的如下测试：
+1. 4M顺序读写
+1. 4K随机读写
+
+```bash
+#!/usr/bin/env bash
+
+set -x 
+
+TESTDIR=/share/test
+ELBENCHO=/usr/local/bin/elbencho
+RESFILE=fs.log
+THREADS_LIST="1 4 16 64"
+HOSTS_LIST="gn001 gn[001-004] gn[001-016]"
+USER=root
+IODEPTH=16
+TIMELIMIT=20
+
+FIRST_HOST=$(echo $HOSTS_LIST | awk '{print $1}')
+LAST_HOST=$(echo $HOSTS_LIST | awk '{print $NF}')
+LAST_THREAD=$(echo $THREADS_LIST | awk '{print $NF}')
+TOTAL=64
+
+pdsh -w $USER@$LAST_HOST $ELBENCHO --service
+
+for host in $HOSTS_LIST; do
+    if [ "$host" == "$FIRST_HOST" ]; then
+        thread_list=$THREADS_LIST
+    else
+        thread_list=$LAST_THREAD
+    fi
+
+    for threads in $thread_list; do
+
+          SIZE=$(($TOTAL/$threads))g
+
+          # Sequentially write and read $THREADS large files
+          $ELBENCHO --hosts $host -w -n 0 -t $threads -s $SIZE -b 4m --direct --resfile $RESFILE $TESTDIR
+          $ELBENCHO --hosts $host -r -n 0 -t $threads -s $SIZE -b 4m --direct --resfile $RESFILE $TESTDIR
+
+          # Random write and read IOPS for max $TIMELIMIT seconds:
+          $ELBENCHO --hosts $host -w -n 0 -t $threads -s $SIZE -b 4k --direct --iodepth $IODEPTH --rand --timelimit $TIMELIMIT --resfile $RESFILE $TESTDIR
+          $ELBENCHO --hosts $host -r -n 0 -t $threads -s $SIZE -b 4k --direct --iodepth $IODEPTH --rand --timelimit $TIMELIMIT --resfile $RESFILE $TESTDIR
+          $ELBENCHO --hosts $host -F -n 0 -t $threads $TESTDIR
+    done
+done
+
+$ELBENCHO --hosts $USER@$HOSTS --quit
+```
+
+#### 多文件测试
+
+
 ```bash
 #!/usr/bin/env bash
 
@@ -480,18 +662,21 @@ for host in $HOSTS_LIST; do
 
     for threads in $thread_list; do
         for size in $SIZE_LIST; do
-            if [[ "$size" == "$LAST_SIZE" ]]; then
+            #如果是以g结尾就设定4m块大小
+            if [[ $(rev <<< "$size" | head -c 1) == "g" ]]; then
                 files=1
+                block_size="4m"
             else
                 files=$FILES
+                block_size=$size
             fi
 
             # Write
             $ELBENCHO --hosts $host  \
-                    -w -d --direct -t $threads -n $DIRS -N $files -s $size -b 4m --resfile $RESFILE $TESTDIR
+                    -w -d --direct -t $threads -n $DIRS -N $files -s $size -b $block_size --resfile $RESFILE $TESTDIR
             # Read
             $ELBENCHO --hosts $host  \
-                    -r --direct -t $threads -n $DIRS -N $files -s $size -b 4m --resfile $RESFILE $TESTDIR
+                    -r --direct -t $threads -n $DIRS -N $files -s $size -b $block_size --resfile $RESFILE $TESTDIR
             # Delete
             $ELBENCHO --hosts $host  \
                     -D -F -t $threads -n $DIRS -N $files $TESTDIR
