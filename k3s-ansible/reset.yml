@@ -8,18 +8,3 @@
     - role: raspberrypi
       become: true
       vars: { state: absent }
-  post_tasks:
-    - name: Reboot and wait for node to come back up
-      become: true
-      ansible.builtin.reboot:
-        reboot_command: "{{ custom_reboot_command | default(omit) }}"
-        reboot_timeout: 3600
-
-- name: Revert changes to Proxmox cluster
-  hosts: proxmox
-  gather_facts: true
-  become: true
-  remote_user: "{{ proxmox_lxc_ssh_user }}"
-  roles:
-    - role: reset_proxmox_lxc
-      when: proxmox_lxc_configure
