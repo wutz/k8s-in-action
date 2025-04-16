@@ -38,10 +38,7 @@ ansible-playbook reset.yml -i inventory/bj1/hosts.ini
 
 ```bash
 # 复制配置文件到本地
-scp root@<master_ip>:/etc/rancher/k3s/k3s.yaml ~/.kube/config
-
-# 修改地址
-sed -i 's/127.0.0.1/<master_vip>/' ~/.kube/config
+export KUBECONFIG=$PWD/kubeconfig
 
 # 查看节点
 kubectl get node
