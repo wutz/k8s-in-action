@@ -4,6 +4,30 @@
 
 * 依赖: 参见 [环境准备](../docs/0-prepare.md)
 
+  对于扩容现有Ceph集群操作，需要在执行本文档之前验证新加存储节点与现有客户端的连通性。
+  在现有Ceph集群执行如下命令确认客户端的IP
+  ```bash
+   # ceph fs status
+   找到指定文件系统处于active状态的mds服务
+   # ceph tell mds.bjcfs01.mn01.zxhhrq client ls |grep addr
+    {
+        "id": 205000,
+        "entity": {
+            "name": {
+                "type": "client",
+                "num": 205000
+            },
+            "addr": {
+                "type": "v1",
+                "addr": "10.251.10.17:0",
+                "nonce": 1156683885
+            }
+        }
+      ...
+    }
+   上面得到的信息中addr就是客户端的IP地址，使用ping命令确认当前新加节点与现有客户端的网络连通性。
+  ```
+
 * 环境示例 
 
     | 节点 | Public Network IP | Cluster Network IP |
