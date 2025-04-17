@@ -11,8 +11,8 @@
     192.168.1.102 bj1sn002.example.com bj1sn002
     192.168.1.103 bj1sn003.example.com bj1sn003
     192.168.1.104 bj1sn004.example.com bj1sn004
-    192.168.2.1 bj1cn001.example.com bj1cn001
-    192.168.2.2 bj1cn002.example.com bj1cn002
+    192.168.2.1   bj1cn001.example.com bj1cn001
+    192.168.2.2   bj1cn002.example.com bj1cn002
     EOF
     ```
 
@@ -41,6 +41,9 @@
     bj1sn[001-004]
     bj1cn[001-002]
     EOF
+
+    export PDSH_SSH_ARGS_APPEND="-o StrictHostKeyChecking=no"
+    pdsh -w ^sn hostname
     ```
 
 5. 关闭 selinux & firewalld
