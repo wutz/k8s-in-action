@@ -317,6 +317,23 @@ pdsh -w 10.128.0.1 iperf -i1 -c 10.128.0.2 -P8 -R
 # 依次测试两两节点间网络性能
 ```
 
+注意： 该部分测试中如果ping的延迟大于0.1ms需要注意是不是CPU降频造成的。
+
+通常情况下AMD CPU开启了性能模式后就可以让CPU超过基础频率运行，而INTEL CPU还有深度睡眠模式C1E主要注意。
+
+INTEL CPU的C1E深度睡眠模式在服务器上需要显式的关闭才能有效让处理器运行在基础频率之上。该部分需要再BIOS中设定。
+
+![BIOS C1E 设置](images/c1e.jpeg)
+
+入上图所示，需要做如下调整：
+
+1. Pstates 置为禁用状态。
+1. CPU C6 置为禁用状态。
+1. CPU C1E 置为禁用状态。
+1. Package C State 选择C0C1
+
+编辑好以后保存退出重启服务器，再次确认ping操作延迟问题是否已解决。
+
 ### 磁盘性能测试
 
 访问 [elbencho](https://github.com/breuner/elbencho/releases) 下载 elbencho 二进制文件
