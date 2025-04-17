@@ -298,24 +298,9 @@ ufw status verbose
 
 ## 基础测试
 
-### 网络性能测试
+### 网络连通测试
 
 首先使用 ping 测试节点间延迟，值必须小于 `0.1ms`
-
-```sh
-pdsh -w ^all apt install -y iperf
-
-# 启动 iperf 服务
-pdsh -w ^all iperf -i1 -s
-
-# 打开另外终端
-# 测试上行
-pdsh -w 10.128.0.1 iperf -i1 -c 10.128.0.2 -P8
-# 测试下行
-pdsh -w 10.128.0.1 iperf -i1 -c 10.128.0.2 -P8 -R
-
-# 依次测试两两节点间网络性能
-```
 
 注意： 该部分测试中如果ping的延迟大于0.1ms需要注意是不是CPU降频造成的。
 
@@ -333,6 +318,24 @@ INTEL CPU的C1E深度睡眠模式在服务器上需要显式的关闭才能有�
 1. Package C State 选择C0C1
 
 编辑好以后保存退出重启服务器，再次确认ping操作延迟问题是否已解决。
+
+### 网络性能测试
+
+
+```sh
+pdsh -w ^all apt install -y iperf
+
+# 启动 iperf 服务
+pdsh -w ^all iperf -i1 -s
+
+# 打开另外终端
+# 测试上行
+pdsh -w 10.128.0.1 iperf -i1 -c 10.128.0.2 -P8
+# 测试下行
+pdsh -w 10.128.0.1 iperf -i1 -c 10.128.0.2 -P8 -R
+
+# 依次测试两两节点间网络性能
+```
 
 ### 磁盘性能测试
 
