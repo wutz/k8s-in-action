@@ -511,6 +511,27 @@ root@mn01:~# ceph tell mds.bjcfs01.mn01.zxhhrq client ls |grep client.165916
 
 获取到客户端的IP地址后可以去对应节点观察客户端做了什么操作。
 
+
+除了以上的方法可以获取到客户端的基本信息以外，还可以通过观察mds的日志确认客户端慢请求操作。
+
+注意：以下操作涉及修改MDS服务的日志优先级，可能会影响MDS的响应速度，请谨慎操作。
+
+```bash
+# ceph fs status
+通过该命令找到指定文件系统mds的active服务所在服务器，比如mds.bjcfs01.mn01.zxhhrq所在服务器为mn01
+# ssh mn01
+登录到mn01服务器上
+# journalctl -e -u ceph-2623d358-ee87-11ef-a575-51ec07143d06@mds.bjcfs01.mn01.zxhhrq.service
+
+默认情况下上述日志打印的级别比较低，需要调高日志级别观察到更多信息
+# ceph tell mds.zw3cfs02.zw3mds03.vgjudl config get debug_mds
+获取当前配置值，后面需要恢复回该值，比如当前值为1/5
+# ceph tell mds.zw3cfs02.zw3mds03.vgjudl config set debug_mds 20
+设定更高的优先级会导致mds压力增高，短暂开启后解决完问题需要立马关闭。
+# ceph tell mds.zw3cfs02.zw3mds03.vgjudl config set debug_mds "1/5"
+恢复回原来的值
+```
+
 ### 响应慢处理方案
 
 ####  增加MDS主服务内存容量
