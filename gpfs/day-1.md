@@ -176,7 +176,7 @@ bj1cn001
 bj1cn002
 EOF
 
-mmcrcluster -N NodeList --ccr-enable -r /usr/bin/ssh -R /usr/bin/scp -C bj1.example.com
+mmcrcluster -N NodeList -C bj1.example.com
 
 mmchlicense server --accept -N bj1sn001,bj1sn002,bj1sn003,bj1sn004
 mmchlicense client --accept -N bj1cn001,bj1cn002
