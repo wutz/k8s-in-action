@@ -5,3 +5,9 @@
   roles:
     - role: reset
       become: true
+  post_tasks:
+    - name: Reboot and wait for node to come back up
+      become: true
+      ansible.builtin.reboot:
+        reboot_command: "{{ custom_reboot_command | default(omit) }}"
+        reboot_timeout: 3600
