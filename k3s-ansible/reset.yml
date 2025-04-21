@@ -5,6 +5,3 @@
   roles:
     - role: reset
       become: true
-    - role: raspberrypi
-      become: true
-      vars: { state: absent }
