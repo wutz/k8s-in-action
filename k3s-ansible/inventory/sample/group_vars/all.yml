@@ -139,6 +139,11 @@ proxy_env:
   HTTPS_PROXY: "http://172.18.3.171:3128"
   NO_PROXY: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,*.exmaple.com"
 
+tls:
+  # By default, a newly signed certificate is set to expire 365 days (1 year) after its creation time and date. 
+  # You can use the CATTLE_NEW_SIGNED_CERT_EXPIRATION_DAYS environment variable to change this value.
+  CATTLE_NEW_SIGNED_CERT_EXPIRATION_DAYS: 3650
+
 # Enable most allocated scheduler for GPU clusters.
 custom_scheduler: true
 custom_scheduler_yaml: |
