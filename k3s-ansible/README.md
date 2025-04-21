@@ -22,9 +22,8 @@ ansible-galaxy collection install -r ./collections/requirements.yml
 git clone https://github.com/techno-tim/k3s-ansible.git
 cd k3s-ansible
 
-# 复制示例, 新目录命名集群名称 bj1
+# 复制示例, 新目录命名集群名称, 例如 bj1
 cp -R inventory/sample inventory/bj1
-
 
 # 配置 inventory/bj1/hosts.ini
 # 配置 inventory/bj1/group_vars/all.yml

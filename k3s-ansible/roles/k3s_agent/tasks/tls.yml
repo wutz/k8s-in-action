@@ -1,7 +1,7 @@
 ---
-- name: Create k3s-node.service.d directory
+- name: Create k3s-agent.service.d directory
   ansible.builtin.file:
-    path: "{{ systemd_dir }}/k3s-node.service.d"
+    path: "{{ systemd_dir }}/k3s-agent.service.d"
     state: directory
     owner: root
     group: root
@@ -10,7 +10,7 @@
 - name: Copy K3s tls conf file
   ansible.builtin.template:
     src: tls.conf.j2
-    dest: "{{ systemd_dir }}/k3s-node.service.d/tls.conf"
+    dest: "{{ systemd_dir }}/k3s-agent.service.d/tls.conf"
     owner: root
     group: root
     mode: "0755"

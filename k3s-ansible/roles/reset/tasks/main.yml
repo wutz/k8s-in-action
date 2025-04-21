@@ -7,7 +7,7 @@
   failed_when: false
   with_items:
     - k3s
-    - k3s-node
+    - k3s-agent
     - k3s-init
 
 - name: RUN pkill -9 -f "k3s/data/[^/]+/bin/containerd-shim-runc"
@@ -36,7 +36,9 @@
   with_items:
     - /usr/local/bin/k3s
     - "{{ systemd_dir }}/k3s.service"
-    - "{{ systemd_dir }}/k3s-node.service"
+    - "{{ systemd_dir }}/k3s.service.d"
+    - "{{ systemd_dir }}/k3s-agent.service"
+    - "{{ systemd_dir }}/k3s-agent.service.d"
     - /etc/rancher/k3s
     - /run/k3s
     - /run/flannel
@@ -46,17 +48,6 @@
     - /var/lib/rancher/
     - /var/lib/cni/
     - /etc/cni/net.d
-
-- name: Remove K3s http_proxy files
-  ansible.builtin.file:
-    name: "{{ item }}"
-    state: absent
-  with_items:
-    - "{{ systemd_dir }}/k3s.service.d/http_proxy.conf"
-    - "{{ systemd_dir }}/k3s.service.d"
-    - "{{ systemd_dir }}/k3s-node.service.d/http_proxy.conf"
-    - "{{ systemd_dir }}/k3s-node.service.d"
-  when: proxy_env is defined
 
 - name: Reload daemon_reload
   ansible.builtin.systemd:
