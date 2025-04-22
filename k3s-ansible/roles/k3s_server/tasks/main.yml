@@ -1,22 +1,9 @@
 ---
-- name: Stop k3s-init
-  ansible.builtin.systemd:
-    name: k3s-init
-    state: stopped
-  failed_when: false
-
-# k3s-init won't work if the port is already in use
 - name: Stop k3s
   ansible.builtin.systemd:
     name: k3s
     state: stopped
   failed_when: false
-
-- name: Clean previous runs of k3s-init # noqa command-instead-of-module
-  # The systemd module does not support "reset-failed", so we need to resort to command.
-  ansible.builtin.command: systemctl reset-failed k3s-init
-  failed_when: false
-  changed_when: false
 
 - name: Deploy K3s http_proxy conf
   ansible.builtin.include_tasks: http_proxy.yml
@@ -37,35 +24,6 @@
   ansible.builtin.include_tasks: kube-vip.yml
   tags: kubevip
   when: kube_vip_lb_ip_range is defined
-
-- name: Init cluster inside the transient k3s-init service
-  ansible.builtin.command:
-    cmd: systemd-run -p RestartSec=2 -p Restart=on-failure --unit=k3s-init k3s server {{ server_init_args }}
-    creates: "{{ systemd_dir }}/k3s-init.service"
-
-- name: Verification
-  when: not ansible_check_mode
-  block:
-    - name: Verify that all nodes actually joined (check k3s-init.service if this fails)
-      ansible.builtin.command:
-        cmd: "{{ k3s_kubectl_binary | default('k3s kubectl') }} get nodes -l 'node-role.kubernetes.io/master=true' -o=jsonpath='{.items[*].metadata.name}'" # yamllint disable-line rule:line-length
-      register: nodes
-      until: nodes.rc == 0 and (nodes.stdout.split() | length) == (groups[group_name_master | default('master')] | length) # yamllint disable-line rule:line-length
-      retries: "{{ retry_count | default(20) }}"
-      delay: 10
-      changed_when: false
-  always:
-    - name: Save logs of k3s-init.service
-      ansible.builtin.include_tasks: fetch_k3s_init_logs.yml
-      when: log_destination
-      vars:
-        log_destination: >-
-          {{ lookup('ansible.builtin.env', 'ANSIBLE_K3S_LOG_DIR', default=False) }}
-    - name: Kill the temporary service used for initialization
-      ansible.builtin.systemd:
-        name: k3s-init
-        state: stopped
-      failed_when: false
 
 - name: Copy K3s service file
   register: k3s_service
