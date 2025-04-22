@@ -24,6 +24,21 @@
         name: socat
         state: present
 
+- name: Increase inotify number to fix kubectl logs issue too many open files
+  block:
+    - name: Increase inotify max user instances
+      ansible.posix.sysctl:
+        name: fs.inotify.max_user_instances
+        value: "1280"
+        state: present
+        reload: true
+    - name: Increase inotify max user watches
+      ansible.posix.sysctl:
+        name: fs.inotify.max_user_watches
+        value: "655360"
+        state: present
+        reload: true
+
 - name: Enable IPv4 forwarding
   ansible.posix.sysctl:
     name: net.ipv4.ip_forward
