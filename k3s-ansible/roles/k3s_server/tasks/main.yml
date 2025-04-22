@@ -56,6 +56,20 @@
         mode: "0644"
       register: _server_config_result
 
+- name: Setup optional scheduler config file
+  when: scheduler_config_yaml is defined
+  block:
+    - name: Make scheduler config directory
+      ansible.builtin.file:
+        path: "/etc/rancher/k3s"
+        mode: "0755"
+        state: directory
+    - name: Copy scheduler config values
+      ansible.builtin.copy:
+        content: "{{ scheduler_config_yaml }}"
+        dest: "/etc/rancher/k3s/scheduler.yaml"
+        mode: "0644"
+
 - name: Init first server node
   when: inventory_hostname == groups[server_group][0] or ansible_host == groups[server_group][0]
   block:

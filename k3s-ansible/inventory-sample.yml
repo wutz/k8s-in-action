@@ -25,6 +25,11 @@ k3s_cluster:
     iface: ens160
     k3s_node_ip: "{{ ansible_facts[iface]['ipv4']['address']}}"
 
+    proxy_env:
+      HTTP_PROXY: "http://172.18.3.171:3128"
+      HTTPS_PROXY: "http://172.18.3.171:3128"
+      NO_PROXY: "127.0.0.1/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,*.example.com"
+
     # Optional vars
     # extra_server_args: ""
     # extra_agent_args: ""
@@ -56,6 +61,11 @@ k3s_cluster:
       disable:
       - traefik
       - servicelb
+      {% if scheduler_config_yaml is defined %}
+      kube-scheduler-arg:
+      - authentication-tolerate-lookup-failure=false
+      - config=/etc/rancher/k3s/scheduler.yaml
+      {% endif %}
     agent_config_yaml: |
       node-ip: {{ k3s_node_ip }}
       kubelet-arg:
@@ -67,8 +77,22 @@ k3s_cluster:
         docker.io:
           endpoint:
             - "https://mirror.gcr.io"
-
-    proxy_env:
-      HTTP_PROXY: "http://172.18.3.171:3128"
-      HTTPS_PROXY: "http://172.18.3.171:3128"
-      NO_PROXY: "127.0.0.1/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,*.example.com"
+    scheduler_config_yaml: |
+      apiVersion: kubescheduler.config.k8s.io/v1
+      kind: KubeSchedulerConfiguration
+      clientConnection:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+      profiles:
+      - pluginConfig:
+        - args:
+            scoringStrategy:
+              resources:
+              - name: cpu
+                weight: 1
+              - name: memory
+                weight: 1
+              - name: nvidia.com/gpu
+                weight: 3
+              type: MostAllocated
+          name: NodeResourcesFit
+    
