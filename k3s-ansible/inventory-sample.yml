@@ -42,18 +42,26 @@ k3s_cluster:
     # extra_manifests: [ '/path/to/manifest1.yaml', '/path/to/manifest2.yaml' ]
     # airgap_dir: /tmp/k3s-airgap-images
 
-    # server_config_yaml:  |
-    #   This is now an inner yaml file. Maintain the indentation.
-    #   YAML here will be placed as the content of /etc/rancher/k3s/config.yaml
-    #   See https://docs.k3s.io/installation/configuration#configuration-file
-    # agent_config_yaml:  |
-    #   Same as server_config_yaml, but for the agent nodes.
-    #   YAML here will be placed as the content of /etc/rancher/k3s/config.yaml
-    #   See https://docs.k3s.io/installation/configuration#configuration-file
-    # registries_config_yaml:  |
-    #   Containerd can be configured to connect to private registries and use them to pull images as needed by the kubelet.
-    #   YAML here will be placed as the content of /etc/rancher/k3s/registries.yaml
-    #   See https://docs.k3s.io/installation/private-registry
+    server_config_yaml: |
+      cluster-cidr: 172.24.0.0/13
+      service-cidr: 172.23.0.0/16
+      disable:
+      - traefik
+      - servicelb
+      kubelet-arg:
+      - runtime-request-timeout=15m
+      - container-log-max-files=3
+      - container-log-max-size=10Mi
+    agent_config_yaml: |
+      kubelet-arg:
+      - runtime-request-timeout=15m
+      - container-log-max-files=3
+      - container-log-max-size=10Mi
+    registries_config_yaml: |
+      mirrors:
+        docker.io:
+          endpoint:
+            - "https://mirror.gcr.io"
 
     proxy_env:
       HTTP_PROXY: "http://172.18.3.171:3128"
