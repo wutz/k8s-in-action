@@ -4,10 +4,10 @@ k3s_cluster:
     server:
       hosts:
         172.18.15.101:
-    agent:
-      hosts:
         172.18.15.102:
         172.18.15.103:
+    agent:
+      hosts:
         172.18.15.104:
 
   # Required Vars
