@@ -11,6 +11,19 @@
     name: policycoreutils  # Used by install script to restore SELinux context
     update_cache: true
 
+- name: Install socat for support kubectl port-forward
+  block:
+    - name: Install socat for Ubuntu
+      when: ansible_os_family == 'Debian'
+      ansible.builtin.apt:
+        name: socat
+        state: present
+    - name: Install socat for CentOS/RHEL/Rocky Linux
+      when: ansible_os_family == 'RedHat'
+      ansible.builtin.yum:
+        name: socat
+        state: present
+
 - name: Enable IPv4 forwarding
   ansible.posix.sysctl:
     name: net.ipv4.ip_forward
