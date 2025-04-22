@@ -68,6 +68,13 @@
   with_items:
     - "K3S_TOKEN={{ token }}"
 
+- name: Add agent environment variables
+  when: extra_agent_envs is defined
+  ansible.builtin.lineinfile:
+    path: "{{ systemd_dir }}/k3s-agent.service.env"
+    line: "{{ item }}"
+  with_items: "{{ extra_agent_envs }}"
+
 - name: Copy K3s service file
   register: k3s_agent_service
   ansible.builtin.template:

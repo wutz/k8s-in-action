@@ -29,7 +29,12 @@ k3s_cluster:
     # api_port: 6443
     # k3s_server_location: /var/lib/rancher/k3s
     # systemd_dir: /etc/systemd/system
-    # extra_service_envs: [ 'ENV_VAR1=VALUE1', 'ENV_VAR2=VALUE2' ]
+    extra_envs:
+    - CATTLE_NEW_SIGNED_CERT_EXPIRATION_DAYS=3650
+    extra_server_envs: >-
+      {{ extra_envs }}
+    extra_agent_envs: >-
+      {{ extra_envs }}
     # user_kubectl: true, by default kubectl is symlinked and configured for use by ansible_user. Set to false to only kubectl via root user.
 
     # Manifests or Airgap should be either full paths or relative to the playbook directory.
