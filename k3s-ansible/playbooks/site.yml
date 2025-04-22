@@ -1,0 +1,24 @@
+---
+- name: Cluster prep
+  hosts: k3s_cluster
+  environment: "{{ proxy_env | default({}) }}"
+  gather_facts: true
+  become: true
+  roles:
+    - role: prereq
+    - role: airgap
+    - role: raspberrypi
+
+- name: Setup K3S server
+  hosts: server
+  environment: "{{ proxy_env | default({}) }}"
+  become: true
+  roles:
+    - role: k3s_server
+
+- name: Setup K3S agent
+  hosts: agent
+  environment: "{{ proxy_env | default({}) }}"
+  become: true
+  roles:
+    - role: k3s_agent
