@@ -58,6 +58,7 @@ k3s_cluster:
       - container-log-max-size=10Mi
       cluster-cidr: 172.24.0.0/13
       service-cidr: 172.23.0.0/16
+      embedded-registry: true
       disable:
       - traefik
       - servicelb
