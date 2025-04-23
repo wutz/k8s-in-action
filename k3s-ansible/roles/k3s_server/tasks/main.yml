@@ -252,7 +252,6 @@
           register: apply_ms
           changed_when: "'patched' in apply_ms.stdout"
 
-
         - name: Copy local-storage patch file
           ansible.builtin.template:
             src: "local-storage-patch.yaml.j2"
@@ -349,6 +348,13 @@
       retries: 20
       delay: 10
       changed_when: false
+
+- name: Taint control-plane node
+  when:
+    - ansible_host in groups[server_group]
+  ansible.builtin.command:
+    cmd: >
+      k3s kubectl taint nodes {{ ansible_fqdn }} node-role.kubernetes.io/control-plane=true:NoSchedule
 
 - name: Setup kubectl for user
   when: user_kubectl
