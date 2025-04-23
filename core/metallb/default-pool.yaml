@@ -2,16 +2,17 @@ apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
   name: default
-  namespace: metallb
+  namespace: metallb-system
 spec:
   addresses:
-    - 10.128.0.100-10.128.0.199
+    # [需要修改] 从数据中心管理员获取空闲 IP 地址池
+    - 172.18.15.190-172.18.15.199
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
   name: default
-  namespace: metallb
+  namespace: metallb-system
 spec:
   ipAddressPools:
     - default
@@ -19,4 +20,5 @@ spec:
     - matchLabels:
         node-role.kubernetes.io/control-plane: "true"
   interfaces:
-    - eth0
+    # [需要修改] 指定 IPAddressPool 所在的网络接口 
+    - ens160

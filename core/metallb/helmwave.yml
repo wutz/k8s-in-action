@@ -1,5 +1,5 @@
 project: "metallb"
-version: "0.36.3"
+version: "0.40.0"
 
 .options:
   &options # if set, upgrade process rolls back changes made in case of failed upgrade.
@@ -11,7 +11,7 @@ version: "0.36.3"
   # limit the maximum number of revisions saved per release.
   max_history: 3
   # create the release namespace if not present.
-  namespace: metallb
+  namespace: metallb-system
   create_namespace: true
   pending_release_strategy: rollback
 
