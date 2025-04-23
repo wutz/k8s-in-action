@@ -60,9 +60,6 @@ k3s_cluster:
       service-cidr: 172.23.0.0/16
       embedded-registry: true
       disable:
-      - coredns
-      - metrics-server
-      - local-storage
       - traefik
       - servicelb
       {% if scheduler_config_yaml is defined %}
