@@ -354,7 +354,7 @@
     - ansible_host in groups[server_group]
   ansible.builtin.command:
     cmd: >
-      k3s kubectl taint nodes {{ ansible_fqdn }} node-role.kubernetes.io/control-plane=true:NoSchedule
+      k3s kubectl taint nodes {{ ansible_fqdn }} node-role.kubernetes.io/control-plane=true:NoSchedule --overwrite
 
 - name: Setup kubectl for user
   when: user_kubectl

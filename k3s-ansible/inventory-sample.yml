@@ -78,6 +78,13 @@ k3s_cluster:
         docker.io:
           endpoint:
             - "https://mirror.gcr.io"
+        registry.k8s.io:
+        gcr.io:
+        ghcr.io:
+        nvcr.io:
+        k8s.gcr.io:
+        quay.io:
+        cr.example.com:
     scheduler_config_yaml: |
       apiVersion: kubescheduler.config.k8s.io/v1
       kind: KubeSchedulerConfiguration
