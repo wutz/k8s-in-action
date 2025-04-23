@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: apiserver
+  namespace: kube-system
+  annotations:
+    metallb.universe.tf/address-pool: default
+    metallb.universe.tf/loadBalancerIPs: 172.18.15.199
+spec:
+  ports:
+  - name: https
+    port: 6443
+    protocol: TCP
+    targetPort: 6443
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: apiserver
+  namespace: kube-system
+subsets:
+- addresses:
+  - ip: 172.18.15.101
+  - ip: 172.18.15.102
+  - ip: 172.18.15.103
+  ports:
+  - name: https
+    port: 6443
+    protocol: TCP
