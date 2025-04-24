@@ -26,4 +26,6 @@ releases:
       name: nfd/node-feature-discovery
       version: v0.17.2
     values:
-      - values/nfd.yml
+      - nfd/values.yml
+    tags:
+      - nfd
