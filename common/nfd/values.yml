@@ -57,7 +57,9 @@ master:
     name: node-feature-discovery
     create: true
   config:
-    extraLabelNs: ["nvidia.com"]
+    extraLabelNs: ["nvidia.com", "node-role.kubernetes.io", "node.kubernetes.io", "beta.kubernetes.io"]
+    restrictions:
+      allowOverride: true
     # noPublish: false
     # resourceLabels: ["nvidia.com/feature-1","nvidia.com/feature-2"]
     # enableTaints: false

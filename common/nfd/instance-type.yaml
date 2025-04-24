@@ -1,0 +1,30 @@
+apiVersion: nfd.k8s-sigs.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: instance-type
+spec:
+  rules:
+    - name: "cpu-node"
+      labels:
+        "node-role.kubernetes.io/cpu": "true"
+        # [需要修改]
+        "beta.kubernetes.io/instance-type": "cd-a128"
+      matchFeatures:
+        - feature: system.name
+          matchExpressions:
+            # [需要修改]
+            nodename: { op: InRegexp, value: ["^c", "^bj1sn002"] }
+
+    - name: "gpu-node"
+      labels:
+        "node-role.kubernetes.io/gpu": "true"
+        # [需要修改]
+        "beta.kubernetes.io/instance-type": "gd-8xh100ib-i128"
+      taints:
+        - key: nvidia.com/gpu
+          effect: NoSchedule
+      matchFeatures:
+        - feature: system.name
+          matchExpressions:
+            # [需要修改]
+            nodename: { op: InRegexp, value: ["^g", "^bj1sn004"] }

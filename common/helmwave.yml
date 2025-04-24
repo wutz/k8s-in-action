@@ -27,5 +27,8 @@ releases:
       version: v0.17.2
     values:
       - nfd/values.yml
+    lifecycle:
+      post_up:
+        - kubectl apply -k nfd/
     tags:
       - nfd
