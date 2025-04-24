@@ -1,0 +1,65 @@
+enableNodeFeatureApi: true
+priorityClassName: system-node-critical
+gc:
+  enable: true
+  replicaCount: 2
+  serviceAccount:
+    name: node-feature-discovery
+    create: false
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+  tolerations:
+    - key: "node-role.kubernetes.io/master"
+      operator: "Equal"
+      value: ""
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Equal"
+      value: ""
+      effect: "NoSchedule"
+worker:
+  serviceAccount:
+    name: node-feature-discovery
+    # disable creation to avoid duplicate serviceaccount creation by master spec below
+    create: false
+  tolerations:
+    - key: "node-role.kubernetes.io/master"
+      operator: "Equal"
+      value: ""
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Equal"
+      value: ""
+      effect: "NoSchedule"
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+  config:
+    sources:
+      pci:
+        deviceClassWhitelist:
+          - "02"
+          - "0200"
+          - "0207"
+          - "0300"
+          - "0302"
+        deviceLabelFields:
+          - vendor
+master:
+  replicaCount: 2
+  serviceAccount:
+    name: node-feature-discovery
+    create: true
+  config:
+    extraLabelNs:
+      ["nvidia.com", "node.kubernetes.io", "node-role.kubernetes.io"]
+    # noPublish: false
+    # resourceLabels: ["nvidia.com/feature-1","nvidia.com/feature-2"]
+    # enableTaints: false
+    # labelWhiteList: "nvidia.com/gpu
