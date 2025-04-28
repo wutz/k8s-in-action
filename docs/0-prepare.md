@@ -220,20 +220,13 @@ pdsh -w ^all "sed -i 's/^\/swap/#&/' /etc/fstab"
 
 ### 开启 CPU Performance Mode
 
-```sh
-cat << 'EOF' > cpufrequtils
-GOVERNOR="performance"
-EOF
-pdsh -w ^all apt install cpufrequtils -y
-pdcp -w ^all cpufrequtils /etc/default
-pdsh -w ^all systemctl restart cpufrequtils
+如果节点间 `ping` 延迟大于 `0.1ms`， 则需要在 BIOS 中禁用 `SpeedStep` 和 `C1E` 模式
 
+```sh
 # 查看当前 CPU 频率 (执行任意命令即可)
 pdsh -w ^all 'apt install linux-tools-common linux-tools-`uname -r` -y'
 turbostat --interval 1
 ```
-
-如果节点间 `ping` 延迟大于 `0.1ms`， 则需要在 BIOS 中禁用 `SpeedStep` 和 `C1E` 模式
 
 ### 锁定内核版本，避免驱动失效
 
