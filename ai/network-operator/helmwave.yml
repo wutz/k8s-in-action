@@ -1,5 +1,5 @@
 project: "network-operator"
-version: "0.36.3"
+version: "0.41.0"
 
 .options:
   &options # if set, upgrade process rolls back changes made in case of failed upgrade.
@@ -24,6 +24,12 @@ releases:
     <<: *options
     chart:
       name: nvidia/network-operator
-      version: v24.4.0
+      version: v25.1.0
     values:
       - values.yml
+    lifecycle:
+      post_up:
+        - kubectl apply -f nic-cluster-policy.yaml
+      pre_down:
+        - kubectl delete -f nic-cluster-policy.yaml
+

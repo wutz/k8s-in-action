@@ -74,9 +74,9 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
 
 ## AI
 
-1. [部署 Node Feature Discovery](nfd/README.md)
+1. [部署 Node Feature Discovery](common/nfd/README.md)
 2. [部署 GPU Operator 支持 GPU 设备](gpu-operator/README.md)
-3. [部署 Network Operator 支持 Infiniband/RoCE 设备](network-operator/README.md)
+3. [部署 Network Operator 支持 Infiniband/RoCE 设备](ai/network-operator/README.md)
 
 ### 推理
 

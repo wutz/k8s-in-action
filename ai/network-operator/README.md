@@ -2,7 +2,7 @@
 
 当配置了 Infiniband 或者 RoCE 设备时，才需要安装 Network Operator。
 
-- 修改 `values.yml` 中需要使用的设备
+- 修改 `nic-cluster-policy.yml` 中需要使用的设备
 
   ```sh
   lspci -nn |grep -i mellanox
@@ -10,7 +10,7 @@
   5d:00.0 Ethernet controller [0200]: Mellanox Technologies MT2892 Family [ConnectX-6 Dx] [15b3:101d]
   ```
 
-  > 假如只使用 Infiniband 设备，则设置 Vendor ID 为 15b3, Device ID 为 1021
+  > 假如只使用 Infiniband 设备，则 Vendor ID 为 15b3, Device ID 为 1021
 
 - 部署
 
