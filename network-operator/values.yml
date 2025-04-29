@@ -4,7 +4,7 @@ deployCR: true
 rdmaSharedDevicePlugin:
   deploy: true
   resources:
-    - name: ib
+    - name: hca
       vendors: [15b3]
       deviceIDs: ["1021"]
       rdmaHcaMax: 63
