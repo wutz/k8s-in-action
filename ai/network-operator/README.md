@@ -8,6 +8,7 @@
 
   ```sh
   helmwave up --build
+  kubectl apply -f ib.yaml
   ```
 - 测试
 
@@ -40,6 +41,7 @@
   mkdir /opt/cni && ln -s /var/lib/rancher/k3s/data/cni /opt/cni/bin
 
   helmwave up --build
+  kubectl apply -f roce.yaml
   ```
 - 测试
 
