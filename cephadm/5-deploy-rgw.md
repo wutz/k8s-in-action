@@ -261,6 +261,8 @@ warp mixed \
 ```
 
 * 如果使用 https 则加上参数 `--tls`
+* 在命令前增加time命令得出程序执行时间
+* 分别测试--duration 1m和--duration 10m两种持续时间的性能数据
 
 ### elbencho
 
