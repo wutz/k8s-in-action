@@ -325,6 +325,57 @@ done
 $ELBENCHO --hosts $USER@$HOSTS --quit
 ```
 
+### juicefs objbench
+
+访问如下地址获取该测试官方的说明： https://juicefs.com/docs/community/performance_evaluation_guide/#juicefs-objbench
+
+```bash
+ACCESS_KEY=xxx SECRET_KEY=xxxxxx ./juicefs objbench --storage s3  https://s3.example.com -p 64
+通过调整线程个数找到一个速率和响应时间的最佳值
+```
+
+测试结果示例
+```txt
+Start Functional Testing ...
++----------+---------------------+--------------------------------------------------+
+| CATEGORY |         TEST        |                      RESULT                      |
++----------+---------------------+--------------------------------------------------+
+|    basic |     create a bucket |                                             pass |
+|    basic |       put an object |                                             pass |
+|    basic |       get an object |                                             pass |
+|    basic |       get non-exist |                                             pass |
+|    basic |  get partial object | failed to get object with the offset out of r... |
+|    basic |      head an object |                                             pass |
+|    basic |    delete an object |                                             pass |
+|    basic |    delete non-exist |                                             pass |
+|    basic |        list objects |                                             pass |
+|     sync |         special key |                                             pass |
+|     sync |    put a big object |                                             pass |
+|     sync | put an empty object |                                             pass |
+|     sync |    multipart upload |                                             pass |
+|     sync |  change owner/group |                                      not support |
+|     sync |   change permission |                                      not support |
+|     sync |        change mtime |                                      not support |
++----------+---------------------+--------------------------------------------------+
+
+Start Performance Testing ...
+Benchmark finished! block-size: 4.0 MiB, big-object-size: 1.0 GiB, small-object-size: 128 KiB, small-objects: 100, NumThreads: 64
++--------------------+---------------------+------------------+
+|        ITEM        |        VALUE        |       COST       |
++--------------------+---------------------+------------------+
+|     upload objects |       1833.13 MiB/s | 139.65 ms/object |
+|   download objects |       4434.44 MiB/s |  57.73 ms/object |
+|  put small objects |    3213.6 objects/s |  19.92 ms/object |
+|  get small objects |   11424.6 objects/s |   5.60 ms/object |
+|       list objects | 297093.01 objects/s |      21.54 ms/op |
+|       head objects |   30424.6 objects/s |   2.10 ms/object |
+|     delete objects |   11096.3 objects/s |   5.77 ms/object |
+| change permissions |         not support |      not support |
+| change owner/group |         not support |      not support |
+|       update mtime |         not support |      not support |
++--------------------+---------------------+------------------+
+```
+
 # 其它
 
 ## 调整同时最大 backfills 数
