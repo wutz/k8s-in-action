@@ -27,9 +27,3 @@ releases:
       version: v25.1.0
     values:
       - values.yml
-    lifecycle:
-      post_up:
-        - kubectl apply -f nic-cluster-policy.yaml
-      pre_down:
-        - kubectl delete -f nic-cluster-policy.yaml
-

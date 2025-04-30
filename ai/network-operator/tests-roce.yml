@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rdma-test-pod-1
+  annotations:
+    k8s.v1.cni.cncf.io/networks: default/rdma-net-ipam
+spec:
+  nodeSelector:
+    # 修改实际节点名称
+    kubernetes.io/hostname: gn001
+  restartPolicy: OnFailure
+  containers:
+  - image: mellanox/rping-test 
+    name: rdma-test-ctr
+    securityContext:
+      capabilities:
+        add: [ "IPC_LOCK" ]
+    resources:
+      limits:
+        rdma/hca: 1
+    command:
+    - sh
+    - -c
+    - |
+      sleep infinity
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rdma-test-pod-2
+  annotations:
+    k8s.v1.cni.cncf.io/networks: default/rdma-net-ipam
+spec:
+  nodeSelector:
+    # 修改实际节点名称
+    kubernetes.io/hostname: gn002
+  restartPolicy: OnFailure
+  containers:
+  - image: mellanox/rping-test 
+    name: rdma-test-ctr
+    securityContext:
+      capabilities:
+        add: [ "IPC_LOCK" ]
+    resources:
+      limits:
+        rdma/hca: 1
+    command:
+    - sh
+    - -c
+    - |
+      sleep infinity
