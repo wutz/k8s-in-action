@@ -311,10 +311,10 @@ for host in $HOSTS_LIST; do
                     -d $S3BUCKET
             # Write
             $ELBENCHO --hosts $host --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                    -w -t $threads -n $DIRS -N $files -s $size -b 4m --resfile $RESFILE $S3BUCKET
+                    -w -t $threads -n $DIRS -N $files -s $size -b $size --resfile $RESFILE $S3BUCKET
             # Read
             $ELBENCHO --hosts $host --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
-                    -r -t $threads -n $DIRS -N $files -s $size -b 4m --resfile $RESFILE $S3BUCKET
+                    -r -t $threads -n $DIRS -N $files -s $size -b $size --resfile $RESFILE $S3BUCKET
             # Delete
             $ELBENCHO --hosts $host --s3endpoints $S3SERVER --s3key $S3KEY --s3secret $S3SECRET \
                     -D -F -t $threads -n $DIRS -N $files $S3BUCKET
