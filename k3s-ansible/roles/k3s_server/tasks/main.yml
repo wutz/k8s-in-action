@@ -252,24 +252,6 @@
           register: apply_ms
           changed_when: "'patched' in apply_ms.stdout"
 
-        - name: Copy local-storage patch file
-          ansible.builtin.template:
-            src: "local-storage-patch.yaml.j2"
-            dest: "/tmp/k3s/local-storage-patch.yaml"
-            owner: root
-            group: root
-            mode: "0644"
-        - name: Patch local-storage service
-          ansible.builtin.command:
-            cmd: kubectl patch deployment -n kube-system local-path-provisioner --patch-file /tmp/k3s/local-storage-patch.yaml
-          register: apply_ls
-          changed_when: "'patched' in apply_ls.stdout"
-        - name: Patch local-storage service to remove default storage class
-          ansible.builtin.command:
-            cmd: kubectl annotate storageclass local-path storageclass.kubernetes.io/is-default-class-
-          register: apply_ls
-          changed_when: "'patched' in apply_ls.stdout"
-
 - name: Start other server if any and verify status
   when:
     - (groups[server_group] | length) > 1
