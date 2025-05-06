@@ -1,0 +1,14 @@
+version: "0.41.0"
+
+repositories:
+  - name: cilium
+    url: https://helm.cilium.io/
+
+releases:
+  - name: cilium
+    namespace: kube-system
+    chart:
+      name: cilium/cilium
+      version: 1.17.3
+    values:
+      - values.yml
