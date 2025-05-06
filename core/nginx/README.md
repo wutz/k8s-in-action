@@ -1,13 +1,19 @@
 # Ingress Nginx
 
-> [Ingress-Nginx Controller](https://kubernetes.github.io/ingress-nginx/)
+提供 Ingress 服务
 
 ## 部署
 
-修改 [patch.yaml](patch.yaml) 符合实际情况
+修改 [values.yaml](values.yaml) 中的配置 `controller.service.loadBalancerIP` 为 Service Nginx 的 IP 地址
 
 ```sh
-kubectl apply -k .
+helmwave up --build
+
+# 等待 Ingress-Nginx 启动
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
 ```
 
 配置 DNS 解析到 Service Nginx 的 IP 上 (需要联系 DNS 管理员配置解析)
@@ -24,5 +30,5 @@ kubectl get svc ingress-nginx-controller -n ingress-nginx
 ## 卸载
 
 ```sh
-kubectl delete -k .
+helmwave down
 ```

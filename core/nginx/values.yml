@@ -1,0 +1,19 @@
+controller:
+  replicaCount: 2
+  ingressClassResource:
+    default: true
+  service:
+    annotations:
+      metallb.universe.tf/address-pool: default
+      # [需要修改] 指定 Service Load Balancer 的 IP, 防止意外重建时 IP 变化
+      # 一般选择 metallb ipAddressPools 中地址池倒数第二个地址
+      metallb.universe.tf/loadBalancerIPs: "172.18.15.198"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+  tolerations:
+    - operator: Exists

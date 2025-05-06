@@ -5,6 +5,7 @@ metadata:
   namespace: kube-system
   annotations:
     metallb.universe.tf/address-pool: default
+    # 修改为实际分配的 vip, 一般选择 metallb ip pool 最后一个地址
     metallb.universe.tf/loadBalancerIPs: 172.18.15.199
 spec:
   ports:
@@ -21,6 +22,7 @@ metadata:
   namespace: kube-system
 subsets:
 - addresses:
+  # 修改为实际的 apiserver 成员节点 IP
   - ip: 172.18.15.101
   - ip: 172.18.15.102
   - ip: 172.18.15.103

@@ -1,0 +1,20 @@
+version: "0.41.0"
+
+repositories:
+  - name: metallb
+    url: https://metallb.github.io/metallb
+
+releases:
+  - name: metallb
+    namespace: metallb-system
+    create_namespace: true
+    chart:
+      name: metallb/metallb
+      version: v0.14.9
+    values:
+      - values.yml
+    lifecycle:
+      post_up:
+        - kubectl apply -f default-pool.yaml
+      pre_down:
+        - kubectl delete -f default-pool.yaml
