@@ -15,31 +15,14 @@ gc:
               - key: node-role.kubernetes.io/control-plane
                 operator: Exists
   tolerations:
-    - key: "node-role.kubernetes.io/master"
-      operator: "Equal"
-      value: ""
-      effect: "NoSchedule"
-    - key: "node-role.kubernetes.io/control-plane"
-      operator: "Equal"
-      value: ""
-      effect: "NoSchedule"
+    - operator: "Exists"
 worker:
   serviceAccount:
     name: node-feature-discovery
     # disable creation to avoid duplicate serviceaccount creation by master spec below
     create: false
   tolerations:
-    - key: "node-role.kubernetes.io/master"
-      operator: "Equal"
-      value: ""
-      effect: "NoSchedule"
-    - key: "node-role.kubernetes.io/control-plane"
-      operator: "Equal"
-      value: ""
-      effect: "NoSchedule"
-    - key: nvidia.com/gpu
-      operator: Exists
-      effect: NoSchedule
+    - operator: "Exists"
   config:
     sources:
       pci:

@@ -4,3 +4,4 @@
 2. 部署 [metallb](metallb/) 用于提供 LoadBalancer 服务
 3. 部署 [apiserver-lb](apiserver-lb/) 用于提供 API Server 面向外部负载均衡服务
 4. 部署 [nginx](nginx/) 用于提供 Nginx Ingress 服务
+5. 部署 [nfd](nfd/) 用于提供硬件特性检测服务, 并将其作为 Label 附加到节点上

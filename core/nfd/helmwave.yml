@@ -1,0 +1,20 @@
+version: "0.41.0"
+
+repositories:
+  - name: nfd
+    url: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+
+releases:
+  - name: nfd
+    namespace: nfd
+    create_namespace: true
+    chart:
+      name: nfd/node-feature-discovery
+      version: v0.17.2
+    values:
+      - values.yml
+    lifecycle:
+      post_up:
+        - kubectl apply -k .
+      pre_down:
+        - kubectl delete -k .
