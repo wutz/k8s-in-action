@@ -2,6 +2,10 @@
 
 用于支持配置 GPU 设备的 Kubernetes 集群, 主要包含安装 GPU 驱动，Container Runtime Nvidia, K8S Device Plugin 等
 
+- 准备
+
+  宿主机安装最新 GPU 驱动
+
 - 部署
 
   ```sh
