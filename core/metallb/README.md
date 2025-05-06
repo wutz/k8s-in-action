@@ -11,7 +11,7 @@
 helmwave up --build
 
 # 等待所有 pod 就绪
-kubectl wait -n kube-system --for=condition=ready pod -l app.kubernetes.io/instance=metallb
+kubectl wait -n metallb-system --for=condition=ready pod -l app.kubernetes.io/instance=metallb
 ```
 
 ## 使用
