@@ -16,18 +16,18 @@ kind: NicClusterPolicy
 metadata:
   name: nic-cluster-policy
 spec:
-  ofedDriver:
-    image: doca-driver
-    repository: nvcr.io/nvidia/mellanox
-    version: 25.01-0.6.0.0-0
-    upgradePolicy:
-      autoUpgrade: true
-      drain:
-        deleteEmptyDir: true
-        enable: true
-        force: true
-        timeoutSeconds: 300
-      maxParallelUpgrades: 1
+  # ofedDriver:
+  #   image: doca-driver
+  #   repository: nvcr.io/nvidia/mellanox
+  #   version: 25.01-0.6.0.0-0
+  #   upgradePolicy:
+  #     autoUpgrade: true
+  #     drain:
+  #       deleteEmptyDir: true
+  #       enable: true
+  #       force: true
+  #       timeoutSeconds: 300
+  #     maxParallelUpgrades: 1
   rdmaSharedDevicePlugin:
     image: k8s-rdma-shared-dev-plugin
     repository: ghcr.io/mellanox
