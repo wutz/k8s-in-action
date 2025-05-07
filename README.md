@@ -74,20 +74,7 @@ k3s 缺省安装 local-path 存储，适合缓存数据或者支持 HA 的数据
 
 ## AI
 
-1. [部署 Node Feature Discovery](common/nfd/README.md)
-2. [部署 GPU Operator 支持 GPU 设备](gpu-operator/README.md)
-3. [部署 Network Operator 支持 Infiniband/RoCE 设备](ai/network-operator/README.md)
-
-### 推理
-
-1. [部署 Ollama + Open WebUI 推理服务](ollama/README.md)
-2. 部署 Serverless 服务 KNative
-3. 部署推理服务 KServe + vLLM
-
-### 训练
-
-1. [部署 MPI Operator 支持训练](mpi-operator/README.md)
-2. [部署 Training Operator](training-operator/README.md)
+部署用于 [AI](ai/) 相关计算服务
 
 ### 其他
 
