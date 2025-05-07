@@ -29,9 +29,6 @@ Ceph RBD 是 Ceph 提供的块存储服务，常用于数据库、虚拟机、�
    ceph osd pool set-quota bj1rbd01 max_bytes 10995116277760
    # 查看bj1rbd01的quota设定
    ceph osd pool get-quota bj1rbd01
-   quotas for pool 'bj1rbd01':
-   max objects: N/A
-   max bytes  : 10 TiB  (current num bytes: 19 bytes)
    ```
     
 3. 生成 Client 访问 Key
