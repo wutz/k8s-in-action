@@ -4,14 +4,18 @@
 
 ## 部署
 
-根据实际情况修改 [default-pool.yaml](default-pool.yaml) 中的 IP 地址池和其所在的 interface
-
 ```sh
 # 部署 
 helmwave up --build
 
 # 等待所有 pod 就绪
 kubectl wait -n metallb-system --for=condition=ready pod -l app.kubernetes.io/instance=metallb
+```
+
+根据实际情况修改 [default-pool.yaml](default-pool.yaml) 中的 IP 地址池和其所在的 interface
+
+```sh
+kubectl apply -k .
 ```
 
 ## 使用
@@ -41,5 +45,7 @@ EOF
 ## 卸载
 
 ```sh 
+kubectl delete -k .
+
 helmwave down
 ```

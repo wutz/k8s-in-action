@@ -3,13 +3,12 @@ k3s_cluster:
   children:
     server:
       hosts:
-        10.128.0.1:
-        10.128.0.2:
-        10.128.0.3:
+        172.18.15.101:
+        172.18.15.102:
+        172.18.15.103:
     agent:
       hosts:
-        10.128.1.1:
-        10.128.1.2:
+        172.18.15.104:
 
   # Required Vars
   vars:
@@ -20,15 +19,15 @@ k3s_cluster:
     # The token should be a random string of reasonable length. You can generate
     # one with the following commands:
     # - tr -dc a-z0-9 </dev/urandom | head -c 32
-    token: "changeme!!!"
+    token: "krxmr046wt51ua9zbpfglrru8czpkdm0"
     api_endpoint: "{{ hostvars[groups['server'][0]]['ansible_host'] | default(groups['server'][0]) }}"
     # interface which will be used for cni
     iface: ens160
     k3s_node_ip: "{{ ansible_facts[iface]['ipv4']['address']}}"
 
     proxy_env:
-      HTTP_PROXY: "http://100.68.3.1:3128"
-      HTTPS_PROXY: "http://100.68.3.1:3128"
+      HTTPS_PROXY: "http://172.18.3.171:8080"
+      HTTP_PROXY: "http://172.18.3.171:8080"
       NO_PROXY: "127.0.0.1/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,localhost,*.example.com"
 
     # Optional vars
@@ -54,9 +53,8 @@ k3s_cluster:
       cluster-cidr: 172.24.0.0/13
       service-cidr: 172.23.0.0/16
       tls-san:
-      - 10.128.0.201
+      - 172.18.15.199
       flannel-backend: "none"
-      disable-kube-proxy: true
       disable-network-policy: true
       disable:
       - traefik

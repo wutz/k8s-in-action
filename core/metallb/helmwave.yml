@@ -13,8 +13,3 @@ releases:
       version: v0.14.9
     values:
       - values.yml
-    lifecycle:
-      post_up:
-        - kubectl apply -f default-pool.yaml
-      pre_down:
-        - kubectl delete -f default-pool.yaml

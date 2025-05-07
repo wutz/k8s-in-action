@@ -17,3 +17,7 @@ controller:
                 operator: Exists
   tolerations:
     - operator: Exists
+  admissionWebhooks:
+    patch:
+      tolerations:
+        - operator: Exists

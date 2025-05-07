@@ -13,3 +13,10 @@ kubectl apply -k .
 ## 使用
 
 修改本地的 `kubeconfig` 文件中的 `server` 字段为 `apiserver-lb` 的 vip 地址
+
+## 卸载
+
+```sh
+kubectl delete -k .
+```
+
