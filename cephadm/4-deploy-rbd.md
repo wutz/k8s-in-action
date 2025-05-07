@@ -21,8 +21,20 @@ Ceph RBD 是 Ceph 提供的块存储服务，常用于数据库、虚拟机、�
     # 初始化 pool 用于 rbd
     rbd pool init bj1rbd01
     ```
+
+    Ceph支持为存储池创建quota
+
+   ```bash
+   # 为bj1rbd01设置quota为10T
+   ceph osd pool set-quota bj1rbd01 max_bytes 10995116277760
+   # 查看bj1rbd01的quota设定
+   ceph osd pool get-quota bj1rbd01
+   quotas for pool 'bj1rbd01':
+   max objects: N/A
+   max bytes  : 10 TiB  (current num bytes: 19 bytes)
+   ```
     
-2. 生成 Client 访问 Key
+3. 生成 Client 访问 Key
     
     ```bash
     ceph auth get-or-create client.bj1rbd01 mon 'profile rbd' osd 'profile rbd pool=bj1rbd01' mgr 'profile rbd pool=bj1rbd01' |tee /etc/ceph/ceph.client.bj1rbd01.keyring
