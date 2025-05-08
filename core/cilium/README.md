@@ -4,7 +4,7 @@
 
 ## 部署
 
-修改 [values.yaml](values.yaml) 中的配置 `k8sServiceHost` 和 `k8sServicePort` 为 API Server 的地址和端口
+修改 [values.yaml](values.yaml) 中的配置 `devices` 为实际的网卡名称
 
 ```sh
 # 部署 helm

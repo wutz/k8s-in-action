@@ -15,7 +15,7 @@
 # masqueraded (to an output device IPv4 address), if the output device runs the
 # program. When not specified, probing will automatically detect devices that have
 # a non-local route. This should be used only when autodetection is not suitable.
-# devices: ""
+devices: "ens160"
 
 # -- Roll out cilium agent pods automatically when configmap is updated.
 rollOutCiliumPods: false
