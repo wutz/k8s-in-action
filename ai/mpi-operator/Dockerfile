@@ -1,8 +1,6 @@
-FROM qwenllm/qwen:1.5-cu121
+FROM ubuntu:22.04
 
 RUN set -eux; \
-    # pip install
-    pip install mdit-py-plugins==0.3.3 trl==0.8.6 transformers==4.37.2 gradio==3.38.0; \
     # apt install
     sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list; \
     apt-get update; \
