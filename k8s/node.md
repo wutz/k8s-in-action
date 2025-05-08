@@ -12,10 +12,8 @@ brew install pdsh
 
 # 生成 hosts 用于后续执行 pdsh / pdcp
 cat << 'EOF' > all
-root@10.128.0.[1-3]
-root@10.128.1.[1-3]
-root@100.68.16.[1-3]
-root@100.68.20.[1-4]
+bj1mn[01-03]
+bj1gn[001-003]
 EOF
 
 # 设置 pdsh 使用 ssh 而非缺省的 rsh
@@ -167,6 +165,24 @@ EOF
 
 pdcp -w ^all nolinuxupgrades /etc/apt/preferences.d/nolinuxupgrades
 ```
+
+### 修复 `kubectl logs` 输出 `too many open files` 错误
+
+```sh
+cat << 'EOF' > 80-inotify.conf
+fs.inotify.max_user_instances=1280
+fs.inotify.max_user_watches=655360
+EOF
+
+pdcp -w ^all 80-inotify.conf /etc/sysctl.d
+pdsh -w ^all sysctl --system
+```
+
+### 修复 `kubectl port-forward` 输出 `unable to do port forwarding: socat not found` 错误
+
+```sh
+pdsh -w ^all apt install -y socat
+
 
 ## 安全
 
