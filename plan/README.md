@@ -1,6 +1,6 @@
 # 集群架构与命名
 
-![k8s-arch](images/k8s-arch.png)
+![arch](arch.png)
 
 ## 命名
 
