@@ -3,6 +3,22 @@
   hosts: k3s_cluster
   become: true
   tasks:
+    - name: "Remove cilium interfaces"
+      ansible.builtin.shell:
+        cmd: "ip link delete {{ item }} || :"
+      with_items:
+        - cilium_host
+        - cilium_net
+        - cilium_vxlan
+      ignore_errors: true
+    - name: "Remove cilium from iptables4"
+      ansible.builtin.shell:
+        cmd: iptables-save | grep -iv cilium | iptables-restore
+      ignore_errors: true
+    - name: "Remove cilium from iptables6"
+      ansible.builtin.shell:
+        cmd: ip6tables-save | grep -iv cilium | ip6tables-restore
+      ignore_errors: true
     - name: Run K3s Uninstall script [server]
       when: "'server' in group_names"
       ansible.builtin.command:
@@ -13,6 +29,13 @@
       ansible.builtin.command:
         cmd: k3s-agent-uninstall.sh
         removes: /var/lib/rancher/k3s/*
+    - name: "Remove cni directory"
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /opt/cni
+        - /etc/cni
     - name: Remove user kubeconfig
       ansible.builtin.file:
         path: ~{{ ansible_user }}/.kube/config
@@ -26,11 +49,14 @@
       ansible.builtin.shell:
         cmd: "rm -rf {{ k3s_server_location }}/*"
         removes: "{{ k3s_server_location }}/*"
-    - name: Remove K3s config
+    - name: Remove k3s config
       when: server_config_yaml is defined
       ansible.builtin.file:
-        path: /etc/rancher/k3s/config.yaml
+        path: "{{ item }}"
         state: absent
+      loop:
+        - /etc/rancher/k3s
+        - /etc/rancher/node
 
 - name: Undo user setup
   hosts: server
