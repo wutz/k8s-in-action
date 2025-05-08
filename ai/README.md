@@ -13,11 +13,13 @@
 1. 部署 [mpi-operator](mpi-operator/) 用于提供 MPI 分布式训练服务
 2. 部署 [train-operator](train-operator/) 用于提供 Pytorch 等分别训练服务
 
-### 性能测试
-
-* [nccl-tests](nccl-tests/) 用于测试 NCCL 性能
-
 ## 推理
 
 1. 部署 lws 用于分布式推理
 2. 部署 [ollama](ollama/) 用于提供 Ollama+OpenWebUI 轻量推理服务
+
+## 性能测试
+
+* [nccl-tests](nccl-tests/) 用于测试 NCCL 性能
+* nvbandwidth 用于 Host(CPU) 与 Device(GPU) 间内存带宽测试, 以及 Device(GPU) 间内存带宽测试
+
