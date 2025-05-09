@@ -57,8 +57,12 @@
 
 - 部署 [local-storage](local-storage/) 用于提供本地系统盘 csi 服务, 适合缓存数据或者支持 HA 的数据库使用
 - 部署 [nfs-csi](nfs-csi/) 用于提供 NFS 存储服务, 适合外部带 HA 的 NAS 服务，或者自建无 HA 的 NFS Server 小规模环境或者开发环境
-- 部署 [rook](rook/) 用于提供基于 Ceph 的块存储，文件系统和对象存储服务，适合存储和计算在同一集群。如果 Ceph 存储为外部集群，则参考 [使用 Cephadm 部署 Ceph](../storage/cephadm/)
-- 部署 [juicefs](juicefs/) 用于提供 JuiceFS 存储服务, 适合计算集群在云上，或者有外部提供 RDS 和对象存储的环境
+- 部署 Ceph CSI 存储
+  - 存储与计算在同一集群: 部署 [rook](rook/) 用于提供基于 Ceph 的块存储，文件系统和对象存储服务
+  - 存储来自计算集群之外：
+    - 部署 [ceph-csi-cephfs](ceph-csi-cephfs/) 用于提供基于 Ceph 的文件系统存储服务
+    - 部署 [ceph-csi-rbd](ceph-csi-rbd/) 用于提供基于 Ceph 的块存储服务
+- 部署 [juicefs-csi](juicefs/) 用于提供 JuiceFS 存储服务, 适合计算集群在云上，或者有外部提供 RDS 和对象存储的环境
 
 ### 存储性能测试
 
