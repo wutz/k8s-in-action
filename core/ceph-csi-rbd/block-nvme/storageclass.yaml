@@ -1,0 +1,19 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: block-nvme
+parameters:
+  clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
+  pool: bj1rbd01
+  csi.storage.k8s.io/controller-expand-secret-name: csi-block-nvme-secret
+  csi.storage.k8s.io/controller-expand-secret-namespace: ceph-csi-rbd
+  csi.storage.k8s.io/node-stage-secret-name: csi-block-nvme-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: ceph-csi-rbd
+  csi.storage.k8s.io/provisioner-secret-name: csi-block-nvme-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: ceph-csi-rbd
+  csi.storage.k8s.io/fstype: ext4
+  imageFeatures: layering
+provisioner: rbd.csi.ceph.com
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+allowVolumeExpansion: true

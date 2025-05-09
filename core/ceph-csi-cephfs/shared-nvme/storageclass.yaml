@@ -4,14 +4,14 @@ metadata:
   name: shared-nvme
 parameters:
   clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
+  fsName: bj1cfs01
   csi.storage.k8s.io/controller-expand-secret-name: csi-shared-nvme-secret
   csi.storage.k8s.io/controller-expand-secret-namespace: ceph-csi-cephfs
   csi.storage.k8s.io/node-stage-secret-name: csi-shared-nvme-secret
   csi.storage.k8s.io/node-stage-secret-namespace: ceph-csi-cephfs
   csi.storage.k8s.io/provisioner-secret-name: csi-shared-nvme-secret
   csi.storage.k8s.io/provisioner-secret-namespace: ceph-csi-cephfs
-  fsName: bj1cfs01
 provisioner: cephfs.csi.ceph.com
-reclaimPolicy: Retain
+reclaimPolicy: Delete
 volumeBindingMode: Immediate
 allowVolumeExpansion: true

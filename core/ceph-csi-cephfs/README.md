@@ -18,7 +18,7 @@
 
     假如命名 storageclass 为 `shared-nvme`，则需要创建 `shared-nvme` 目录，并创建 `secret.yaml` 和 `storageclass.yaml` 文件
 
-    其中 `secret.yaml` 文件中的 `adminID` 来自 `ceph.client.bj1cfs01.keyring` 名称 `bj1cfs01`, `adminKey` 来自 `ceph.client.bj1cfs01.keyring` 文件内容
+    其中 `secret.yaml` 文件中的 `userID` 来自 `ceph.client.bj1cfs01.keyring` 名称 `bj1cfs01`, `userKey` 来自 `ceph.client.bj1cfs01.keyring` 文件内容
     其中 `storageclass.yaml` 文件中的 `fsName` 来自 `ceph.client.bj1cfs01.keyring` 名中的 `bj1cfs01`
 
     ```bash
