@@ -16,7 +16,7 @@ secretGenerator:
   options:
     disableNameSuffixHash: true
   type: Opaque
-namespace: juicefs
+namespace: juicefs-csi
 resources:
 - secret.yaml
 - storageclass.yaml

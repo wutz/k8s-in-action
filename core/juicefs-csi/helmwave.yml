@@ -1,0 +1,15 @@
+version: "0.41.0"
+
+repositories:
+  - name: juicefs
+    url: https://juicedata.github.io/charts/
+
+releases:
+  - name: "juicefs-csi-driver"
+    namespace: "juicefs-csi"
+    create_namespace: true
+    chart:
+      name: juicefs/juicefs-csi-driver
+      version: 0.21.1
+    values:
+      - values.yml
