@@ -621,124 +621,12 @@ ceph tell mds.bjcfs01.mn01.zxhhrq client ls
 
 参考文档:  https://docs.ceph.com/en/latest/cephfs/eviction/
 
-
 ## 性能测试
 
-### elbencho
-
-访问 [elbencho](https://github.com/breuner/elbencho/releases) 下载工具
-
-经过测试，新版本的elbencho貌似有内存泄漏问题。建议使用v3.0.19版本。
-
-#### 大文件读写测试
-
-本章节所示脚本主要进行大文件的如下测试：
-1. 4M顺序读写
-1. 4K随机读写
-
-```bash
-#!/usr/bin/env bash
-
-set -x 
-
-TESTDIR=/share/test
-ELBENCHO=/usr/local/bin/elbencho
-RESFILE=fs.log
-THREADS_LIST="1 4 16 64"
-HOSTS_LIST="gn001 gn[001-004] gn[001-016]"
-USER=root
-IODEPTH=16
-TIMELIMIT=20
-
-FIRST_HOST=$(echo $HOSTS_LIST | awk '{print $1}')
-LAST_HOST=$(echo $HOSTS_LIST | awk '{print $NF}')
-LAST_THREAD=$(echo $THREADS_LIST | awk '{print $NF}')
-TOTAL=64
-
-pdsh -w $USER@$LAST_HOST $ELBENCHO --service
-
-for host in $HOSTS_LIST; do
-    if [ "$host" == "$FIRST_HOST" ]; then
-        thread_list=$THREADS_LIST
-    else
-        thread_list=$LAST_THREAD
-    fi
-
-    for threads in $thread_list; do
-
-          SIZE=$(($TOTAL/$threads))g
-
-          # Sequentially write and read $THREADS large files
-          $ELBENCHO --hosts $host -w -n 0 -t $threads -s $SIZE -b 4m --direct --resfile $RESFILE $TESTDIR
-          $ELBENCHO --hosts $host -r -n 0 -t $threads -s $SIZE -b 4m --direct --resfile $RESFILE $TESTDIR
-
-          # Random write and read IOPS for max $TIMELIMIT seconds:
-          $ELBENCHO --hosts $host -w -n 0 -t $threads -s $SIZE -b 4k --direct --iodepth $IODEPTH --rand --timelimit $TIMELIMIT --resfile $RESFILE $TESTDIR
-          $ELBENCHO --hosts $host -r -n 0 -t $threads -s $SIZE -b 4k --direct --iodepth $IODEPTH --rand --timelimit $TIMELIMIT --resfile $RESFILE $TESTDIR
-          $ELBENCHO --hosts $host -F -n 0 -t $threads $TESTDIR
-    done
-done
-
-$ELBENCHO --hosts $USER@$HOSTS --quit
-```
-
-#### 多文件测试
-
-
-```bash
-#!/usr/bin/env bash
-
-TESTDIR=/share/test
-ELBENCHO=/usr/local/bin/elbencho
-RESFILE=fs.log
-DIRS=1
-FILES=128
-THREADS_LIST="1 4 16 64"
-SIZE_LIST="4m 4k"
-HOSTS_LIST="gn001 gn[001-004] gn[001-016]"
-USER=root
-
-FIRST_HOST=$(echo $HOSTS_LIST | awk '{print $1}')
-LAST_HOST=$(echo $HOSTS_LIST | awk '{print $NF}')
-LAST_THREAD=$(echo $THREADS_LIST | awk '{print $NF}')
-LAST_SIZE=$(echo $SIZE_LIST | awk '{print $NF}')
-
-pdsh -w $USER@$LAST_HOST $ELBENCHO --service
-
-for host in $HOSTS_LIST; do
-    if [ "$host" == "$FIRST_HOST" ]; then
-        thread_list=$THREADS_LIST
-    else
-        thread_list=$LAST_THREAD
-    fi
-
-    for threads in $thread_list; do
-        for size in $SIZE_LIST; do
-            #如果是以g结尾就设定4m块大小
-            if [[ $(rev <<< "$size" | head -c 1) == "g" ]]; then
-                files=1
-                block_size="4m"
-            else
-                files=$FILES
-                block_size=$size
-            fi
-
-            # Write
-            $ELBENCHO --hosts $host  \
-                    -w -d --direct -t $threads -n $DIRS -N $files -s $size -b $block_size --resfile $RESFILE $TESTDIR
-            # Read
-            $ELBENCHO --hosts $host  \
-                    -r --direct -t $threads -n $DIRS -N $files -s $size -b $block_size --resfile $RESFILE $TESTDIR
-            # Delete
-            $ELBENCHO --hosts $host  \
-                    -D -F -t $threads -n $DIRS -N $files $TESTDIR
-        done
-    done
-done
-
-$ELBENCHO --hosts $USER@$HOSTS --quit
-```
+使用 [elbencho](../../core/elbencho/) 测试 CephFS 性能
 
 ## 监控
 
 如果没有 `ceph_mds_xxx` metrics 需要执行 `ceph config set mgr mgr/prometheus/exclude_perf_counters false` 切回从 mgr 获取 metrics
+
+
