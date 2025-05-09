@@ -195,91 +195,15 @@ setfattr -n ceph.dir.layout.pool -v bj1cfs01_data_ec42 /share
 **注意：调整纠删码可能会导致该存储池进行数据的重新分配和平衡，执行期间可能会严重影响用户的使用体验。请谨慎执行该操作**
 
 
-# 使用 K8S PVC
+## 使用 K8S PVC
 
-> https://github.com/ceph/ceph-csi
+创建 subvolumegroup
+    
+```bash
+ceph fs subvolumegroup create bj1cfs01 csi
+```
 
-1. 创建 subvolumegroup
-    
-    ```bash
-    ceph fs subvolumegroup create bj1cfs01 csi
-    ```
-    
-2. 准备 helm values.yaml
-    
-    ```yaml
-    storageClass:
-      create: true
-      name: csi-cephfs-sc
-      clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
-      fsName: bj1cfs01
-    secret:
-      create: true
-      adminID: bj1cfs01
-      adminKey: <---key--->
-    csiConfig:
-      - clusterID: c966095a-6e4e-11ef-82d6-0131360f7c6f
-        monitors:
-          - 10.128.0.101:6789
-          - 10.128.0.102:6789
-          - 10.128.0.103:6789
-          - 10.128.0.104:6789
-          - 10.128.0.105:6789
-    ```
-    
-    - clusterID, monitors 来自配置 ceph.conf
-    - adminID, adminKey 来自配置 ceph.client.bj1cfs01.keyring
-
-3. 安装 ceph-csi
-    
-    ```bash
-    $ helm repo add ceph-csi https://ceph.github.io/csi-charts
-    $ kubectl create namespace ceph-csi-cephfs
-    $ helm install --namespace "ceph-csi-cephfs" -f values.yaml "ceph-csi-cephfs" ceph-csi/ceph-csi-cephfs
-    $ helm status "ceph-csi-cephfs"
-    
-    # 比如在需要自定义 image, 可以使用 raw yaml 安装，这时执行 helm template 导出
-    $ helm template -f myvalues.yaml  ceph-csi/ceph-csi-cephfs > ceph-csi.yaml
-    $ kubectl apply -f ceph-csi.yaml
-    ```
-    
-4. 运行 ceph pvc 示例
-    
-    ```yaml
-    ---
-    apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      name: csi-cephfs-pvc
-    spec:
-      accessModes:
-        - ReadWriteMany
-      resources:
-        requests:
-          storage: 1Gi
-      storageClassName: csi-cephfs-sc
-    ---
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: csi-cephfs-demo-pod
-    spec:
-      containers:
-        - name: web-server
-          image: docker.io/library/nginx:latest
-          volumeMounts:
-            - name: mypvc
-              mountPath: /var/lib/www
-      volumes:
-        - name: mypvc
-          persistentVolumeClaim:
-            claimName: csi-cephfs-pvc
-            readOnly: false
-    ```
-    
-    ```bash
-    kubectl apply -f pod-pvc.yaml
-    ```
+然后在 k8s 集群中按照 [ceph-csi-cephfs](../../core/ceph-csi-cephfs/README.md) 部署 ceph-csi 即可
 
 ## 自定义 MDS 缓存大小
 

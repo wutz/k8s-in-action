@@ -1,0 +1,15 @@
+version: "0.41.0"
+
+repositories:
+  - name: ceph-csi
+    url: https://ceph.github.io/csi-charts
+
+releases:
+  - name: ceph-csi-cephfs
+    namespace: ceph-csi-cephfs
+    create_namespace: true
+    chart:
+      name: ceph-csi/ceph-csi-cephfs
+      version: 3.14.0
+    values:
+      - values.yml
