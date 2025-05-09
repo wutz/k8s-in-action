@@ -73,8 +73,3 @@ JuiceFS 主要包含 3 种版本，分别是：
         # 验证
         kubectl apply -f tests.yaml
         ``` 
-
-
-## 性能测试
-
-使用 [elbencho](../elbencho/README.md) 测试 JuiceFS 性能
