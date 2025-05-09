@@ -199,6 +199,14 @@ curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh \
   kubectl patch deployment metrics-server -n kube-system --type merge --patch-file k3s-patch/metrics-server-patch.yaml
   ```
 
+- 为控制节点打上污点
+
+  ```bash
+  kubectl taint node bj1mn01 node-role.kubernetes.io/control-plane:NoSchedule
+  kubectl taint node bj1mn02 node-role.kubernetes.io/control-plane:NoSchedule
+  kubectl taint node bj1mn03 node-role.kubernetes.io/control-plane:NoSchedule
+  ```
+
 ## 卸载 k3s
 
 ```sh
