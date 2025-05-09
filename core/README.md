@@ -60,4 +60,6 @@
 - 部署 [rook](rook/) 用于提供基于 Ceph 的块存储，文件系统和对象存储服务，适合存储和计算在同一集群。如果 Ceph 存储为外部集群，则参考 [使用 Cephadm 部署 Ceph](../storage/cephadm/)
 - 部署 [juicefs](juicefs/) 用于提供 JuiceFS 存储服务, 适合计算集群在云上，或者有外部提供 RDS 和对象存储的环境
 
+### 存储性能测试
 
+使用 [elbencho](../elbencho/README.md) 测试存储性能
