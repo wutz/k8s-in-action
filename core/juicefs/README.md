@@ -75,55 +75,6 @@ JuiceFS 主要包含 3 种版本，分别是：
         ``` 
 
 
-# 性能测试
+## 性能测试
 
-```bash
-#!/usr/bin/env bash
-
-TESTDIR=/jfs/testdir
-ELBENCHO=/usr/local/bin/elbencho
-RESFILE=fs.log
-DIRS=1
-FILES=128
-THREADS_LIST="1 4 16 64"
-SIZES_LIST="4k 128k 4m 1g"
-HOSTS_LIST="gn001 gn[001-004] gn[001-016]"
-USER=root
-
-FIRST_HOST=$(echo $HOSTS_LIST | awk '{print $1}')
-LAST_HOST=$(echo $HOSTS_LIST | awk '{print $NF}')
-LAST_THREAD=$(echo $THREADS_LIST | awk '{print $NF}')
-LAST_SIZE=$(echo $SIZES_LIST | awk '{print $NF}')
-
-mkdir -p $TESTDIR
-pdsh -w $USER@$LAST_HOST $ELBENCHO --service
-
-for host in $HOSTS_LIST; do
-    if [ "$host" == "$FIRST_HOST" ]; then
-        thread_list=$THREADS_LIST
-    else
-        thread_list=$LAST_THREAD
-    fi
-
-    for threads in $thread_list; do
-        for size in $SIZES_LIST; do
-            if [[ "$size" == "$LAST_SIZE" ]]; then
-                files=1
-            else
-                files=$FILES
-            fi
-
-            # write
-            $ELBENCHO --hosts $host --direct -w -d -t $threads -n $DIRS -N $files -s $size --resfile $RESFILE $TESTDIR
-            # read
-            $ELBENCHO --hosts $host --direct -r -t $threads -n $DIRS -N $files -s $size --resfile $RESFILE $TESTDIR
-            # re-read
-            $ELBENCHO --hosts $host --direct -r -t $threads -n $DIRS -N $files -s $size --resfile $RESFILE $TESTDIR
-            # delete
-            $ELBENCHO --hosts $host -F -D -t $threads -n $DIRS -N $files $TESTDIR
-        done
-    done 
-done
-
-$ELBENCHO --hosts $USER@$LAST_HOST --quit
-```
+使用 [elbencho](../elbencho/README.md) 测试 JuiceFS 性能
