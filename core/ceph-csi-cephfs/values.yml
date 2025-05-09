@@ -4,3 +4,17 @@ csiConfig:
       - 172.18.15.101:6789
       - 172.18.15.102:6789
       - 172.18.15.103:6789
+
+provisioner:
+  tolerations:
+    - operator: Exists
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerm:
+          matchExpressions:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+nodeplugin:
+  tolerations:
+    - operator: Exists
