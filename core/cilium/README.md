@@ -1,5 +1,7 @@
 # Cilium
 
+> GA
+
 提供 CNI，Service 和 Networking Policies 等功能
 
 ## 部署

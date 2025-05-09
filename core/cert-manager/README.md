@@ -1,5 +1,7 @@
 # Cert Manager
 
+> GA
+
 > https://cert-manager.io/docs/
 
 - 修改 `certs/clusterissuer.yaml` 中的 email 为自己的邮箱地址

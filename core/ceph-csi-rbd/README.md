@@ -1,5 +1,7 @@
 # ceph-csi-rbd
 
+> GA
+
 用于添加 rbd csi 进入集群
 
 ## 部署

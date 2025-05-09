@@ -1,5 +1,7 @@
 # 集群架构与命名
 
+> Beta
+
 ![arch](arch.png)
 
 ## 命名

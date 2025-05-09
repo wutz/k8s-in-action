@@ -1,5 +1,7 @@
 # ceph-csi-cephfs
 
+> GA
+
 用于添加 cephfs csi 进入集群
 
 ## 部署

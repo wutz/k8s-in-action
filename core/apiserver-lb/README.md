@@ -1,5 +1,7 @@
 # apiserver-lb
 
+> Beta
+
 用于对外提供 API Server 负载均衡服务
 
 ## 部署

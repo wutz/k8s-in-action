@@ -1,5 +1,7 @@
 # [部署 JuiceFS](https://juicefs.com/docs/zh/community/introduction/)
 
+> GA
+
 JuiceFS 是一个开源的分布式文件系统，支持多种对象存储后端。
 
 使用 JuiceFS 的原因是可以在机械盘构建的对象存储上，再配合客户端缓存盘，实现高性能、低成本的存储解决方案。

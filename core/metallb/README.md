@@ -1,5 +1,7 @@
 # [MetalLB](https://metallb.universe.tf/)
 
+> GA
+
 高可用的服务均衡器
 
 ## 部署

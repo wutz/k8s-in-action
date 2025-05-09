@@ -1,5 +1,7 @@
 # NFS CSI
 
+> Beta
+
 ## 前置准备
 
 - 创建 RAID 设备。如果使用多块本地磁盘，可以创建软 RAID，参考 https://ruan.dev/blog/2022/06/29/create-a-raid5-array-with-mdadm-on-linux

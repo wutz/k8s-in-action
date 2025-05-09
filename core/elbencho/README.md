@@ -1,5 +1,7 @@
 # elbencho
 
+> GA
+
 elbencho 是由 BeeGFS 创始人开发的一款用于测试存储系统性能的工具。
 
 elbencho 涵盖 fio, mdtest, ior 等测试工具功能，支持文件系统，对象存储 S3 和块存储性能测试。
