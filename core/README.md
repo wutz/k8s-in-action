@@ -62,7 +62,7 @@
   - 存储来自计算集群之外：
     - 部署 [ceph-csi-cephfs](ceph-csi-cephfs/) 用于提供基于 Ceph 的文件系统存储服务
     - 部署 [ceph-csi-rbd](ceph-csi-rbd/) 用于提供基于 Ceph 的块存储服务
-- 部署 [juicefs-csi](juicefs/) 用于提供 JuiceFS 存储服务, 适合计算集群在云上，或者有外部提供 RDS 和对象存储的环境
+- 部署 [juicefs-csi](juicefs-csi/) 用于提供 JuiceFS 存储服务, 适合计算集群在云上，或者有外部提供 RDS 和对象存储的环境
 
 ### 存储性能测试
 
